@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>إرسال رسالة | SafeRelay AI</title>
+  <meta name="description" content="صفحة استقبال رسائل تجريبية في SafeRelay AI." />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="container nav">
+      <a class="brand" href="index.html">SafeRelay<span>AI</span></a>
+      <nav class="nav-links"><a href="index.html">الرئيسية</a><a href="dashboard.html">لوحة التحكم</a><a href="terms.html">الشروط</a></nav>
+    </div>
+  </header>
+  <main class="page">
+    <div class="container demo-grid">
+      <section>
+        <p class="section-kicker">رابط استقبال تجريبي</p>
+        <h1>أرسل رسالة مسؤولة</h1>
+        <p class="lead">هذه الصفحة تمثل الرابط العام الذي سيشاركه المستخدم لاحقاً في حساباته. حالياً لا يتم حفظ الرسائل؛ التحليل محلي داخل المتصفح فقط.</p>
+      </section>
+      <form class="demo-form" id="messageForm">
+        <label>نوع الرسالة
+          <select id="messageType">
+            <option>ملاحظة عمل</option><option>اعتذار</option><option>نصيحة</option><option>شكوى</option><option>تنبيه</option>
+          </select>
+        </label>
+        <label>رسالتك
+          <textarea id="messageText" rows="8" placeholder="اكتب رسالة واضحة ومحترمة..."></textarea>
+        </label>
+        <button class="btn primary full" type="submit">فحص الرسالة قبل الإرسال</button>
+        <div class="result" id="resultBox" role="status" aria-live="polite"></div>
+        <p class="section-text">في النسخة الحقيقية سيتم إرسال الرسالة إلى قاعدة بيانات آمنة بعد اجتياز الفلترة.</p>
+      </form>
+    </div>
+  </main>
+  <footer class="footer"><div class="container footer-grid"><p>SafeRelay AI — MVP</p><a href="privacy-policy.html">الخصوصية</a></div></footer>
+  <script src="script.js"></script>
+</body>
+</html>
