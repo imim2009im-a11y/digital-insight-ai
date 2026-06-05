@@ -1,68 +1,106 @@
 // =====================
-// سكريبتات JavaScript
+// Main JavaScript Script
 // =====================
 
-// التعامل مع نموذج التواصل
-const contactForm = document.querySelector('.contact-form');
+// Theme Toggle
+const themeToggle = document.getElementById('themeToggle');
+const htmlElement = document.documentElement;
 
-if (contactForm) {
-    contactForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        // جمع بيانات النموذج
-        const inputs = this.querySelectorAll('input, textarea');
-        const data = {
-            name: inputs[0].value,
-            email: inputs[1].value,
-            message: inputs[2].value
-        };
-        
-        // التحقق من صحة البيانات
-        if (data.name && data.email && data.message) {
-            console.log('تم إرسال البيانات:', data);
-            
-            // عرض رسالة نجاح
-            showNotification('تم إرسال رسالتك بنجاح!', 'success');
-            
-            // مسح النموذج
-            contactForm.reset();
-        } else {
-            showNotification('يرجى ملء جميع الحقول', 'error');
-        }
+function loadTheme() {
+    const savedTheme = localStorage.getItem('theme') || 'light';
+    htmlElement.setAttribute('data-theme', savedTheme);
+    updateThemeToggle(savedTheme);
+}
+
+function updateThemeToggle(theme) {
+    if (themeToggle) {
+        themeToggle.textContent = theme === 'dark' ? '☀️' : '🌙';
+    }
+}
+
+if (themeToggle) {
+    themeToggle.addEventListener('click', () => {
+        const currentTheme = htmlElement.getAttribute('data-theme') || 'light';
+        const newTheme = currentTheme === 'light' ? 'dark' : 'light';
+        htmlElement.setAttribute('data-theme', newTheme);
+        localStorage.setItem('theme', newTheme);
+        updateThemeToggle(newTheme);
     });
 }
 
-// دالة عرض الإشعارات
-function showNotification(message, type) {
-    const notification = document.createElement('div');
-    notification.className = `notification notification-${type}`;
-    notification.textContent = message;
-    notification.style.cssText = `
-        position: fixed;
-        top: 20px;
-        right: 20px;
-        padding: 15px 20px;
-        border-radius: 5px;
-        font-size: 1rem;
-        z-index: 2000;
-        animation: slideIn 0.3s ease;
-        ${type === 'success' 
-            ? 'background-color: #10b981; color: white;' 
-            : 'background-color: #ef4444; color: white;'}
-    `;
-    
-    document.body.appendChild(notification);
-    
-    // إزالة الإشعار بعد 3 ثوان
-    setTimeout(() => {
-        notification.style.animation = 'slideOut 0.3s ease';
-        setTimeout(() => notification.remove(), 300);
-    }, 3000);
+loadTheme();
+
+// Navigation Toggle
+const navToggle = document.getElementById('navToggle');
+const navLinks = document.getElementById('navLinks');
+
+if (navToggle) {
+    navToggle.addEventListener('click', () => {
+        navLinks.classList.toggle('active');
+    });
+
+    document.querySelectorAll('.nav-links a').forEach(link => {
+        link.addEventListener('click', () => {
+            navLinks.classList.remove('active');
+        });
+    });
 }
 
-// إضافة حركات التمرير الناعمة
-document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-    anchor.addEventListener('click', function(e) {
+// FAQ Accordion
+const faqItems = document.querySelectorAll('.faq-item');
+
+faqItems.forEach(item => {
+    const question = item.querySelector('.faq-question');
+    if (question) {
+        question.addEventListener('click', () => {
+            faqItems.forEach(otherItem => {
+                if (otherItem !== item) {
+                    otherItem.classList.remove('active');
+                }
+            });
+            item.classList.toggle('active');
+        });
+    }
+});
+
+// Contact Form
+const contactForm = document.querySelector('.contact-form');
+const notification = document.getElementById('notification');
+
+function showNotification(message, type = 'success') {\n    if (!notification) return;
+    notification.textContent = message;
+    notification.className = `notification show ${type}`;
+    setTimeout(() => {
+        notification.classList.remove('show');
+    }, 4000);
+}
+
+if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.querySelector('input[id=\"name\"]')?.value;
+        const email = document.querySelector('input[type=\"email\"]')?.value;
+        const message = document.querySelector('textarea')?.value;
+
+        if (!name || !email || !message) {
+            showNotification('يرجى ملء جميع الحقول', 'error');
+            return;
+        }
+
+        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        if (!emailRegex.test(email)) {
+            showNotification('بريد إلكتروني غير صحيح', 'error');
+            return;
+        }
+
+        showNotification('تم الإرسال بنجاح!', 'success');
+        contactForm.reset();
+    });
+}
+
+// Smooth Scroll
+document.querySelectorAll('a[href^=\"#\"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
         const href = this.getAttribute('href');
         if (href !== '#' && document.querySelector(href)) {
             e.preventDefault();
@@ -73,81 +111,18 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     });
 });
 
-// التعامل مع تغيير حجم النافذة
-function handleResponsive() {
-    const navLinks = document.querySelector('.nav-links');
-    
-    if (window.innerWidth <= 768) {
-        // إضافة أيقونة القائمة على الأجهزة الصغيرة
-        if (!document.querySelector('.menu-toggle')) {
-            const menuToggle = document.createElement('button');
-            menuToggle.className = 'menu-toggle';
-            menuToggle.textContent = '☰';
-            document.querySelector('.navbar .container').appendChild(menuToggle);
+// Animations on Scroll
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            entry.target.classList.add('animate-fade-in-up');
+            observer.unobserve(entry.target);
         }
-    }
-}
+    });
+}, { threshold: 0.1 });
 
-// استدعاء الدالة عند تحميل الصفحة
-window.addEventListener('load', handleResponsive);
-window.addEventListener('resize', handleResponsive);
+document.querySelectorAll('.feature-card, .testimonial-card, .pricing-card').forEach(el => {
+    observer.observe(el);
+});
 
-// تحريك العناصر عند التمرير
-function animateOnScroll() {
-    const elements = document.querySelectorAll('.feature-card, .about-content');
-    
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.animation = 'fadeInUp 0.6s ease forwards';
-                observer.unobserve(entry.target);
-            }
-        });
-    }, { threshold: 0.1 });
-    
-    elements.forEach(el => observer.observe(el));
-}
-
-// استدعاء دالة الحركة
-document.addEventListener('DOMContentLoaded', animateOnScroll);
-
-// إضافة أنماط الحركة (CSS في JavaScript)
-const style = document.createElement('style');
-style.textContent = `
-    @keyframes fadeInUp {
-        from {
-            opacity: 0;
-            transform: translateY(30px);
-        }
-        to {
-            opacity: 1;
-            transform: translateY(0);
-        }
-    }
-    
-    @keyframes slideIn {
-        from {
-            transform: translateX(100px);
-            opacity: 0;
-        }
-        to {
-            transform: translateX(0);
-            opacity: 1;
-        }
-    }
-    
-    @keyframes slideOut {
-        from {
-            transform: translateX(0);
-            opacity: 1;
-        }
-        to {
-            transform: translateX(100px);
-            opacity: 0;
-        }
-    }
-`;
-document.head.appendChild(style);
-
-// تسجيل الحدث عند تحميل الصفحة
-console.log('Digital Insight AI - تم تحميل الصفحة بنجاح');
+console.log('✅ Digital Insight AI - JavaScript loaded successfully');
