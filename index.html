@@ -111,8 +111,10 @@
     <section id="newsletter" class="section newsletter">
       <div class="container newsletter-box">
         <h2>احصل على أفضل أدوات الذكاء الاصطناعي أسبوعياً</h2>
-        <p>النموذج يحفظ الطلب محلياً في النسخة التجريبية فقط. اربطه لاحقاً بخدمة مجانية مثل Google Forms أو Formspree قبل الإطلاق التجاري.</p>
-        <form class="js-newsletter" novalidate>
+        <p>النموذج جاهز للإرسال الحقيقي عند إضافة رابط خدمة النماذج. حالياً يحفظ الطلب محلياً في النسخة التجريبية.</p>
+        <form class="js-newsletter" data-endpoint="REPLACE_WITH_FORMSPREE_NEWSLETTER_ENDPOINT" novalidate>
+          <input type="hidden" name="_subject" value="اشتراك جديد في Digital Insight AI">
+          <input type="hidden" name="form_name" value="newsletter">
           <label class="sr-only" for="name">الاسم</label>
           <input id="name" name="name" type="text" placeholder="الاسم" autocomplete="name" />
           <label class="sr-only" for="email">البريد الإلكتروني</label>
