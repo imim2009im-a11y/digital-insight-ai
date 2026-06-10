@@ -1,0 +1,98 @@
+[
+  {
+    "name": "Kling AI",
+    "category": "video",
+    "label": "فيديو AI",
+    "bestFor": "فيديوهات قصيرة، ستوري، إعلانات سريعة، وتجارب بصرية.",
+    "strength": "نتائج بصرية سريعة ومناسبة لاختبار أفكار المحتوى.",
+    "caution": "لا تبدأ باشتراك طويل قبل اختبار عدة مقاطع قصيرة.",
+    "priceTier": "mid",
+    "beginnerFriendly": true,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/kling-ai/partner/KatmA"
+  },
+  {
+    "name": "Runway",
+    "category": "video",
+    "label": "فيديو متقدم",
+    "bestFor": "تحرير فيديو، إنتاج إبداعي، مؤثرات، وتجارب احترافية.",
+    "strength": "مرونة أعلى لصناع المحتوى والمستخدمين المتوسطين.",
+    "caution": "قد يكون أكثر تعقيداً من الخيارات البسيطة للمبتدئ.",
+    "priceTier": "mid",
+    "beginnerFriendly": false,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/runway-accounts/partner/KatmA"
+  },
+  {
+    "name": "HeyGen",
+    "category": "avatar-video",
+    "label": "أفاتار فيديو",
+    "bestFor": "فيديوهات شرح، عروض تسويقية، ومتحدث افتراضي.",
+    "strength": "مناسب لمن يريد فيديو تعريفي سريع بدون تصوير.",
+    "caution": "تحقق من جودة اللغة والصوت قبل استخدامه في إعلان رسمي.",
+    "priceTier": "mid",
+    "beginnerFriendly": true,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/heygen/partner/KatmA"
+  },
+  {
+    "name": "OpenArt",
+    "category": "design",
+    "label": "صور وتصميم",
+    "bestFor": "صور للسوشيال، أفكار بصرية، وتصاميم أولية.",
+    "strength": "مناسب لإنتاج صور ومفاهيم بسرعة.",
+    "caution": "راجع حقوق الاستخدام قبل استخدام الصور تجارياً.",
+    "priceTier": "low",
+    "beginnerFriendly": true,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/openart/partner/KatmA"
+  },
+  {
+    "name": "Lovable",
+    "category": "app-builder",
+    "label": "بناء تطبيقات",
+    "bestFor": "بناء MVP، صفحات، ونماذج تطبيقات بسرعة.",
+    "strength": "مناسب لصاحب فكرة يريد نموذجاً أولياً بدون تعقيد كبير.",
+    "caution": "لا تعتمد عليه وحده قبل مراجعة الأمان والبيانات.",
+    "priceTier": "low",
+    "beginnerFriendly": true,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/lovable/partner/KatmA"
+  },
+  {
+    "name": "v0",
+    "category": "app-builder",
+    "label": "واجهات AI",
+    "bestFor": "واجهات Frontend، نماذج أولية، وتصميم صفحات.",
+    "strength": "قوي للمطور أو من يريد واجهات سريعة قابلة للتعديل.",
+    "caution": "يحتاج فهماً أساسياً لكيفية تحويل النموذج إلى منتج حقيقي.",
+    "priceTier": "low",
+    "beginnerFriendly": false,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/v0/partner/KatmA"
+  },
+  {
+    "name": "ChatGPT Web",
+    "category": "assistant",
+    "label": "إنتاجية وكتابة",
+    "bestFor": "كتابة، تخطيط، أفكار، تلخيص، وتسويق.",
+    "strength": "نقطة بداية ممتازة لمعظم المستخدمين.",
+    "caution": "راجع المعلومات المهمة ولا تنشر مخرجاته دون تدقيق.",
+    "priceTier": "free",
+    "beginnerFriendly": true,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/chatgpt-web/partner/KatmA"
+  },
+  {
+    "name": "Gemini",
+    "category": "assistant",
+    "label": "بحث وإنتاجية",
+    "bestFor": "بحث، تلخيص، إنتاجية، ومهام مرتبطة ببيئة Google.",
+    "strength": "مفيد للبحث السريع وربط الأفكار بالمستندات والعمل.",
+    "caution": "قارن النتائج مع مصادر موثوقة قبل اتخاذ قرار مالي.",
+    "priceTier": "free",
+    "beginnerFriendly": true,
+    "affiliate": true,
+    "url": "https://www.gamsgo.com/details/gemini/partner/KatmA"
+  }
+]
