@@ -11,6 +11,7 @@
   <meta property="og:description" content="مراجعات ومقارنات عملية لأدوات الذكاء الاصطناعي للأعمال والتسويق وصناعة المحتوى." />
   <meta property="og:type" content="website" />
   <meta property="og:url" content="https://imim2009im-a11y.github.io/digital-insight-ai/" />
+  <meta name="theme-color" content="#2563eb" />
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
@@ -21,7 +22,7 @@
     <div class="container nav">
       <a class="logo" href="index.html" aria-label="Digital Insight AI الرئيسية"><span>Digital</span> Insight AI</a>
       <nav class="nav-links" aria-label="التنقل الرئيسي">
-        <a href="index.html">الرئيسية</a>
+        <a href="index.html" aria-current="page">الرئيسية</a>
         <a href="tools.html">الأدوات</a>
         <a href="best-ai-video-tools.html">فيديو AI</a>
         <a href="kling-vs-runway.html">Kling vs Runway</a>
@@ -110,13 +111,14 @@
     <section id="newsletter" class="section newsletter">
       <div class="container newsletter-box">
         <h2>احصل على أفضل أدوات الذكاء الاصطناعي أسبوعياً</h2>
-        <p>سيتم ربط هذا النموذج لاحقاً بخدمة مجانية مثل Google Forms أو Formspree.</p>
-        <form>
+        <p>النموذج يحفظ الطلب محلياً في النسخة التجريبية فقط. اربطه لاحقاً بخدمة مجانية مثل Google Forms أو Formspree قبل الإطلاق التجاري.</p>
+        <form class="js-newsletter" novalidate>
           <label class="sr-only" for="name">الاسم</label>
-          <input id="name" type="text" placeholder="الاسم" autocomplete="name" />
+          <input id="name" name="name" type="text" placeholder="الاسم" autocomplete="name" />
           <label class="sr-only" for="email">البريد الإلكتروني</label>
-          <input id="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email" />
-          <button type="button">اشترك الآن</button>
+          <input id="email" name="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email" required />
+          <button type="submit">اشترك الآن</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
         </form>
         <p class="disclosure">قد تحتوي بعض الروابط على روابط تسويق بالعمولة. عند الشراء من خلالها قد نحصل على عمولة دون أي تكلفة إضافية عليك.</p>
       </div>
@@ -124,5 +126,6 @@
   </main>
 
   <footer class="footer"><div class="container"><p>© 2026 Digital Insight AI — <a href="privacy-policy.html">سياسة الخصوصية</a> — <a href="contact.html">تواصل معنا</a></p></div></footer>
+  <script src="script.js" defer></script>
 </body>
 </html>
