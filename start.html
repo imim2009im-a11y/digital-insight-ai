@@ -1,0 +1,207 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>ابدأ اختيار أدوات الذكاء الاصطناعي | Digital Insight AI</title>
+  <meta name="description" content="صفحة بداية تفاعلية تساعدك على اختيار أدوات الذكاء الاصطناعي المناسبة للفيديو، التسويق، الإنتاجية، التصميم، وبناء التطبيقات." />
+  <meta name="keywords" content="اختيار أدوات الذكاء الاصطناعي, أفضل أدوات AI, أدوات AI للفيديو, أدوات AI للتسويق, بناء تطبيقات بالذكاء الاصطناعي" />
+  <link rel="canonical" href="https://imim2009im-a11y.github.io/digital-insight-ai/start.html" />
+  <meta property="og:title" content="ابدأ اختيار أدوات الذكاء الاصطناعي | Digital Insight AI" />
+  <meta property="og:description" content="اختر هدفك واحصل على ترشيحات أدوات AI مناسبة قبل أن تدفع لأي اشتراك." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://imim2009im-a11y.github.io/digital-insight-ai/start.html" />
+  <meta name="theme-color" content="#0f172a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    :root { --launch-bg: #07111f; --launch-card: rgba(15, 23, 42, .84); --launch-line: rgba(125, 211, 252, .22); --launch-cyan: #22d3ee; --launch-blue: #3b82f6; --launch-text: #e5f3ff; --launch-muted: #9fb4cc; }
+    body { background: radial-gradient(circle at top right, rgba(34, 211, 238, .16), transparent 32%), radial-gradient(circle at 20% 20%, rgba(59, 130, 246, .18), transparent 34%), var(--launch-bg); color: var(--launch-text); }
+    .launch-hero { position: relative; overflow: hidden; padding: 76px 0 48px; border-bottom: 1px solid var(--launch-line); }
+    .launch-hero:before { content: ""; position: absolute; inset: 0; background-image: linear-gradient(rgba(125, 211, 252, .06) 1px, transparent 1px), linear-gradient(90deg, rgba(125, 211, 252, .06) 1px, transparent 1px); background-size: 42px 42px; mask-image: linear-gradient(to bottom, #000, transparent 88%); pointer-events: none; }
+    .launch-grid { position: relative; display: grid; grid-template-columns: 1.15fr .85fr; gap: 28px; align-items: center; }
+    .launch-badge { display: inline-flex; gap: 8px; align-items: center; padding: 8px 13px; border: 1px solid var(--launch-line); border-radius: 999px; color: #bae6fd; background: rgba(14, 165, 233, .08); font-weight: 700; }
+    .launch-hero h1 { font-size: clamp(2.2rem, 5vw, 4.8rem); line-height: 1.08; margin: 18px 0; color: #fff; letter-spacing: -.03em; }
+    .launch-hero h1 span { color: var(--launch-cyan); text-shadow: 0 0 28px rgba(34, 211, 238, .36); }
+    .launch-hero p { color: var(--launch-muted); font-size: 1.15rem; max-width: 780px; }
+    .launch-card { background: linear-gradient(180deg, rgba(15, 23, 42, .92), rgba(2, 6, 23, .82)); border: 1px solid var(--launch-line); border-radius: 28px; padding: 24px; box-shadow: 0 24px 90px rgba(0, 0, 0, .34); }
+    .qr-wrap { text-align: center; }
+    .qr-box { display: inline-block; padding: 14px; background: #fff; border-radius: 22px; box-shadow: 0 0 40px rgba(34, 211, 238, .28); }
+    .qr-box img { width: 190px; height: 190px; display: block; border-radius: 10px; }
+    .short-link { direction: ltr; display: inline-block; margin-top: 16px; padding: 10px 14px; border-radius: 999px; background: linear-gradient(90deg, rgba(34, 211, 238, .95), rgba(59, 130, 246, .95)); color: #06101f; font-weight: 800; }
+    .finder { margin-top: 24px; }
+    .choice-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 22px 0; }
+    .choice-btn { cursor: pointer; border: 1px solid var(--launch-line); background: rgba(15, 23, 42, .72); color: #e0f2fe; border-radius: 18px; padding: 16px 12px; font-family: inherit; font-weight: 800; transition: .2s ease; }
+    .choice-btn:hover, .choice-btn.active { transform: translateY(-2px); border-color: rgba(34, 211, 238, .72); background: rgba(14, 165, 233, .16); }
+    .recommendations { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; margin-top: 22px; }
+    .recommendation { border: 1px solid var(--launch-line); background: var(--launch-card); border-radius: 22px; padding: 18px; }
+    .recommendation span { color: var(--launch-cyan); font-weight: 800; }
+    .recommendation h3 { margin: 8px 0; color: #fff; }
+    .recommendation p { color: var(--launch-muted); margin: 8px 0; }
+    .recommendation .warning { font-size: .95rem; color: #fde68a; }
+    .recommendation a { display: inline-flex; margin-top: 10px; padding: 10px 13px; border-radius: 999px; background: #0ea5e9; color: #00111f; font-weight: 800; text-decoration: none; }
+    .trust-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
+    .trust-strip div { border: 1px solid var(--launch-line); border-radius: 18px; padding: 16px; background: rgba(15, 23, 42, .58); }
+    .lead-box { display: grid; grid-template-columns: 1fr .9fr; gap: 20px; align-items: center; }
+    .lead-box input { width: 100%; padding: 14px; margin-bottom: 10px; border-radius: 14px; border: 1px solid var(--launch-line); background: rgba(2, 6, 23, .64); color: #fff; font-family: inherit; }
+    .lead-box button { width: 100%; padding: 14px; border: 0; border-radius: 14px; background: linear-gradient(90deg, var(--launch-cyan), var(--launch-blue)); color: #00111f; font-family: inherit; font-weight: 900; cursor: pointer; }
+    .mini-note { font-size: .92rem; color: var(--launch-muted); }
+    @media (max-width: 900px) { .launch-grid, .lead-box { grid-template-columns: 1fr; } .choice-grid { grid-template-columns: repeat(2, 1fr); } .recommendations, .trust-strip { grid-template-columns: 1fr; } .launch-hero { padding-top: 42px; } }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "ابدأ اختيار أدوات الذكاء الاصطناعي",
+    "url": "https://imim2009im-a11y.github.io/digital-insight-ai/start.html",
+    "description": "صفحة تفاعلية لاختيار أدوات الذكاء الاصطناعي المناسبة حسب الهدف والاستخدام.",
+    "isPartOf": {
+      "@type": "WebSite",
+      "name": "Digital Insight AI",
+      "url": "https://imim2009im-a11y.github.io/digital-insight-ai/"
+    }
+  }
+  </script>
+</head>
+<body data-page="start">
+  <header class="site-header">
+    <div class="container nav">
+      <a class="logo" href="index.html" aria-label="Digital Insight AI الرئيسية"><span>Digital</span> Insight AI</a>
+      <nav class="nav-links" aria-label="التنقل الرئيسي">
+        <a href="index.html">الرئيسية</a>
+        <a href="start.html" aria-current="page">ابدأ هنا</a>
+        <a href="tools.html">الأدوات</a>
+        <a href="best-ai-video-tools.html">فيديو AI</a>
+        <a href="contact.html">تواصل</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="launch-hero">
+      <div class="container launch-grid">
+        <div>
+          <span class="launch-badge">⚡ صفحة البداية الذكية</span>
+          <h1>لا تشترك في أدوات <span>AI</span> عشوائيًا.</h1>
+          <p>اختر هدفك وسنرشح لك أدوات مناسبة للفيديو، التسويق، التصميم، الإنتاجية، أو بناء التطبيقات. الهدف أن تدفع فقط عندما تفهم القيمة.</p>
+          <div class="actions">
+            <a class="btn primary" href="#finder">اختر هدفك الآن</a>
+            <a class="btn secondary" href="tools.html">تصفح كل الأدوات</a>
+          </div>
+        </div>
+        <aside class="launch-card qr-wrap">
+          <h2>افتحها من الجوال</h2>
+          <p class="mini-note">امسح الرمز أو استخدم الرابط المختصر في ستوري سناب وواتساب.</p>
+          <div class="qr-box">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ftinyurl.com%2Fyypzzsu9" alt="QR code for Digital Insight AI short link">
+          </div>
+          <div class="short-link">tinyurl.com/yypzzsu9</div>
+        </aside>
+      </div>
+    </section>
+
+    <section class="section container">
+      <div class="trust-strip">
+        <div><strong>إفصاح واضح</strong><p class="mini-note">بعض الروابط أفلييت دون تكلفة إضافية عليك.</p></div>
+        <div><strong>اختيار حسب الهدف</strong><p class="mini-note">فيديو، تصميم، تسويق، إنتاجية، أو تطبيقات.</p></div>
+        <div><strong>تجربة قبل الدفع</strong><p class="mini-note">لا نوصي باشتراك طويل قبل اختبار الأداة.</p></div>
+        <div><strong>محتوى قابل للتطوير</strong><p class="mini-note">الترشيحات تتحسن حسب بيانات النقرات.</p></div>
+      </div>
+    </section>
+
+    <section id="finder" class="section container finder">
+      <div class="section-head">
+        <p>AI Tool Finder</p>
+        <h2>ما هدفك الآن؟</h2>
+      </div>
+      <div class="choice-grid" role="group" aria-label="اختر نوع الأداة">
+        <button class="choice-btn active" data-category="video">🎬 فيديو</button>
+        <button class="choice-btn" data-category="design">🎨 صور وتصميم</button>
+        <button class="choice-btn" data-category="app-builder">🧩 بناء تطبيق</button>
+        <button class="choice-btn" data-category="assistant">⚡ إنتاجية وكتابة</button>
+        <button class="choice-btn" data-category="avatar-video">🧑‍💼 متحدث افتراضي</button>
+      </div>
+      <div id="recommendations" class="recommendations" aria-live="polite"></div>
+      <p class="mini-note">ملاحظة: الترشيحات للتوجيه الأولي فقط. راجع السعر والشروط من مزود الخدمة قبل أي شراء.</p>
+    </section>
+
+    <section class="section container">
+      <div class="lead-box launch-card">
+        <div>
+          <span class="launch-badge">📩 قائمة أدوات أسبوعية</span>
+          <h2>احصل على ترشيحات أدوات AI بدون فوضى.</h2>
+          <p>اشترك ليصلك محتوى مختصر عن أدوات تستحق التجربة، مقارنات، وتحذيرات قبل الاشتراك.</p>
+        </div>
+        <form class="js-newsletter" data-endpoint="https://formspree.io/f/xlgklann" novalidate>
+          <input type="hidden" name="_subject" value="اشتراك من صفحة البداية Digital Insight AI">
+          <input type="hidden" name="form_name" value="start_page_newsletter">
+          <input type="hidden" name="source" value="start_page">
+          <label class="sr-only" for="start-name">الاسم</label>
+          <input id="start-name" name="name" type="text" placeholder="الاسم" autocomplete="name">
+          <label class="sr-only" for="start-email">البريد الإلكتروني</label>
+          <input id="start-email" name="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email" required>
+          <button type="submit">اشترك الآن</button>
+          <p class="form-status" role="status" aria-live="polite"></p>
+          <p class="mini-note">لا ترسل أي معلومات حساسة. يمكنك التواصل معنا من صفحة التواصل.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer"><div class="container"><p>© 2026 Digital Insight AI — <a href="privacy-policy.html">سياسة الخصوصية والإفصاح</a> — <a href="contact.html">تواصل معنا</a></p></div></footer>
+  <script>
+    const fallbackTools = [
+      {name:'Kling AI', category:'video', label:'فيديو AI', bestFor:'فيديوهات قصيرة، ستوري، وإعلانات سريعة.', strength:'نتائج بصرية سريعة لاختبار أفكار المحتوى.', caution:'لا تبدأ باشتراك طويل قبل اختبار عدة مقاطع.', url:'https://www.gamsgo.com/details/kling-ai/partner/KatmA'},
+      {name:'Runway', category:'video', label:'فيديو متقدم', bestFor:'تحرير فيديو وإنتاج إبداعي.', strength:'مرونة أعلى لصناع المحتوى.', caution:'قد يكون أكثر تعقيدًا للمبتدئ.', url:'https://www.gamsgo.com/details/runway-accounts/partner/KatmA'},
+      {name:'OpenArt', category:'design', label:'صور وتصميم', bestFor:'صور للسوشيال وأفكار بصرية.', strength:'إنتاج صور ومفاهيم بسرعة.', caution:'راجع حقوق الاستخدام قبل الاستخدام التجاري.', url:'https://www.gamsgo.com/details/openart/partner/KatmA'},
+      {name:'Lovable', category:'app-builder', label:'بناء تطبيقات', bestFor:'بناء MVP ونماذج تطبيقات.', strength:'مناسب لصاحب فكرة يريد نموذجًا سريعًا.', caution:'راجع الأمان والبيانات قبل الاعتماد عليه.', url:'https://www.gamsgo.com/details/lovable/partner/KatmA'},
+      {name:'ChatGPT Web', category:'assistant', label:'إنتاجية وكتابة', bestFor:'كتابة وتخطيط وأفكار وتسويق.', strength:'نقطة بداية ممتازة لمعظم المستخدمين.', caution:'راجع المعلومات المهمة قبل النشر.', url:'https://www.gamsgo.com/details/chatgpt-web/partner/KatmA'},
+      {name:'HeyGen', category:'avatar-video', label:'أفاتار فيديو', bestFor:'فيديوهات شرح ومتحدث افتراضي.', strength:'مناسب لفيديو تعريفي سريع بدون تصوير.', caution:'تحقق من جودة اللغة والصوت.', url:'https://www.gamsgo.com/details/heygen/partner/KatmA'}
+    ];
+    const addCampaignParams = (url, tool) => {
+      try {
+        const next = new URL(url);
+        next.searchParams.set('utm_source', 'digital_insight_ai');
+        next.searchParams.set('utm_medium', 'affiliate');
+        next.searchParams.set('utm_campaign', 'start_tool_finder');
+        next.searchParams.set('utm_content', tool.toLowerCase().replace(/\s+/g, '-'));
+        return next.toString();
+      } catch { return url; }
+    };
+    const trackClick = (tool, url) => {
+      const key = 'digitalInsightAffiliateClicks';
+      const current = JSON.parse(localStorage.getItem(key) || '[]');
+      current.unshift({ tool, url, page: location.pathname, ts: new Date().toISOString() });
+      localStorage.setItem(key, JSON.stringify(current.slice(0, 250)));
+      if (window.gtag) window.gtag('event', 'affiliate_click', { tool_name: tool, link_url: url, page_path: location.pathname });
+    };
+    const renderTools = (tools, category='video') => {
+      const box = document.getElementById('recommendations');
+      const selected = tools.filter(t => t.category === category).slice(0, 3);
+      const list = selected.length ? selected : tools.slice(0, 3);
+      box.innerHTML = list.map((tool, index) => {
+        const link = addCampaignParams(tool.url, tool.name);
+        return `<article class="recommendation"><span>${index === 0 ? 'الاختيار الأول' : tool.label}</span><h3>${tool.name}</h3><p>${tool.bestFor}</p><p><strong>نقطة القوة:</strong> ${tool.strength}</p><p class="warning"><strong>تنبيه:</strong> ${tool.caution}</p><a data-tool="${tool.name}" href="${link}" target="_blank" rel="sponsored noopener">جرّب بحذر</a></article>`;
+      }).join('');
+      box.querySelectorAll('a[data-tool]').forEach(link => link.addEventListener('click', () => trackClick(link.dataset.tool, link.href)));
+    };
+    const boot = async () => {
+      let tools = fallbackTools;
+      try {
+        const response = await fetch('tools-data.json', { cache: 'no-store' });
+        if (response.ok) tools = await response.json();
+      } catch {}
+      renderTools(tools, 'video');
+      document.querySelectorAll('.choice-btn').forEach(btn => btn.addEventListener('click', () => {
+        document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        renderTools(tools, btn.dataset.category);
+      }));
+    };
+    boot();
+  </script>
+  <script src="script.js" defer></script>
+</body>
+</html>
