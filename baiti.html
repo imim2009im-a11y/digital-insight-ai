@@ -30,7 +30,7 @@
     <header class="hero">
       <nav class="topbar" aria-label="روابط أعلى الصفحة">
         <a class="brand-link" href="index.html" aria-label="العودة إلى Digital Insight AI">Digital Insight AI</a>
-        <span class="prototype-badge">MVP تجريبي</span>
+        <span class="prototype-badge">MVP تجريبي متصل</span>
       </nav>
 
       <section class="hero-grid">
@@ -216,7 +216,7 @@
           <article class="panel">
             <h3>🧭 خارطة التطوير القادمة</h3>
             <ol class="roadmap">
-              <li>ربط قاعدة بيانات حقيقية مثل Supabase أو Firebase.</li>
+              <li>تشغيل Supabase من ملف الإعدادات وربط البيانات الحية.</li>
               <li>إنشاء تسجيل دخول منفصل للعميل والطباخة والإدارة.</li>
               <li>ربط الدفع الإلكتروني وخيارات التوصيل.</li>
               <li>تحويل البث إلى خدمة حقيقية عبر WebRTC أو مزود بث.</li>
@@ -228,7 +228,7 @@
               <button id="exportDataBtn" class="btn btn-ghost" type="button">تصدير البيانات JSON</button>
               <button id="resetAppBtn" class="btn btn-danger" type="button">إعادة ضبط النموذج</button>
             </div>
-            <p class="muted">هذا النموذج يعمل محلياً في المتصفح. أي بيانات تدخلها تحفظ في جهازك فقط عبر localStorage.</p>
+            <p id="backendStatus" class="muted">جاري فحص حالة الربط...</p>
           </article>
         </div>
       </section>
@@ -240,6 +240,8 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
+  <script src="assets/baiti-config.js" defer></script>
   <script src="assets/baiti.js" defer></script>
 </body>
 </html>
