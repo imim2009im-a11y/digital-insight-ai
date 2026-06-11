@@ -1,340 +1,245 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>بيتِيّ - منصة الأسر المنتجة الحية</title>
-  <meta name="description" content="نموذج أولي لمنصة بيتِيّ: طلبات مسبقة للأسر المنتجة، حالة اتصال مباشرة، تتبع طلبات، وبث مباشر للطبخ المنزلي." />
-  <meta name="theme-color" content="#c17b4c" />
-  <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Tahoma, system-ui, sans-serif; }
-    body { background: #fef7e8; color: #2d1b0c; padding: 20px; line-height: 1.7; }
-    h1 { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 18px; }
-    .brand-pill { font-size: .9rem; background: #f0e2d4; padding: 4px 12px; border-radius: 50px; }
-    .tabs { display: flex; gap: 10px; margin-bottom: 20px; background: #fff0e0; padding: 8px; border-radius: 60px; box-shadow: 0 2px 6px rgba(0,0,0,.05); position: sticky; top: 10px; z-index: 5; }
-    .tab-btn { flex: 1; background: transparent; border: 0; padding: 12px; font-size: 1rem; font-weight: 800; border-radius: 40px; cursor: pointer; transition: .2s; color: #7a4c2c; }
-    .tab-btn.active, .primary-btn { background: #c17b4c; color: #fff; box-shadow: 0 2px 8px rgba(193,123,76,.3); }
-    .tab-content { display: none; animation: fade .3s ease; }
-    .tab-content.active { display: block; }
-    @keyframes fade { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-    .search-row { display: flex; gap: 10px; margin-bottom: 16px; }
-    input, button { font: inherit; }
-    .search-row input, .comment-input { flex: 1; padding: 12px; border-radius: 60px; border: 1px solid #ffe1bf; background: #fff; }
-    .filter-btn, .primary-btn, .ghost-btn { border: 0; padding: 10px 20px; border-radius: 60px; cursor: pointer; font-weight: 800; }
-    .filter-btn { background: #c17b4c; color: #fff; white-space: nowrap; }
-    .ghost-btn { background: #e0cbb9; color: #2d1b0c; }
-    .cook-card, .tracker, .cook-dashboard { background: #fff; border-radius: 28px; padding: 16px; margin-bottom: 16px; box-shadow: 0 4px 12px rgba(0,0,0,.05); border: 1px solid #ffe1bf; }
-    .cook-header { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
-    .cook-name { font-size: 1.25rem; font-weight: 900; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .online-badge, .live-badge, .offline-badge { color: #fff; font-size: .72rem; padding: 4px 10px; border-radius: 50px; display: inline-flex; align-items: center; gap: 5px; }
-    .online-badge { background: #2e7d32; }
-    .offline-badge { background: #757575; }
-    .live-badge { background: #e53935; }
-    .orders-count { background: #f0e2d4; padding: 5px 10px; border-radius: 30px; font-size: .82rem; }
-    .product-list { margin: 12px 0; display: flex; flex-wrap: wrap; gap: 8px; }
-    .product-tag { background: #fbe9e0; padding: 5px 12px; border-radius: 30px; font-size: .82rem; }
-    .btn-order { background: #c17b4c; border: 0; color: #fff; padding: 10px 20px; border-radius: 40px; font-weight: 900; cursor: pointer; width: 100%; font-size: 1rem; transition: .2s; }
-    .btn-order:disabled { background: #d1b69b; cursor: not-allowed; }
-    .tracker-steps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin: 20px 0; }
-    .step { text-align: center; font-size: .78rem; color: #ad8b6e; background: #fff7ef; border-radius: 16px; padding: 8px 6px; border: 1px solid #f3dfcb; }
-    .step.active { color: #fff; background: #c17b4c; font-weight: 900; }
-    .live-stream-card { background: #2b1a0e; border-radius: 28px; padding: 16px; margin-bottom: 20px; color: #fff; }
-    .live-top { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
-    .live-video-placeholder { background: #1f1a16; border-radius: 20px; min-height: 180px; display: flex; align-items: center; justify-content: center; gap: 10px; margin: 12px 0; padding: 18px; text-align: center; background-image: linear-gradient(45deg, #3a2a1e 25%, transparent 25%); }
-    .comment-row { display: flex; gap: 10px; }
-    .toggle-switch { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: #f5ede4; padding: 12px; border-radius: 60px; }
-    .toggle-label { font-weight: 900; }
-    .toggle-button { width: 50px; height: 26px; background: #ccc; border-radius: 30px; cursor: pointer; position: relative; transition: .2s; }
-    .toggle-button.active { background: #2e7d32; }
-    .toggle-button::after { content: ''; width: 22px; height: 22px; background: #fff; border-radius: 50%; position: absolute; top: 2px; left: 4px; transition: .2s; }
-    .toggle-button.active::after { left: 24px; }
-    .order-item { border-bottom: 1px solid #f0e2d4; padding: 12px 0; }
-    .order-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-    .accept-btn, .start-prep-btn, .ready-btn, .deliver-btn { background: #c17b4c; border: 0; color: #fff; padding: 7px 12px; border-radius: 30px; cursor: pointer; font-weight: 800; }
-    hr { margin: 16px 0; border: 0; border-top: 1px solid #ffe1bf; }
-    footer { text-align: center; margin-top: 30px; font-size: .85rem; color: #ad8b6e; }
-    @media (max-width: 620px) {
-      body { padding: 14px; }
-      .tabs, .search-row, .comment-row { flex-direction: column; border-radius: 28px; }
-      .filter-btn, .tab-btn { width: 100%; }
-      .tracker-steps { grid-template-columns: 1fr 1fr; }
-    }
-  </style>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>بيتِيّ | منصة الأسر المنتجة الحية</title>
+  <meta name="description" content="نموذج MVP احترافي لمنصة بيتِيّ: طلبات مسبقة للأسر المنتجة، سلة مشتريات، تتبع طلبات، لوحة طباخة، وبث مباشر للطبخ المنزلي." />
+  <meta name="keywords" content="الأسر المنتجة, طبخ منزلي, طلبات منزلية, منصة أسر منتجة, بث طبخ مباشر, بيتِيّ" />
+  <link rel="canonical" href="https://imim2009im-a11y.github.io/digital-insight-ai/baiti.html" />
+  <meta property="og:title" content="بيتِيّ | منصة الأسر المنتجة الحية" />
+  <meta property="og:description" content="MVP تفاعلي لمنصة تربط العملاء بالأسر المنتجة المتصلة الآن مع طلبات مسبقة وتتبع مباشر." />
+  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://imim2009im-a11y.github.io/digital-insight-ai/baiti.html" />
+  <meta name="theme-color" content="#bd7442" />
+  <link rel="stylesheet" href="assets/baiti.css" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "بيتِيّ",
+    "applicationCategory": "FoodOrderingApplication",
+    "operatingSystem": "Web",
+    "url": "https://imim2009im-a11y.github.io/digital-insight-ai/baiti.html",
+    "description": "نموذج أولي لمنصة طلبات الأسر المنتجة مع حالة اتصال مباشرة وتتبع طلبات."
+  }
+  </script>
 </head>
 <body>
-  <h1>🍲 بيتِيّ <span class="brand-pill">منصة الأسر المنتجة الحية</span></h1>
+  <div class="app-shell">
+    <header class="hero">
+      <nav class="topbar" aria-label="روابط أعلى الصفحة">
+        <a class="brand-link" href="index.html" aria-label="العودة إلى Digital Insight AI">Digital Insight AI</a>
+        <span class="prototype-badge">MVP تجريبي</span>
+      </nav>
 
-  <div class="tabs" role="tablist" aria-label="تبويبات المنصة">
-    <button class="tab-btn active" data-tab="customer" type="button">👩‍👧 عملاء</button>
-    <button class="tab-btn" data-tab="cook" type="button">👩‍🍳 لوحة الطباخة</button>
-    <button class="tab-btn" data-tab="live" type="button">📺 بث مباشر</button>
+      <section class="hero-grid">
+        <div class="hero-copy">
+          <p class="eyebrow">🍲 منصة أسر منتجة حية</p>
+          <h1>بيتِيّ</h1>
+          <p class="hero-text">اطلب من طباخات منزليات متصلات الآن، شاهد البث، تابع حالة طلبك، وادفع لاحقاً عند التحويل إلى نسخة إنتاجية.</p>
+          <div class="hero-actions">
+            <button class="btn btn-primary" data-view-jump="customer" type="button">ابدأ الطلب الآن</button>
+            <button class="btn btn-ghost" data-view-jump="cook" type="button">افتح لوحة الطباخة</button>
+          </div>
+        </div>
+        <aside class="hero-card" aria-label="ملخص المنصة">
+          <div class="hero-metric"><strong id="metricOnline">0</strong><span>متصلات الآن</span></div>
+          <div class="hero-metric"><strong id="metricOrders">0</strong><span>طلبات نشطة</span></div>
+          <div class="hero-metric"><strong id="metricLive">0</strong><span>بث مباشر</span></div>
+        </aside>
+      </section>
+    </header>
+
+    <div class="view-tabs" role="tablist" aria-label="أقسام بيتِيّ">
+      <button class="view-tab active" data-view="customer" type="button">🏠 السوق</button>
+      <button class="view-tab" data-view="cart" type="button">🧺 السلة والطلبات <span id="cartCount" class="count-pill">0</span></button>
+      <button class="view-tab" data-view="cook" type="button">👩‍🍳 لوحة الطباخة</button>
+      <button class="view-tab" data-view="live" type="button">📺 البث</button>
+      <button class="view-tab" data-view="admin" type="button">📊 الإدارة</button>
+    </div>
+
+    <main>
+      <section id="customerView" class="app-view active" aria-labelledby="customerTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">اختيار سريع</p>
+            <h2 id="customerTitle">الطباخات والمنتجات</h2>
+          </div>
+          <button id="resetFiltersBtn" class="btn btn-soft" type="button">تصفير الفلاتر</button>
+        </div>
+
+        <div class="filters-card">
+          <label class="field grow">
+            <span>بحث</span>
+            <input id="searchInput" type="search" placeholder="ابحث باسم الطباخة، الطبق، أو الحي..." autocomplete="off" />
+          </label>
+          <label class="field">
+            <span>النوع</span>
+            <select id="categoryFilter">
+              <option value="all">كل الأصناف</option>
+              <option value="rice">كبسات وأرز</option>
+              <option value="breakfast">فطور</option>
+              <option value="dessert">حلويات</option>
+              <option value="snack">مقبلات</option>
+            </select>
+          </label>
+          <label class="check-filter">
+            <input id="onlineOnlyFilter" type="checkbox" />
+            <span>متصلات فقط</span>
+          </label>
+          <label class="check-filter">
+            <input id="liveOnlyFilter" type="checkbox" />
+            <span>لديهن بث مباشر</span>
+          </label>
+        </div>
+
+        <div id="cookGrid" class="cook-grid"></div>
+      </section>
+
+      <section id="cartView" class="app-view" aria-labelledby="cartTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">إتمام الطلب</p>
+            <h2 id="cartTitle">السلة والطلبات</h2>
+          </div>
+        </div>
+
+        <div class="two-column">
+          <article class="panel">
+            <div class="panel-head">
+              <h3>🧺 سلتك</h3>
+              <button id="clearCartBtn" class="btn btn-soft" type="button">تفريغ</button>
+            </div>
+            <div id="cartItems"></div>
+            <div id="cartSummary" class="summary-box"></div>
+
+            <form id="checkoutForm" class="checkout-form">
+              <label class="field">
+                <span>اسم العميل</span>
+                <input id="customerName" type="text" maxlength="40" placeholder="مثال: إبراهيم" required />
+              </label>
+              <label class="field">
+                <span>رقم الجوال</span>
+                <input id="customerPhone" type="tel" inputmode="tel" placeholder="05xxxxxxxx" required />
+              </label>
+              <label class="field">
+                <span>العنوان / الحي</span>
+                <input id="customerAddress" type="text" maxlength="80" placeholder="مثال: حي المروج، تبوك" required />
+              </label>
+              <label class="field">
+                <span>ملاحظات</span>
+                <textarea id="customerNotes" rows="3" maxlength="160" placeholder="بدون فلفل، توصيل بعد المغرب..."></textarea>
+              </label>
+              <button class="btn btn-primary full" type="submit">تأكيد الطلب التجريبي</button>
+            </form>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <h3>📦 طلباتك</h3>
+              <button id="clearDeliveredBtn" class="btn btn-soft" type="button">إخفاء المسلّمة</button>
+            </div>
+            <div id="customerOrders"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="cookView" class="app-view" aria-labelledby="cookTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">تشغيل الطلبات</p>
+            <h2 id="cookTitle">لوحة الطباخة</h2>
+          </div>
+        </div>
+
+        <div class="two-column wide-left">
+          <article class="panel">
+            <div class="dashboard-tools">
+              <label class="field grow">
+                <span>اختيار حساب الطباخة</span>
+                <select id="cookSelector"></select>
+              </label>
+              <button id="simulateOrderBtn" class="btn btn-ghost" type="button">محاكاة طلب جديد</button>
+            </div>
+
+            <div id="cookProfileCard" class="profile-card"></div>
+
+            <div class="settings-grid">
+              <label class="switch-row">
+                <span>حالة الاتصال</span>
+                <input id="cookOnlineToggle" type="checkbox" />
+              </label>
+              <label class="switch-row">
+                <span>تفعيل البث</span>
+                <input id="cookLiveToggle" type="checkbox" />
+              </label>
+              <label class="field">
+                <span>الطاقة الاستيعابية</span>
+                <input id="capacityRange" type="range" min="1" max="8" value="4" />
+                <small id="capacityLabel"></small>
+              </label>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <h3>📋 الطلبات الواردة</h3>
+              <span id="cookOrdersBadge" class="count-pill">0</span>
+            </div>
+            <div id="cookOrdersList"></div>
+          </article>
+        </div>
+      </section>
+
+      <section id="liveView" class="app-view" aria-labelledby="liveTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">تفاعل مباشر</p>
+            <h2 id="liveTitle">البثوث الحية</h2>
+          </div>
+        </div>
+        <div id="liveGrid" class="live-grid"></div>
+      </section>
+
+      <section id="adminView" class="app-view" aria-labelledby="adminTitle">
+        <div class="section-heading">
+          <div>
+            <p class="eyebrow">إدارة النموذج</p>
+            <h2 id="adminTitle">مؤشرات وتشغيل</h2>
+          </div>
+        </div>
+
+        <div class="stats-grid" id="statsGrid"></div>
+
+        <div class="two-column">
+          <article class="panel">
+            <h3>🧭 خارطة التطوير القادمة</h3>
+            <ol class="roadmap">
+              <li>ربط قاعدة بيانات حقيقية مثل Supabase أو Firebase.</li>
+              <li>إنشاء تسجيل دخول منفصل للعميل والطباخة والإدارة.</li>
+              <li>ربط الدفع الإلكتروني وخيارات التوصيل.</li>
+              <li>تحويل البث إلى خدمة حقيقية عبر WebRTC أو مزود بث.</li>
+            </ol>
+          </article>
+          <article class="panel">
+            <h3>🧰 أدوات النموذج</h3>
+            <div class="stack-actions">
+              <button id="exportDataBtn" class="btn btn-ghost" type="button">تصدير البيانات JSON</button>
+              <button id="resetAppBtn" class="btn btn-danger" type="button">إعادة ضبط النموذج</button>
+            </div>
+            <p class="muted">هذا النموذج يعمل محلياً في المتصفح. أي بيانات تدخلها تحفظ في جهازك فقط عبر localStorage.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <strong>بيتِيّ</strong> — Prototype احترافي قابل للتحويل إلى تطبيق حقيقي 🧡
+    </footer>
   </div>
 
-  <main>
-    <section id="customerTab" class="tab-content active">
-      <div class="search-row">
-        <input type="text" id="searchInput" placeholder="🔍 ابحث عن طباخة أو طبق..." aria-label="البحث عن طباخة أو طبق" />
-        <button id="onlineFilterBtn" class="filter-btn" type="button">🟢 متصلات الآن</button>
-      </div>
-      <div id="cooksListContainer"></div>
-      <div id="trackerContainer" class="tracker" style="display:none;">
-        <h3>📦 تتبع طلبك الأخير</h3>
-        <div class="tracker-steps" id="trackerSteps"></div>
-        <p id="trackerMsg"></p>
-      </div>
-    </section>
-
-    <section id="cookTab" class="tab-content">
-      <div class="cook-dashboard">
-        <div class="toggle-switch">
-          <span class="toggle-label">🟢 حالة الاتصال المباشر</span>
-          <div id="onlineToggle" class="toggle-button" role="switch" aria-label="تبديل حالة الاتصال" aria-checked="false"></div>
-        </div>
-        <h3>📋 الطلبات الحية <span id="capacityText"></span></h3>
-        <div id="cookOrdersList"></div>
-        <button id="simulateNewOrderBtn" class="ghost-btn" type="button" style="margin-top:15px;">➕ محاكاة طلب جديد</button>
-        <hr />
-        <h3>⚙️ الطاقة الاستيعابية</h3>
-        <input type="range" id="maxOrdersSlider" min="1" max="4" value="4" style="width:100%;" />
-        <span>الحد الأقصى: <span id="maxOrdersValue">4</span></span>
-        <p style="margin-top:12px;font-size:.86rem;">💡 النموذج تجريبي: البيانات محفوظة مؤقتاً في متصفحك عبر localStorage.</p>
-      </div>
-    </section>
-
-    <section id="liveTab" class="tab-content">
-      <div class="live-stream-card">
-        <div class="live-top">
-          <span><span class="live-badge">🔴 LIVE</span> بث مباشر</span>
-          <span>👁️ 12 مشاهداً</span>
-        </div>
-        <div class="live-video-placeholder">🎥📡 <span>أم سلمان تطبخ كبسة لحم - تفاعل مباشر</span></div>
-        <div class="comment-row">
-          <input class="comment-input" type="text" placeholder="💬 اكتب تعليقاً أو طلب تعديل..." aria-label="تعليق على البث" />
-          <button class="primary-btn" type="button">إرسال</button>
-        </div>
-        <p style="margin-top:12px;">✨ يمكنك طلب الوجبة التي تُحضّر الآن مباشرة.</p>
-        <button id="liveOrderBtn" class="btn-order" type="button" style="margin-top:12px;">اطلب الوجبة الحية</button>
-      </div>
-      <div class="tracker">
-        <h3>📢 بثوث سابقة وحية أخرى</h3>
-        <p>▪️ أم محمد - مناقيش جبنة (مسجل)</p>
-        <p>▪️ أم علي - كنافة نابلسية (بث مباشر منذ 5 دقائق)</p>
-      </div>
-    </section>
-  </main>
-
-  <footer>بيتِيّ | منصة الأسر المنتجة - طلب مسبق، اتصال مباشر، بث حي 🧡</footer>
-
-  <script>
-    const STORAGE_KEY = 'baitiPrototypeV2';
-    const defaultState = {
-      currentCookId: 1,
-      filterOnlineOnly: false,
-      lastOrder: null,
-      cooks: [
-        { id: 1, name: 'أم محمد', online: true, currentOrders: 2, maxOrders: 4, products: ['كبسة دجاج', 'سلطة خضراء', 'مناقيش'], live: false, orders: [] },
-        { id: 2, name: 'أم سعيد', online: false, currentOrders: 0, maxOrders: 3, products: ['معصوب', 'عصير برتقال'], live: false, orders: [] },
-        { id: 3, name: 'أم سلمان', online: true, currentOrders: 1, maxOrders: 4, products: ['كبسة لحم', 'حلى قهوة'], live: true, orders: [] },
-        { id: 4, name: 'أم إبراهيم', online: true, currentOrders: 3, maxOrders: 4, products: ['سمبوسة جبن', 'شوربة عدس'], live: false, orders: [] }
-      ]
-    };
-
-    let state = loadState();
-
-    function loadState() {
-      try {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (!saved) return structuredClone(defaultState);
-        const parsed = JSON.parse(saved);
-        parsed.cooks.forEach(c => {
-          if (!Array.isArray(c.orders)) c.orders = [];
-          if (typeof c.currentOrders !== 'number') c.currentOrders = c.orders.length;
-        });
-        return parsed;
-      } catch {
-        return structuredClone(defaultState);
-      }
-    }
-
-    function saveState() { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
-    function getCook(id) { return state.cooks.find(c => c.id === id); }
-    function getCurrentCook() { return getCook(state.currentCookId) || state.cooks[0]; }
-    function newOrderId() { return Math.floor(Math.random() * 9000 + 1000); }
-
-    function renderCustomerView() {
-      const container = document.getElementById('cooksListContainer');
-      const searchTerm = (document.getElementById('searchInput')?.value || '').trim().toLowerCase();
-      const filtered = state.cooks.filter(cook => {
-        const onlineMatch = state.filterOnlineOnly ? cook.online : true;
-        const textMatch = cook.name.toLowerCase().includes(searchTerm) || cook.products.some(p => p.toLowerCase().includes(searchTerm));
-        return onlineMatch && textMatch;
-      });
-
-      container.innerHTML = filtered.length ? filtered.map(cook => {
-        const canOrder = cook.online && cook.currentOrders < cook.maxOrders;
-        const status = cook.online ? '<span class="online-badge">🟢 متصلة الآن</span>' : '<span class="offline-badge">⚫ غير متصلة</span>';
-        const live = cook.live ? '<span class="live-badge">🔴 بث</span>' : '';
-        return `
-          <article class="cook-card">
-            <div class="cook-header">
-              <div class="cook-name">${cook.name} ${status} ${live}</div>
-              <div class="orders-count">📊 ${cook.currentOrders} / ${cook.maxOrders}</div>
-            </div>
-            <div class="product-list">${cook.products.map(p => `<span class="product-tag">${p}</span>`).join('')}</div>
-            <button class="btn-order" data-cook-id="${cook.id}" ${canOrder ? '' : 'disabled'} type="button">
-              ${canOrder ? '📦 اطلب مسبقاً' : (cook.online ? '🚫 الطاقة ممتلئة' : '🔴 غير متصلة')}
-            </button>
-          </article>`;
-      }).join('') : '<div class="cook-card">لا توجد طباخات متصلة أو مطابقة للبحث حالياً.</div>';
-
-      document.querySelectorAll('.btn-order[data-cook-id]').forEach(btn => {
-        btn.addEventListener('click', () => placeOrder(Number(btn.dataset.cookId), 'طلب مسبق'));
-      });
-    }
-
-    function placeOrder(cookId, source) {
-      const cook = getCook(cookId);
-      if (!cook || !cook.online || cook.currentOrders >= cook.maxOrders) {
-        alert('لا يمكن الطلب حالياً: الطباخة غير متصلة أو ممتلئة.');
-        return;
-      }
-      const order = { orderId: newOrderId(), cookId, cookName: cook.name, source, status: 'new', createdAt: new Date().toLocaleTimeString('ar-SA') };
-      cook.orders.push(order);
-      cook.currentOrders++;
-      state.lastOrder = { orderId: order.orderId, cookId, status: 'pending' };
-      saveState();
-      renderAll();
-      alert(`✅ تم إرسال طلبك إلى ${cook.name}. سيتم إشعارك عند القبول.`);
-    }
-
-    function renderCookView() {
-      const cook = getCurrentCook();
-      const toggle = document.getElementById('onlineToggle');
-      const slider = document.getElementById('maxOrdersSlider');
-      const maxValue = document.getElementById('maxOrdersValue');
-      const capacityText = document.getElementById('capacityText');
-      const container = document.getElementById('cookOrdersList');
-
-      toggle.className = `toggle-button ${cook.online ? 'active' : ''}`;
-      toggle.setAttribute('aria-checked', String(cook.online));
-      slider.value = cook.maxOrders;
-      maxValue.textContent = cook.maxOrders;
-      capacityText.textContent = `(الحد الأقصى: ${cook.maxOrders} طلبات)`;
-
-      container.innerHTML = cook.orders.length ? cook.orders.map((order, index) => `
-        <div class="order-item">
-          <div>🧾 طلب #${order.orderId} - ${order.source || 'طلب مباشر'}</div>
-          <div>الحالة: ${statusLabel(order.status)}</div>
-          <small>وقت الطلب: ${order.createdAt || '-'}</small>
-          <div class="order-actions">
-            ${order.status === 'new' ? `<button class="accept-btn" data-index="${index}" type="button">✅ قبول الطلب</button>` : ''}
-            ${order.status === 'accepted' ? `<button class="start-prep-btn" data-index="${index}" type="button">👩‍🍳 بدء التحضير</button>` : ''}
-            ${order.status === 'preparing' ? `<button class="ready-btn" data-index="${index}" type="button">🔥 جاهز</button>` : ''}
-            ${order.status === 'ready' ? `<button class="deliver-btn" data-index="${index}" type="button">🚚 تم التسليم</button>` : ''}
-          </div>
-        </div>`).join('') : '<p>✨ لا توجد طلبات حالية. اجعلي حالتك متصلة لاستقبال الطلبات.</p>';
-
-      bindOrderActions(cook);
-    }
-
-    function statusLabel(status) {
-      return { new: 'جديد', accepted: 'مقبول', preparing: 'قيد التحضير', ready: 'جاهز للتسليم', delivered: 'تم التسليم' }[status] || status;
-    }
-
-    function bindOrderActions(cook) {
-      document.querySelectorAll('.accept-btn').forEach(btn => btn.addEventListener('click', () => updateOrder(cook, Number(btn.dataset.index), 'accepted')));
-      document.querySelectorAll('.start-prep-btn').forEach(btn => btn.addEventListener('click', () => updateOrder(cook, Number(btn.dataset.index), 'preparing')));
-      document.querySelectorAll('.ready-btn').forEach(btn => btn.addEventListener('click', () => updateOrder(cook, Number(btn.dataset.index), 'ready')));
-      document.querySelectorAll('.deliver-btn').forEach(btn => btn.addEventListener('click', () => deliverOrder(cook, Number(btn.dataset.index))));
-    }
-
-    function updateOrder(cook, index, status) {
-      const order = cook.orders[index];
-      if (!order) return;
-      order.status = status;
-      if (state.lastOrder?.orderId === order.orderId) state.lastOrder.status = status;
-      saveState();
-      renderAll();
-    }
-
-    function deliverOrder(cook, index) {
-      const order = cook.orders[index];
-      if (!order) return;
-      if (state.lastOrder?.orderId === order.orderId) state.lastOrder.status = 'delivered';
-      cook.orders.splice(index, 1);
-      cook.currentOrders = Math.max(0, cook.currentOrders - 1);
-      saveState();
-      renderAll();
-    }
-
-    function updateTrackerUI() {
-      const tracker = document.getElementById('trackerContainer');
-      if (!state.lastOrder?.orderId) { tracker.style.display = 'none'; return; }
-      tracker.style.display = 'block';
-      const stepByStatus = { pending: 0, accepted: 1, preparing: 2, ready: 3, delivered: 3 };
-      const currentStep = stepByStatus[state.lastOrder.status] ?? 0;
-      const steps = ['طلب مسجل', 'قبول الطباخة', 'قيد التحضير', 'جاهز للتسليم'];
-      document.getElementById('trackerSteps').innerHTML = steps.map((step, i) => `<div class="step ${i <= currentStep ? 'active' : ''}">${step}</div>`).join('');
-      const msg = ['⏳ في انتظار قبول الطباخة...', '👩‍🍳 تم القبول، سيتم تحضيره قريباً.', '🔥 الطباخة تعد طلبك الآن...', '✅ الطلب جاهز! سيتم توصيله قريباً.'][currentStep];
-      document.getElementById('trackerMsg').textContent = state.lastOrder.status === 'delivered' ? '🎉 تم تسليم الطلب. بالعافية!' : msg;
-    }
-
-    function simulateNewOrderForCook() {
-      const cook = getCurrentCook();
-      if (!cook.online) return alert('الطباخة غير متصلة، لن تظهر الطلبات الجديدة.');
-      if (cook.currentOrders >= cook.maxOrders) return alert('الطاقة الاستيعابية ممتلئة، لا يمكن استقبال طلب جديد.');
-      const order = { orderId: newOrderId(), cookId: cook.id, cookName: cook.name, source: 'طلب تجريبي', status: 'new', createdAt: new Date().toLocaleTimeString('ar-SA') };
-      cook.orders.push(order);
-      cook.currentOrders++;
-      saveState();
-      renderAll();
-      alert(`📢 طلب جديد وهمي #${order.orderId} ورد إلى الطباخة.`);
-    }
-
-    function renderAll() { renderCustomerView(); renderCookView(); updateTrackerUI(); }
-
-    document.getElementById('onlineFilterBtn').addEventListener('click', () => {
-      state.filterOnlineOnly = !state.filterOnlineOnly;
-      document.getElementById('onlineFilterBtn').style.background = state.filterOnlineOnly ? '#9b5e2e' : '#c17b4c';
-      saveState();
-      renderCustomerView();
-    });
-
-    document.getElementById('searchInput').addEventListener('input', renderCustomerView);
-    document.getElementById('simulateNewOrderBtn').addEventListener('click', simulateNewOrderForCook);
-    document.getElementById('liveOrderBtn').addEventListener('click', () => {
-      const liveCook = state.cooks.find(c => c.live);
-      if (liveCook) placeOrder(liveCook.id, 'طلب من البث المباشر');
-    });
-
-    document.getElementById('onlineToggle').addEventListener('click', () => {
-      const cook = getCurrentCook();
-      cook.online = !cook.online;
-      saveState();
-      renderAll();
-    });
-
-    document.getElementById('maxOrdersSlider').addEventListener('input', e => {
-      const cook = getCurrentCook();
-      cook.maxOrders = Number(e.target.value);
-      if (cook.currentOrders > cook.maxOrders) cook.currentOrders = cook.maxOrders;
-      saveState();
-      renderAll();
-    });
-
-    document.querySelectorAll('.tab-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        const tabId = btn.dataset.tab;
-        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-        document.getElementById(`${tabId}Tab`).classList.add('active');
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-        renderAll();
-      });
-    });
-
-    saveState();
-    renderAll();
-  </script>
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="assets/baiti.js" defer></script>
 </body>
 </html>
