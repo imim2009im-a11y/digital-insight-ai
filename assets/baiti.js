@@ -91,6 +91,15 @@
 
   let state = loadState();
   let toastTimer;
+  let syncTimer;
+
+  const backend = {
+    mode: 'local',
+    connected: false,
+    client: null,
+    lastSync: null,
+    error: null
+  };
 
   const $ = (selector) => document.querySelector(selector);
   const $$ = (selector) => Array.from(document.querySelectorAll(selector));
@@ -99,30 +108,141 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function mergeState(input) {
+    const parsed = input && typeof input === 'object' ? input : {};
+    const merged = {
+      ...safeClone(defaultState),
+      ...parsed,
+      filters: { ...safeClone(defaultState.filters), ...(parsed.filters || {}) },
+      customer: { ...safeClone(defaultState.customer), ...(parsed.customer || {}) }
+    };
+    merged.cooks = Array.isArray(parsed.cooks) && parsed.cooks.length ? parsed.cooks : safeClone(defaultState.cooks);
+    merged.cart = Array.isArray(parsed.cart) ? parsed.cart : [];
+    merged.orders = Array.isArray(parsed.orders) ? parsed.orders : [];
+    return merged;
+  }
+
   function loadState() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (!saved) return safeClone(defaultState);
-      const parsed = JSON.parse(saved);
-      const merged = {
-        ...safeClone(defaultState),
-        ...parsed,
-        filters: { ...safeClone(defaultState.filters), ...(parsed.filters || {}) },
-        customer: { ...safeClone(defaultState.customer), ...(parsed.customer || {}) }
-      };
-
-      merged.cooks = Array.isArray(parsed.cooks) && parsed.cooks.length ? parsed.cooks : safeClone(defaultState.cooks);
-      merged.cart = Array.isArray(parsed.cart) ? parsed.cart : [];
-      merged.orders = Array.isArray(parsed.orders) ? parsed.orders : [];
-      return merged;
+      return mergeState(JSON.parse(saved));
     } catch (error) {
       console.warn('Failed to load Baiti state:', error);
       return safeClone(defaultState);
     }
   }
 
-  function saveState() {
+  function getConfig() {
+    const config = window.BAITI_CONFIG || {};
+    return {
+      backend: config.backend || 'local',
+      supabaseUrl: (config.supabaseUrl || '').trim(),
+      supabaseAnonKey: (config.supabaseAnonKey || '').trim(),
+      tableName: config.tableName || 'baiti_app_state',
+      stateId: config.stateId || 'public-demo'
+    };
+  }
+
+  async function initBackend() {
+    const config = getConfig();
+    const hasSupabaseConfig = config.backend === 'supabase' && config.supabaseUrl && config.supabaseAnonKey;
+    const hasClientFactory = Boolean(window.supabase && typeof window.supabase.createClient === 'function');
+
+    if (!hasSupabaseConfig || !hasClientFactory) {
+      backend.mode = 'local';
+      backend.connected = false;
+      backend.error = hasSupabaseConfig ? 'تعذر تحميل مكتبة Supabase.' : 'لم يتم إدخال مفاتيح Supabase بعد.';
+      renderBackendStatus();
+      return;
+    }
+
+    try {
+      backend.mode = 'supabase';
+      backend.client = window.supabase.createClient(config.supabaseUrl, config.supabaseAnonKey);
+
+      const { data, error } = await backend.client
+        .from(config.tableName)
+        .select('data, updated_at')
+        .eq('id', config.stateId)
+        .maybeSingle();
+
+      if (error) throw error;
+
+      if (data && data.data && Object.keys(data.data).length) {
+        state = mergeState(data.data);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } else {
+        await syncToSupabase(true);
+      }
+
+      backend.connected = true;
+      backend.error = null;
+      backend.lastSync = data?.updated_at || new Date().toISOString();
+      renderBackendStatus();
+      showToast('تم ربط بيتِيّ بقاعدة Supabase ✅');
+    } catch (error) {
+      backend.mode = 'local';
+      backend.connected = false;
+      backend.error = error.message || 'تعذر الاتصال بـ Supabase.';
+      console.warn('Supabase connection failed:', error);
+      renderBackendStatus();
+      showToast('تعذر الاتصال بقاعدة البيانات، يعمل النموذج محلياً.');
+    }
+  }
+
+  function saveState(options = {}) {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    if (backend.connected && options.remote !== false) queueRemoteSave();
+    renderBackendStatus();
+  }
+
+  function queueRemoteSave() {
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => syncToSupabase(false), 450);
+  }
+
+  async function syncToSupabase(silent = false) {
+    const config = getConfig();
+    if (!backend.client || backend.mode !== 'supabase') return;
+
+    try {
+      const { error } = await backend.client
+        .from(config.tableName)
+        .upsert({
+          id: config.stateId,
+          data: state,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'id' });
+
+      if (error) throw error;
+      backend.connected = true;
+      backend.error = null;
+      backend.lastSync = new Date().toISOString();
+      renderBackendStatus();
+      if (!silent) console.info('Baiti state synced to Supabase');
+    } catch (error) {
+      backend.connected = false;
+      backend.error = error.message || 'فشل حفظ البيانات في Supabase.';
+      console.warn('Supabase sync failed:', error);
+      renderBackendStatus();
+    }
+  }
+
+  function renderBackendStatus() {
+    const status = $('#backendStatus');
+    if (!status) return;
+    const config = getConfig();
+    if (backend.connected) {
+      const time = backend.lastSync ? new Date(backend.lastSync).toLocaleString('ar-SA') : 'الآن';
+      status.textContent = `✅ متصل بقاعدة Supabase — آخر مزامنة: ${time}`;
+      return;
+    }
+    if (config.backend === 'supabase' && (!config.supabaseUrl || !config.supabaseAnonKey)) {
+      status.textContent = '⚠️ جاهز للربط: أدخل رابط Supabase و anon key في assets/baiti-config.js. حالياً يعمل عبر localStorage.';
+      return;
+    }
+    status.textContent = `💾 يعمل محلياً عبر localStorage${backend.error ? ` — ${backend.error}` : ''}`;
   }
 
   function showToast(message) {
@@ -186,34 +306,26 @@
     return `BT-${new Date().getFullYear()}-${seed}`;
   }
 
-  function setView(viewName) {
+  function setView(viewName, options = {}) {
     state.view = viewName;
     saveState();
     $$('.app-view').forEach((view) => view.classList.remove('active'));
     $(`#${viewName}View`)?.classList.add('active');
     $$('.view-tab').forEach((tab) => tab.classList.toggle('active', tab.dataset.view === viewName));
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (options.scroll !== false) window.scrollTo({ top: 0, behavior: 'smooth' });
     render();
   }
 
   function addToCart(cookId, productId) {
     const cook = getCook(cookId);
     const product = getProduct(cookId, productId);
-    if (!cook || !product || !product.available) {
-      showToast('هذا المنتج غير متاح حالياً.');
-      return;
-    }
-    if (!canCookAccept(cook)) {
-      showToast('الطباخة غير متاحة أو طاقتها ممتلئة حالياً.');
-      return;
-    }
+    if (!cook || !product || !product.available) return showToast('هذا المنتج غير متاح حالياً.');
+    if (!canCookAccept(cook)) return showToast('الطباخة غير متاحة أو طاقتها ممتلئة حالياً.');
 
     const existing = state.cart.find((item) => Number(item.cookId) === Number(cookId) && item.productId === productId);
-    if (existing) {
-      existing.qty += 1;
-    } else {
-      state.cart.push({ cookId: Number(cookId), productId, qty: 1, addedAt: new Date().toISOString() });
-    }
+    if (existing) existing.qty += 1;
+    else state.cart.push({ cookId: Number(cookId), productId, qty: 1, addedAt: new Date().toISOString() });
+
     saveState();
     render();
     showToast(`تمت إضافة ${product.name} إلى السلة 🧺`);
@@ -256,10 +368,7 @@
 
   function checkout(event) {
     event.preventDefault();
-    if (!state.cart.length) {
-      showToast('السلة فارغة. أضف منتجاً أولاً.');
-      return;
-    }
+    if (!state.cart.length) return showToast('السلة فارغة. أضف منتجاً أولاً.');
 
     const customer = {
       name: $('#customerName')?.value.trim() || '',
@@ -268,10 +377,7 @@
       notes: $('#customerNotes')?.value.trim() || ''
     };
 
-    if (!customer.name || !customer.phone || !customer.address) {
-      showToast('أكمل الاسم والجوال والعنوان قبل تأكيد الطلب.');
-      return;
-    }
+    if (!customer.name || !customer.phone || !customer.address) return showToast('أكمل الاسم والجوال والعنوان قبل تأكيد الطلب.');
 
     const grouped = groupCartByCook();
     const newOrders = [];
@@ -306,10 +412,7 @@
       });
     });
 
-    if (!newOrders.length) {
-      showToast('تعذر إنشاء الطلب: الطباخة غير متاحة أو ممتلئة.');
-      return;
-    }
+    if (!newOrders.length) return showToast('تعذر إنشاء الطلب: الطباخة غير متاحة أو ممتلئة.');
 
     state.orders.unshift(...newOrders);
     state.cart = [];
@@ -331,19 +434,13 @@
 
   function cancelOrder(orderId) {
     const order = state.orders.find((item) => item.id === orderId);
-    if (!order || ['ready', 'delivered'].includes(order.status)) {
-      showToast('لا يمكن إلغاء الطلب في هذه المرحلة.');
-      return;
-    }
+    if (!order || ['ready', 'delivered'].includes(order.status)) return showToast('لا يمكن إلغاء الطلب في هذه المرحلة.');
     updateOrderStatus(orderId, 'cancelled');
   }
 
   function simulateOrder() {
     const cook = getCook(state.selectedCookId);
-    if (!canCookAccept(cook)) {
-      showToast('لا يمكن المحاكاة: الحساب غير متصل أو الطاقة ممتلئة.');
-      return;
-    }
+    if (!canCookAccept(cook)) return showToast('لا يمكن المحاكاة: الحساب غير متصل أو الطاقة ممتلئة.');
     const product = cook.products[0];
     const order = {
       id: generateOrderId(),
@@ -365,10 +462,10 @@
   }
 
   function resetApp() {
-    const ok = window.confirm('سيتم حذف بيانات النموذج من هذا المتصفح. هل تريد المتابعة؟');
+    const ok = window.confirm('سيتم حذف بيانات النموذج من هذا المتصفح ومزامنة الحالة الجديدة إن كانت Supabase مفعلة. هل تريد المتابعة؟');
     if (!ok) return;
     state = safeClone(defaultState);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    saveState();
     render();
     setView('customer');
     showToast('تمت إعادة ضبط النموذج.');
@@ -690,6 +787,7 @@
     renderCookDashboard();
     renderLive();
     renderStats();
+    renderBackendStatus();
   }
 
   function bindEvents() {
@@ -753,9 +851,7 @@
       }
 
       const liveComment = event.target.closest('[data-live-comment]');
-      if (liveComment) {
-        showToast('تم إرسال التعليق التجريبي للبث.');
-      }
+      if (liveComment) showToast('تم إرسال التعليق التجريبي للبث.');
     });
 
     $('#checkoutForm')?.addEventListener('submit', checkout);
@@ -798,11 +894,18 @@
     $('#resetAppBtn')?.addEventListener('click', resetApp);
   }
 
-  document.addEventListener('DOMContentLoaded', () => {
+  async function initApp() {
     hydrateFilters();
     hydrateCustomerForm();
     bindEvents();
     render();
-    setView(state.view || 'customer');
-  });
+    setView(state.view || 'customer', { scroll: false });
+    await initBackend();
+    hydrateFilters();
+    hydrateCustomerForm();
+    render();
+    setView(state.view || 'customer', { scroll: false });
+  }
+
+  document.addEventListener('DOMContentLoaded', initApp);
 })();
