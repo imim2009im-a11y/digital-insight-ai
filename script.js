@@ -145,14 +145,17 @@
       at: new Date().toISOString()
     };
     const clicks = readClicks().map(normalizeClick).filter((item) => item.at);
-    const last = clicks[clicks.length - 1];
-    const duplicate = last && last.tool === record.tool && last.url === record.url && Date.parse(record.at) - Date.parse(last.at) < 1500;
+    const duplicate = clicks.some((item) =>
+      item.tool === record.tool &&
+      item.url === record.url &&
+      Math.abs(Date.parse(record.at) - Date.parse(item.at)) < 1500
+    );
     if (!duplicate) {
       clicks.push(record);
       saveClicks(clicks);
-    }
-    if (typeof window.gtag === 'function') {
-      window.gtag('event', 'affiliate_click', { tool_name: record.tool, link_url: record.url, page_path: location.pathname });
+      if (typeof window.gtag === 'function') {
+        window.gtag('event', 'affiliate_click', { tool_name: record.tool, link_url: record.url, page_path: location.pathname });
+      }
     }
   }
 
@@ -191,7 +194,7 @@
         row.appendChild(cell);
         tbody.appendChild(row);
       } else {
-        clicks.slice().reverse().forEach((click) => {
+        clicks.sort((a, b) => Date.parse(b.at) - Date.parse(a.at)).forEach((click) => {
           const row = document.createElement('tr');
           [click.tool, click.page, new Date(click.at).toLocaleString('ar-SA')].forEach((text) => {
             const cell = document.createElement('td');
