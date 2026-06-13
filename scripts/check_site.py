@@ -114,7 +114,7 @@ def main() -> int:
         if duplicates:
             errors.append(f"{relative}: duplicate ids: {', '.join(duplicates)}")
 
-    for source, parser in parsed_pages.items():
+    for source, parser in list(parsed_pages.items()):
         for link in parser.links:
             target, fragment = local_target(source, link)
             if target is None:
