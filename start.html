@@ -30,7 +30,7 @@
     .qr-wrap { text-align: center; }
     .qr-box { display: inline-block; padding: 14px; background: #fff; border-radius: 22px; box-shadow: 0 0 40px rgba(34, 211, 238, .28); }
     .qr-box img { width: 190px; height: 190px; display: block; border-radius: 10px; }
-    .short-link { direction: ltr; display: inline-block; margin-top: 16px; padding: 10px 14px; border-radius: 999px; background: linear-gradient(90deg, rgba(34, 211, 238, .95), rgba(59, 130, 246, .95)); color: #06101f; font-weight: 800; }
+    .short-link { direction: ltr; display: inline-block; margin-top: 16px; padding: 10px 14px; border-radius: 999px; background: linear-gradient(90deg, rgba(34, 211, 238, .95), rgba(59, 130, 246, .95)); color: #06101f; font-weight: 800; text-decoration: none; }
     .finder { margin-top: 24px; }
     .choice-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; margin: 22px 0; }
     .choice-btn { cursor: pointer; border: 1px solid var(--launch-line); background: rgba(15, 23, 42, .72); color: #e0f2fe; border-radius: 18px; padding: 16px 12px; font-family: inherit; font-weight: 800; transition: .2s ease; }
@@ -74,6 +74,7 @@
         <a href="start.html" aria-current="page">ابدأ هنا</a>
         <a href="tools.html">الأدوات</a>
         <a href="best-ai-video-tools.html">فيديو AI</a>
+        <a href="methodology.html">منهجية التقييم</a>
         <a href="contact.html">تواصل</a>
       </nav>
     </div>
@@ -94,10 +95,11 @@
         <aside class="launch-card qr-wrap">
           <h2>افتحها من الجوال</h2>
           <p class="mini-note">امسح الرمز أو استخدم الرابط المختصر في ستوري سناب وواتساب.</p>
-          <div class="qr-box">
-            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Ftinyurl.com%2Fyypzzsu9" alt="QR code for Digital Insight AI short link">
-          </div>
-          <div class="short-link">tinyurl.com/yypzzsu9</div>
+          <a class="qr-box" href="go/" aria-label="فتح صفحة Digital Insight AI المختصرة">
+            <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=https%3A%2F%2Fimim2009im-a11y.github.io%2Fdigital-insight-ai%2Fgo%2F" alt="رمز QR لصفحة Digital Insight AI المختصرة">
+          </a>
+          <br>
+          <a class="short-link" href="go/">digital-insight-ai/go/</a>
         </aside>
       </div>
     </section>
@@ -150,7 +152,7 @@
     </section>
   </main>
 
-  <footer class="footer"><div class="container"><p>© 2026 Digital Insight AI — <a href="privacy-policy.html">سياسة الخصوصية والإفصاح</a> — <a href="contact.html">تواصل معنا</a></p></div></footer>
+  <footer class="footer"><div class="container"><p>© 2026 Digital Insight AI — <a href="privacy-policy.html">سياسة الخصوصية والإفصاح</a> — <a href="methodology.html">منهجية التقييم</a> — <a href="contact.html">تواصل معنا</a></p></div></footer>
   <script>
     const fallbackTools = [
       {name:'Kling AI', category:'video', label:'فيديو AI', bestFor:'فيديوهات قصيرة، ستوري، وإعلانات سريعة.', strength:'نتائج بصرية سريعة لاختبار أفكار المحتوى.', caution:'لا تبدأ باشتراك طويل قبل اختبار عدة مقاطع.', url:'https://www.gamsgo.com/details/kling-ai/partner/KatmA'},
@@ -170,22 +172,14 @@
         return next.toString();
       } catch { return url; }
     };
-    const trackClick = (tool, url) => {
-      const key = 'digitalInsightAffiliateClicks';
-      const current = JSON.parse(localStorage.getItem(key) || '[]');
-      current.unshift({ tool, url, page: location.pathname, ts: new Date().toISOString() });
-      localStorage.setItem(key, JSON.stringify(current.slice(0, 250)));
-      if (window.gtag) window.gtag('event', 'affiliate_click', { tool_name: tool, link_url: url, page_path: location.pathname });
-    };
     const renderTools = (tools, category='video') => {
       const box = document.getElementById('recommendations');
       const selected = tools.filter(t => t.category === category).slice(0, 3);
       const list = selected.length ? selected : tools.slice(0, 3);
       box.innerHTML = list.map((tool, index) => {
         const link = addCampaignParams(tool.url, tool.name);
-        return `<article class="recommendation"><span>${index === 0 ? 'الاختيار الأول' : tool.label}</span><h3>${tool.name}</h3><p>${tool.bestFor}</p><p><strong>نقطة القوة:</strong> ${tool.strength}</p><p class="warning"><strong>تنبيه:</strong> ${tool.caution}</p><a data-tool="${tool.name}" href="${link}" target="_blank" rel="sponsored noopener">جرّب بحذر</a></article>`;
+        return `<article class="recommendation"><span>${index === 0 ? 'الاختيار الأول' : tool.label}</span><h3>${tool.name}</h3><p>${tool.bestFor}</p><p><strong>نقطة القوة:</strong> ${tool.strength}</p><p class="warning"><strong>تنبيه:</strong> ${tool.caution}</p><a class="js-affiliate-link" data-tool="${tool.name}" href="${link}" target="_blank" rel="sponsored noopener">جرّب بحذر</a></article>`;
       }).join('');
-      box.querySelectorAll('a[data-tool]').forEach(link => link.addEventListener('click', () => trackClick(link.dataset.tool, link.href)));
     };
     const boot = async () => {
       let tools = fallbackTools;
@@ -198,6 +192,9 @@
         document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
         renderTools(tools, btn.dataset.category);
+        if (typeof window.gtag === 'function') {
+          window.gtag('event', 'finder_category_click', { category_name: btn.dataset.category, page_path: location.pathname });
+        }
       }));
     };
     boot();
