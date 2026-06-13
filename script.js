@@ -5,6 +5,17 @@
   const CLICK_KEY = 'digitalInsightAffiliateClicks';
   const MAX_CLICKS = 250;
 
+  function emitEvent(name, params) {
+    const payload = Object.assign({ page_path: location.pathname }, params || {});
+    if (typeof window.gtag === 'function') {
+      window.gtag('event', name, payload);
+    } else if (Array.isArray(window.dataLayer)) {
+      window.dataLayer.push(Object.assign({ event: name }, payload));
+    }
+  }
+
+  window.digitalInsightTrack = emitEvent;
+
   function status(form, text, type) {
     const node = form.querySelector('.form-status');
     if (!node) return;
@@ -40,6 +51,8 @@
       tool: String((click && click.tool) || 'unknown'),
       url: String((click && click.url) || ''),
       page: String((click && click.page) || '').split('/').filter(Boolean).pop() || 'index.html',
+      source: String((click && click.source) || ''),
+      campaign: String((click && click.campaign) || ''),
       at: date && !Number.isNaN(date.getTime()) ? date.toISOString() : ''
     };
   }
@@ -79,14 +92,17 @@
         return;
       }
 
+      const source = field(form, 'source') || 'newsletter';
+      const formName = field(form, 'form_name') || 'newsletter';
       const payload = new FormData(form);
-      payload.set('source', payload.get('source') || 'newsletter');
+      payload.set('source', source);
       payload.set('site', 'Digital Insight AI');
       busy(form, true);
       try {
         await submit(form, payload);
         form.reset();
         status(form, 'تم إرسال طلب الاشتراك بنجاح.', 'success');
+        emitEvent('newsletter_submit', { form_name: formName, source_name: source });
       } catch (error) {
         status(form, error.name === 'AbortError' ? 'انتهت مهلة الإرسال. حاول مرة أخرى.' : 'تعذّر إرسال الطلب. جرّب لاحقاً.', 'error');
       } finally {
@@ -115,6 +131,7 @@
         await submit(form, payload);
         form.reset();
         status(form, 'تم إرسال الرسالة بنجاح.', 'success');
+        emitEvent('contact_submit', { form_name: 'contact' });
       } catch (error) {
         status(form, error.name === 'AbortError' ? 'انتهت مهلة الإرسال. حاول مرة أخرى.' : 'تعذّر إرسال الرسالة. جرّب لاحقاً.', 'error');
       } finally {
@@ -138,10 +155,13 @@
   }
 
   function track(link) {
+    const pageParams = new URLSearchParams(location.search);
     const record = {
       tool: link.dataset.tool || link.textContent.trim() || 'unknown',
       url: link.href,
       page: location.pathname.split('/').filter(Boolean).pop() || 'index.html',
+      source: pageParams.get('utm_source') || 'direct',
+      campaign: pageParams.get('utm_campaign') || '',
       at: new Date().toISOString()
     };
     const clicks = readClicks().map(normalizeClick).filter((item) => item.at);
@@ -153,9 +173,12 @@
     if (!duplicate) {
       clicks.push(record);
       saveClicks(clicks);
-      if (typeof window.gtag === 'function') {
-        window.gtag('event', 'affiliate_click', { tool_name: record.tool, link_url: record.url, page_path: location.pathname });
-      }
+      emitEvent('affiliate_click', {
+        tool_name: record.tool,
+        link_url: record.url,
+        traffic_source: record.source,
+        campaign_name: record.campaign
+      });
     }
   }
 
