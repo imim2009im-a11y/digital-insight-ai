@@ -2,5 +2,3 @@ User-agent: *
 Allow: /
 
 Sitemap: https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.xml
-Sitemap: https://imim2009im-a11y.github.io/digital-insight-ai/google-sitemap.xml
-Sitemap: https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.txt
