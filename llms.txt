@@ -1,0 +1,31 @@
+# Digital Insight AI
+
+> Arabic practical guide for discovering and comparing AI tools for business, marketing, content creation, video production, and app development.
+
+## Primary pages
+
+- [Home](https://imim2009im-a11y.github.io/digital-insight-ai/): Main introduction and latest recommendations.
+- [Start here](https://imim2009im-a11y.github.io/digital-insight-ai/start.html): Guided entry point for new visitors.
+- [AI tools directory](https://imim2009im-a11y.github.io/digital-insight-ai/tools.html): Categorized AI tools and practical use cases.
+- [Methodology](https://imim2009im-a11y.github.io/digital-insight-ai/methodology.html): How tools and comparisons are evaluated.
+- [About](https://imim2009im-a11y.github.io/digital-insight-ai/about.html): Project purpose and author information.
+- [Contact](https://imim2009im-a11y.github.io/digital-insight-ai/contact.html): Contact and newsletter forms.
+- [Privacy and affiliate disclosure](https://imim2009im-a11y.github.io/digital-insight-ai/privacy-policy.html): Privacy terms and affiliate disclosure.
+
+## Featured comparisons and guides
+
+- [Best AI video tools](https://imim2009im-a11y.github.io/digital-insight-ai/best-ai-video-tools.html)
+- [Kling AI vs Runway](https://imim2009im-a11y.github.io/digital-insight-ai/kling-vs-runway.html)
+- [Lovable vs v0](https://imim2009im-a11y.github.io/digital-insight-ai/lovable-vs-v0.html)
+- [AI tools guide](https://imim2009im-a11y.github.io/digital-insight-ai/article-ai-tools.html)
+
+## Machine-readable resources
+
+- [Full project context](https://imim2009im-a11y.github.io/digital-insight-ai/llms-full.txt)
+- [Markdown sitemap](https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.md)
+- [XML sitemap](https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.xml)
+- [Robots rules](https://imim2009im-a11y.github.io/digital-insight-ai/robots.txt)
+
+## Notes
+
+Some links may be affiliate links. Recommendations are intended to remain practical, transparent, and based on usefulness rather than commission alone.
