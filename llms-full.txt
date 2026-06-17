@@ -1,0 +1,49 @@
+# Digital Insight AI — Full Context
+
+Digital Insight AI is an Arabic website by Ibrahim Albalawi for discovering and comparing AI tools used in business, marketing, content creation, video production, and app development.
+
+## Purpose
+
+- Explain AI tools in clear Arabic.
+- Compare tools using practical criteria.
+- Help visitors choose tools by use case.
+- Support transparent affiliate marketing experiments.
+- Track visitor interest, clicks, subscriptions, and contact requests.
+
+## Editorial rules
+
+- Be direct and transparent.
+- Do not claim guaranteed income or results.
+- Separate facts, opinions, and estimates.
+- Prefer practical usefulness over promotional language.
+- Disclose affiliate relationships.
+- Update comparisons when products materially change.
+
+## Main pages
+
+- Home: https://imim2009im-a11y.github.io/digital-insight-ai/
+- Start: https://imim2009im-a11y.github.io/digital-insight-ai/start.html
+- Tools: https://imim2009im-a11y.github.io/digital-insight-ai/tools.html
+- Methodology: https://imim2009im-a11y.github.io/digital-insight-ai/methodology.html
+- Best AI video tools: https://imim2009im-a11y.github.io/digital-insight-ai/best-ai-video-tools.html
+- Kling AI vs Runway: https://imim2009im-a11y.github.io/digital-insight-ai/kling-vs-runway.html
+- Lovable vs v0: https://imim2009im-a11y.github.io/digital-insight-ai/lovable-vs-v0.html
+- AI tools guide: https://imim2009im-a11y.github.io/digital-insight-ai/article-ai-tools.html
+- About: https://imim2009im-a11y.github.io/digital-insight-ai/about.html
+- Contact: https://imim2009im-a11y.github.io/digital-insight-ai/contact.html
+- Privacy: https://imim2009im-a11y.github.io/digital-insight-ai/privacy-policy.html
+
+## Technical profile
+
+- Hosting: GitHub Pages
+- Repository: imim2009im-a11y/digital-insight-ai
+- Primary language: Arabic
+- Site type: Static website
+- Contact forms: Formspree
+- Search files: robots.txt and sitemap.xml
+
+## Author
+
+Ibrahim Albalawi
+
+Last updated: 2026-06-17
