@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://aitoosdir-gdrh7zh3.manus.space/sitemap.xml
