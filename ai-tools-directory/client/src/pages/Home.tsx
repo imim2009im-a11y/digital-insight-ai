@@ -58,13 +58,13 @@ export default function Home() {
   useEffect(() => {
     fetch("/tools.json")
       .then(response => {
-        if (!response.ok) throw new Error("تعذر تحميل ملف الأدوات");
+        if (!response.ok) throw new Error("تعذّر تحميل ملف الأدوات");
         return response.json() as Promise<unknown>;
       })
       .then(payload => setTools(parseCatalog(payload)))
       .catch(() =>
         setLoadError(
-          "تعذر تحميل قائمة الأدوات. تحقق من ملف tools.json ثم أعد المحاولة."
+          "تعذّر تحميل قائمة الأدوات. تحقّق من ملف tools.json ثم حاول مرة أخرى."
         )
       )
       .finally(() => setIsLoading(false));
@@ -191,8 +191,8 @@ export default function Home() {
               المفضلة
             </Link>
             <span className="flex items-center gap-2 text-xs">
-              <span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /> يتجدد
-              بالمعرفة
+              <span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /> يتجدّد
+              باستمرار
             </span>
           </nav>
           <div className="flex items-center gap-3">
@@ -262,7 +262,7 @@ export default function Home() {
                   }}
                   className="inline-flex items-center gap-3 border border-white/20 px-5 py-3 text-sm font-bold text-[#f4efe7] transition-colors hover:border-[#e8753a] hover:text-[#e8753a]"
                 >
-                  <Bookmark size={17} /> المحفوظات ({saved.length})
+                  <Bookmark size={17} /> المفضلة ({saved.length})
                 </button>
               </div>
             </div>
@@ -277,7 +277,7 @@ export default function Home() {
                     {tools.length}
                   </span>
                   <span className="mb-2 max-w-[100px] text-sm leading-5 text-[#c9c2b9]">
-                    أداة وموقع
+                    أداة وموقعًا
                     <br />
                     جاهز للاكتشاف
                   </span>
@@ -299,7 +299,7 @@ export default function Home() {
           <div className="mb-10 flex flex-col justify-between gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-end">
             <div>
               <p className="mb-3 text-xs font-bold uppercase tracking-[.24em] text-[#e8753a]">
-                / الفهرس
+                / دليل الأدوات
               </p>
               <h2 className="font-display text-4xl font-bold tracking-tight sm:text-5xl">
                 اختر مهمتك، لا أداتك
@@ -436,7 +436,7 @@ export default function Home() {
                 <div className="border border-dashed border-[#e8753a]/50 px-6 py-20 text-center">
                   <Layers3 className="mx-auto mb-4 text-[#e8753a]" size={28} />
                   <h3 className="font-display text-2xl font-bold">
-                    تعذر تحميل الدليل
+                    تعذّر تحميل الدليل
                   </h3>
                   <p className="mt-2 text-sm text-[#8d8983]">{loadError}</p>
                 </div>

@@ -347,7 +347,7 @@ export default function AddTool() {
               )}
               {copyError && (
                 <p className="text-sm text-[#ef9a9a]" role="alert">
-                  تعذر نسخ الكود. حدده يدويًا من المعاينة.
+                  تعذّر نسخ الكود. حدّده يدويًا من المعاينة.
                 </p>
               )}
             </div>

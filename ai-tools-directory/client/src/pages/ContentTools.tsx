@@ -61,7 +61,7 @@ export default function ContentTools() {
       .then(payload => setTools(parseCatalog(payload)))
       .catch(() =>
         setError(
-          "تعذر تحميل كتالوج أدوات المحتوى. تحقق من ملف content-tools.json."
+          "تعذّر تحميل دليل أدوات المحتوى. تحقّق من ملف content-tools.json ثم حاول مرة أخرى."
         )
       )
       .finally(() => setLoading(false));
@@ -195,7 +195,7 @@ export default function ContentTools() {
           <div className="mx-auto grid min-h-[500px] max-w-[1440px] items-end gap-10 px-5 pb-16 pt-24 lg:grid-cols-[1fr_.65fr] lg:px-10">
             <div>
               <div className="mb-6 flex items-center gap-3 text-sm font-medium text-[#e8753a]">
-                <span className="h-px w-10 bg-[#e8753a]" /> دليل متخصص لصناع
+                <span className="h-px w-10 bg-[#e8753a]" /> دليل متخصص لصنّاع
                 المحتوى
               </div>
               <h1 className="font-display max-w-4xl text-5xl font-extrabold leading-[1.05] tracking-[-.04em] sm:text-7xl lg:text-[84px]">
@@ -233,7 +233,7 @@ export default function ContentTools() {
                     {tools.length}
                   </span>
                   <span className="mb-2 max-w-[100px] text-sm leading-5 text-[#c9c2b9]">
-                    أداة لصناعة
+                    دليل متخصص لصنّاع
                     <br />
                     المحتوى
                   </span>
@@ -254,7 +254,7 @@ export default function ContentTools() {
           <div className="mb-10 flex flex-col justify-between gap-6 border-b border-white/10 pb-8 lg:flex-row lg:items-end">
             <div>
               <p className="mb-3 text-xs font-bold uppercase tracking-[.24em] text-[#e8753a]">
-                / الكتالوج
+                / دليل المحتوى
               </p>
               <h2 className="font-display text-4xl font-bold sm:text-5xl">
                 اختصر طريق الإنتاج
@@ -385,7 +385,7 @@ export default function ContentTools() {
               ) : error ? (
                 <div className="border border-dashed border-[#e8753a]/50 px-6 py-20 text-center">
                   <h3 className="font-display text-2xl font-bold">
-                    تعذر تحميل الكتالوج
+                    تعذّر تحميل دليل المحتوى
                   </h3>
                   <p className="mt-2 text-sm text-[#8d8983]">{error}</p>
                 </div>
@@ -451,7 +451,7 @@ export default function ContentTools() {
                     لا توجد نتائج
                   </h3>
                   <p className="mt-2 text-sm text-[#8d8983]">
-                    غيّر كلمات البحث أو أعد ضبط المجال.
+                    غيّر كلمات البحث أو أعد ضبط الفلاتر.
                   </p>
                   <Button
                     onClick={() => {
