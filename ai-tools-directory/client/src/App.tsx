@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 const Home = lazy(() => import("./pages/Home"));
 const AddTool = lazy(() => import("./pages/AddTool"));
 const Favorites = lazy(() => import("./pages/Favorites"));
+const SuggestTool = lazy(() => import("./pages/SuggestTool"));
 const ContentTools = lazy(() => import("./pages/ContentTools"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
@@ -33,6 +34,7 @@ function Router() {
         <Route path="/" component={Home} />
         <Route path="/add-tool" component={AddTool} />
         <Route path="/favorites" component={Favorites} />
+        <Route path="/suggest-tool" component={SuggestTool} />
         <Route path="/content-tools" component={ContentTools} />
         <Route path="/404" component={NotFound} />
         <Route component={NotFound} />

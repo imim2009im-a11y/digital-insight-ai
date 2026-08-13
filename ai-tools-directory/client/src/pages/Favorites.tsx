@@ -12,6 +12,7 @@ import {
 import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
+import ToolShareButton from "@/components/ToolShareButton";
 import {
   downloadJson,
   getPriceKind,
@@ -108,6 +109,9 @@ export default function Favorites() {
             </Link>
             <Link href="/content-tools" className="hover:text-[#e8753a]">
               أدوات المحتوى
+            </Link>
+            <Link href="/suggest-tool" className="hover:text-[#e8753a]">
+              اقترح أداة
             </Link>
             <span className="font-bold text-[#e8753a]">المفضلة</span>
           </nav>
@@ -213,6 +217,7 @@ export default function Favorites() {
             {favorites.map((tool, index) => (
               <article
                 key={`${tool.name}-${index}`}
+                data-filter-result
                 className="flex min-h-[230px] flex-col justify-between border border-white/10 bg-[#1b1b19]/85 p-5 transition-all hover:-translate-y-1 hover:border-[#e8753a]/70"
               >
                 <div>
@@ -239,14 +244,17 @@ export default function Favorites() {
                     {tool.description}
                   </p>
                 </div>
-                <a
-                  href={tool.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="mt-6 inline-flex items-center gap-2 text-sm font-bold text-[#e8753a] hover:text-[#f38b51]"
-                >
-                  زيارة الأداة <ExternalLink size={15} />
-                </a>
+                <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                  <ToolShareButton tool={tool} />
+                  <a
+                    href={tool.url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-2 text-sm font-bold text-[#e8753a] hover:text-[#f38b51]"
+                  >
+                    زيارة الأداة <ExternalLink size={15} />
+                  </a>
+                </div>
               </article>
             ))}
           </div>

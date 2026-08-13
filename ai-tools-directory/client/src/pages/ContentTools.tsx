@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Link } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
+import ToolShareButton from "@/components/ToolShareButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -150,6 +151,12 @@ export default function ContentTools() {
               className="transition-colors hover:text-[#e8753a]"
             >
               إضافة أداة
+            </Link>
+            <Link
+              href="/suggest-tool"
+              className="transition-colors hover:text-[#e8753a]"
+            >
+              اقترح أداة
             </Link>
             <Link href="/" className="transition-colors hover:text-[#f4efe7]">
               الدليل العام
@@ -394,6 +401,7 @@ export default function ContentTools() {
                   {filtered.map((tool, index) => (
                     <article
                       key={tool.name}
+                      data-filter-result
                       className="flex min-h-[240px] flex-col justify-between border border-white/10 bg-[#1b1b19]/85 p-5 transition-all hover:-translate-y-1 hover:border-[#e8753a]/70"
                     >
                       <div>
@@ -430,6 +438,7 @@ export default function ContentTools() {
                         </p>
                       </div>
                       <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                        <ToolShareButton tool={tool} />
                         <span className="text-xs text-[#8d8983]">
                           {tool.tags?.slice(0, 2).join(" · ") || tool.label}
                         </span>

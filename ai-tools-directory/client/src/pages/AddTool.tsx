@@ -142,6 +142,12 @@ export default function AddTool() {
               الفهرس
             </Link>
             <span className="font-bold text-[#e8753a]">إضافة أداة</span>
+            <Link
+              className="transition-colors hover:text-[#e8753a]"
+              href="/suggest-tool"
+            >
+              اقترح أداة
+            </Link>
           </nav>
           <div className="flex items-center gap-3">
             <button

@@ -20,6 +20,7 @@ import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
+import ToolShareButton from "@/components/ToolShareButton";
 import {
   loadSavedTools,
   loadSavedDates,
@@ -177,6 +178,12 @@ export default function Home() {
               href="/add-tool"
             >
               إضافة أداة
+            </Link>
+            <Link
+              className="transition-colors hover:text-[#e8753a]"
+              href="/suggest-tool"
+            >
+              اقترح أداة
             </Link>
             <Link
               className="transition-colors hover:text-[#e8753a]"
@@ -445,6 +452,7 @@ export default function Home() {
                   {filtered.map((tool, index) => (
                     <article
                       key={tool.name}
+                      data-filter-result
                       className="group relative flex min-h-[220px] flex-col justify-between border border-white/10 bg-[#1b1b19]/85 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#e8753a]/70 hover:bg-[#22211f]"
                       style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}
                     >
@@ -482,6 +490,7 @@ export default function Home() {
                         </p>
                       </div>
                       <div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4">
+                        <ToolShareButton tool={tool} />
                         <Badge
                           variant="outline"
                           className="rounded-none border-white/15 bg-transparent text-[10px] font-normal text-[#8d8983]"

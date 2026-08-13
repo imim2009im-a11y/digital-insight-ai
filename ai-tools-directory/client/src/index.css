@@ -175,3 +175,30 @@ html:not(.dark) [class*="border-white"] {
 html:not(.dark) [class*="bg-white/[.04]"] {
   background-color: rgba(80, 64, 48, 0.06) !important;
 }
+
+/* Community feature motion: theme transitions and filter changes remain subtle, fast, and disabled for reduced-motion users. */
+@media (prefers-reduced-motion: no-preference) {
+  html.theme-transition *,
+  html.theme-transition *::before,
+  html.theme-transition *::after {
+    transition-property:
+      background-color, color, border-color, box-shadow, fill, stroke;
+    transition-duration: 260ms;
+    transition-timing-function: cubic-bezier(0.23, 1, 0.32, 1);
+  }
+
+  [data-filter-result] {
+    animation: filter-result-in 220ms cubic-bezier(0.23, 1, 0.32, 1) both;
+  }
+
+  @keyframes filter-result-in {
+    from {
+      opacity: 0.35;
+      transform: translateY(5px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
