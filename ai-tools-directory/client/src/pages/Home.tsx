@@ -1,74 +1,45 @@
 // Style reminder: neo-editorial utility system, RTL-first, charcoal surfaces, burnt signal orange, asymmetric control-room layout.
-import { useMemo, useState } from "react";
-import { ArrowUpLeft, Bookmark, Check, ExternalLink, Filter, Github, Grid2X2, Layers3, Search, Sparkles, Star, Terminal, X } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ArrowUpLeft, Bookmark, Check, ExternalLink, Filter, Github, Grid2X2, Layers3, Search, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 
-const tools = [
-  { name: "GeneratePrompt.ai", url: "https://generateprompt.ai", category: "ذكاء اصطناعي", label: "برومبت", description: "يحوّل فكرتك الأولية إلى أوامر احترافية لأدوات الذكاء الاصطناعي.", featured: true },
-  { name: "Claude", url: "https://claude.ai", category: "ذكاء اصطناعي", label: "مساعد", description: "كتابة وتحليل وحل للمهام المعقدة بطريقة عملية." },
-  { name: "Photopea", url: "https://photopea.com", category: "تصميم", label: "صور", description: "محرر صور قوي يعمل داخل المتصفح دون تثبيت." },
-  { name: "Squoosh", url: "https://squoosh.app", category: "ملفات ووسائط", label: "صور", description: "ضغط الصور وتحسينها مع تحكم واضح في الجودة." },
-  { name: "Remove.bg", url: "https://remove.bg", category: "تصميم", label: "صور", description: "إزالة خلفيات الصور بنقرة واحدة." },
-  { name: "Cleanup.pictures", url: "https://cleanup.pictures", category: "تصميم", label: "صور", description: "حذف العناصر غير المرغوبة من الصور بسرعة." },
-  { name: "Carbon", url: "https://carbon.now.sh", category: "مطورون", label: "كود", description: "حوّل مقتطفات الكود إلى صور أنيقة للمشاركة." },
-  { name: "Ray.so", url: "https://ray.so", category: "مطورون", label: "كود", description: "لقطات شاشة نظيفة للكود والعروض التقنية." },
-  { name: "Have I Been Pwned", url: "https://haveibeenpwned.com", category: "خصوصية وأمان", label: "أمان", description: "تحقق إن كان بريدك ظهر في تسريب بيانات معروف." },
-  { name: "VirusTotal", url: "https://virustotal.com", category: "خصوصية وأمان", label: "أمان", description: "فحص الملفات والروابط عبر محركات أمنية متعددة." },
-  { name: "Archive.org", url: "https://archive.org", category: "بحث وتعلم", label: "أرشيف", description: "مكتبة رقمية ضخمة للكتب والوسائط والمواد العامة." },
-  { name: "Gutenberg", url: "https://gutenberg.org", category: "بحث وتعلم", label: "كتب", description: "آلاف الكتب الكلاسيكية المتاحة للقراءة مجانًا." },
-  { name: "Open Culture", url: "https://openculture.com", category: "بحث وتعلم", label: "تعلم", description: "دورات وموارد تعليمية مفتوحة من جامعات ومؤسسات مختلفة." },
-  { name: "WolframAlpha", url: "https://wolframalpha.com", category: "بحث وتعلم", label: "حساب", description: "محرك حوسبة يجيب عن المسائل والبيانات مباشرة." },
-  { name: "Elicit", url: "https://elicit.org", category: "بحث وتعلم", label: "أبحاث", description: "مساعد ذكاء اصطناعي للبحث في الأوراق الأكاديمية." },
-  { name: "Consensus", url: "https://consensus.app", category: "بحث وتعلم", label: "أبحاث", description: "استكشاف الإجماع العلمي من الأدبيات البحثية." },
-  { name: "Connected Papers", url: "https://connectedpapers.com", category: "بحث وتعلم", label: "أبحاث", description: "خريطة بصرية تساعدك على فهم شبكة المقالات العلمية." },
-  { name: "Semantic Scholar", url: "https://semanticscholar.org", category: "بحث وتعلم", label: "أبحاث", description: "بحث أكاديمي مجاني مع أدوات لاكتشاف الأوراق المهمة." },
-  { name: "Summarize.tech", url: "https://summarize.tech", category: "ذكاء اصطناعي", label: "فيديو", description: "تلخيص محاضرات وفيديوهات يوتيوب الطويلة." },
-  { name: "Phind", url: "https://phind.com", category: "مطورون", label: "بحث", description: "محرك بحث مدعوم بالذكاء الاصطناعي للمطورين." },
-  { name: "Regex101", url: "https://regex101.com", category: "مطورون", label: "كود", description: "اختبر التعبيرات المنتظمة وافهم نتائجها لحظيًا." },
-  { name: "JSON Formatter", url: "https://jsonformatter.org", category: "مطورون", label: "كود", description: "تنسيق وقراءة JSON بطريقة أسهل للبشر." },
-  { name: "ExplainShell", url: "https://explainshell.com", category: "مطورون", label: "طرفية", description: "افهم أوامر الطرفية جزءًا جزءًا قبل تنفيذها." },
-  { name: "Raindrop.io", url: "https://raindrop.io", category: "إنتاجية", label: "تنظيم", description: "مدير علامات مرجعية بصري ومرن." },
-  { name: "DownDetector", url: "https://downdetector.com", category: "إنتاجية", label: "حالة", description: "تحقق بسرعة إن كان موقع أو خدمة ما متوقفة." },
-  { name: "TinEye", url: "https://tineye.com", category: "تصميم", label: "صور", description: "بحث عكسي عن الصور ومصادرها على الويب." },
-  { name: "Fast.com", url: "https://fast.com", category: "إنتاجية", label: "شبكة", description: "اختبار سريع لسرعة اتصال الإنترنت لديك." },
-  { name: "Smallpdf", url: "https://smallpdf.com", category: "ملفات ووسائط", label: "PDF", description: "تحرير وتحويل وضغط ملفات PDF من المتصفح." },
-  { name: "iLovePDF", url: "https://ilovepdf.com", category: "ملفات ووسائط", label: "PDF", description: "دمج وتقسيم وتحويل ملفات PDF في خطوات قليلة." },
-  { name: "Radio Garden", url: "https://radio.garden", category: "صوت وموسيقى", label: "صوت", description: "استمع إلى محطات الراديو حول العالم عبر خريطة تفاعلية." },
-  { name: "Every Noise", url: "https://everynoise.com", category: "صوت وموسيقى", label: "موسيقى", description: "اكتشف عوالم وأنواعًا موسيقية لا تنتهي." },
-  { name: "MyNoise", url: "https://mynoise.net", category: "صوت وموسيقى", label: "تركيز", description: "بيئات صوتية قابلة للتخصيص للتركيز والاسترخاء." },
-  { name: "Canva", url: "https://canva.com", category: "تصميم", label: "تصميم", description: "إنشاء صور وعروض وفيديوهات ومحتوى اجتماعي بسهولة." },
-  { name: "Ideogram", url: "https://ideogram.ai", category: "ذكاء اصطناعي", label: "صور", description: "توليد تصاميم وصور بالذكاء الاصطناعي." },
-  { name: "HeyGen", url: "https://heygen.com", category: "ذكاء اصطناعي", label: "فيديو", description: "إنشاء فيديوهات وشخصيات رقمية واقعية." },
-  { name: "Replit", url: "https://replit.com", category: "مطورون", label: "بناء", description: "بيئة لبناء التطبيقات والنماذج الأولية بمساعدة AI." },
-  { name: "v0", url: "https://v0.dev", category: "مطورون", label: "واجهة", description: "توليد واجهات UI/UX أولية من الوصف النصي." },
-  { name: "Keyword Search", url: "https://keywordsearch.com", category: "إنتاجية", label: "تسويق", description: "البحث عن الكلمات والجماهير للحملات الإعلانية." },
-  { name: "AlternativeTo", url: "https://alternativeto.net", category: "إنتاجية", label: "بدائل", description: "العثور على بدائل مجانية أو مختلفة لأي تطبيق تقريبًا." },
-  { name: "JustWatch", url: "https://justwatch.com", category: "إنتاجية", label: "مشاهدة", description: "اعرف أين يتوفر فيلم أو مسلسل في خدمات البث." },
-  { name: "Archive.ph", url: "https://archive.ph", category: "بحث وتعلم", label: "أرشيف", description: "حفظ نسخة مؤرشفة من صفحة ويب للرجوع إليها." },
-  { name: "File.io", url: "https://file.io", category: "ملفات ووسائط", label: "مشاركة", description: "مشاركة ملفات بروابط مؤقتة تُحذف تلقائيًا." },
-  { name: "Temp Mail", url: "https://temp-mail.org", category: "خصوصية وأمان", label: "خصوصية", description: "بريد مؤقت للاستخدامات التي لا تحتاج حسابك الأساسي." },
-  { name: "Excalidraw", url: "https://excalidraw.com", category: "إنتاجية", label: "لوح", description: "رسم مخططات وأفكار بأسلوب يدوي داخل المتصفح." },
-  { name: "Flightradar24", url: "https://flightradar24.com", category: "إنتاجية", label: "تتبع", description: "تتبع الرحلات الجوية في الوقت الحقيقي." },
-  { name: "CamelCamelCamel", url: "https://camelcamelcamel.com", category: "إنتاجية", label: "أسعار", description: "تتبع تاريخ أسعار المنتجات على Amazon." },
-  { name: "Cobalt", url: "https://cobalt.tools", category: "ملفات ووسائط", label: "تنزيل", description: "أداة مفتوحة المصدر لتنزيل بعض الوسائط من الويب؛ تحقق من حقوق الاستخدام." },
-  { name: "TinyWow", url: "https://tinywow.com", category: "ملفات ووسائط", label: "متعدد", description: "مجموعة كبيرة من الأدوات المجانية للملفات والصور والنصوص." },
-];
+type Tool = { name: string; url: string; category: string; label: string; description: string; featured?: boolean };
 
-const categories = ["الكل", "ذكاء اصطناعي", "تصميم", "بحث وتعلم", "مطورون", "إنتاجية", "خصوصية وأمان", "صوت وموسيقى", "ملفات ووسائط"];
+const defaultCategories = ["الكل", "ذكاء اصطناعي", "تصميم", "بحث وتعلم", "مطورون", "إنتاجية", "خصوصية وأمان", "صوت وموسيقى", "ملفات ووسائط"];
 
 export default function Home() {
+  const [tools, setTools] = useState<Tool[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("الكل");
   const [saved, setSaved] = useState<string[]>([]);
   const [showSaved, setShowSaved] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [loadError, setLoadError] = useState("");
+
+  useEffect(() => {
+    fetch("/tools.json")
+      .then((response) => {
+        if (!response.ok) throw new Error("تعذر تحميل ملف الأدوات");
+        return response.json() as Promise<{ tools: Tool[] }>;
+      })
+      .then((payload) => setTools(Array.isArray(payload.tools) ? payload.tools : []))
+      .catch(() => setLoadError("تعذر تحميل قائمة الأدوات. تحقق من ملف tools.json ثم أعد المحاولة."))
+      .finally(() => setIsLoading(false));
+  }, []);
+
+  const categories = useMemo(() => [
+    ...defaultCategories.slice(0, 1),
+    ...defaultCategories.slice(1).filter((item) => tools.some((tool) => tool.category === item)),
+  ], [tools]);
+
   const filtered = useMemo(() => tools.filter((tool) => {
     const matchesCategory = category === "الكل" || tool.category === category;
     const matchesQuery = !query || `${tool.name} ${tool.description} ${tool.label} ${tool.category}`.toLowerCase().includes(query.toLowerCase());
     const matchesSaved = !showSaved || saved.includes(tool.name);
     return matchesCategory && matchesQuery && matchesSaved;
-  }), [category, query, saved, showSaved]);
+  }), [category, query, saved, showSaved, tools]);
 
   const toggleSaved = (name: string) => setSaved((current) => current.includes(name) ? current.filter((item) => item !== name) : [...current, name]);
 
@@ -110,7 +81,7 @@ export default function Home() {
           <aside className="lg:sticky lg:top-24 lg:self-start"><div className="mb-4 flex items-center gap-2 text-xs font-bold uppercase tracking-[.18em] text-[#8d8983]"><Filter size={14} /> تصفية حسب المجال</div><div className="flex gap-2 overflow-x-auto pb-3 lg:flex-col lg:overflow-visible">{categories.map((item) => <button key={item} onClick={() => { setCategory(item); setShowSaved(false); }} className={`whitespace-nowrap border px-3 py-2 text-right text-sm transition-all ${category === item && !showSaved ? "border-[#e8753a] bg-[#e8753a] font-bold text-[#151514]" : "border-white/10 text-[#aaa39b] hover:border-white/35 hover:text-white"}`}>{item}<span className="mr-2 text-xs opacity-60">{item === "الكل" ? tools.length : tools.filter((t) => t.category === item).length}</span></button>)}</div><button onClick={() => setShowSaved((value) => !value)} className={`mt-4 flex w-full items-center justify-between border px-3 py-2 text-sm transition-colors ${showSaved ? "border-[#e8753a] text-[#e8753a]" : "border-white/10 text-[#aaa39b] hover:border-white/35"}`}><span className="flex items-center gap-2"><Bookmark size={14} /> المحفوظة</span><span>{saved.length}</span></button></aside>
           <div>
             <div className="mb-8 flex flex-col gap-4 sm:flex-row"><div className="relative flex-1"><Search className="absolute right-4 top-1/2 -translate-y-1/2 text-[#77716b]" size={18} /><Input value={query} onChange={(e) => setQuery(e.target.value)} placeholder="ابحث عن أداة، مهمة، أو مجال..." className="h-12 rounded-none border-white/15 bg-white/[.04] pr-12 text-[#f4efe7] placeholder:text-[#77716b] focus-visible:border-[#e8753a] focus-visible:ring-[#e8753a]/20" />{query && <button onClick={() => setQuery("")} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#77716b] hover:text-white"><X size={16} /></button>}</div><div className="flex items-center gap-3 border border-white/10 px-4 text-sm text-[#8d8983]"><Grid2X2 size={15} className="text-[#e8753a]" /> {filtered.length} نتيجة</div></div>
-            {filtered.length ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{filtered.map((tool, index) => <article key={tool.name} className="group relative flex min-h-[220px] flex-col justify-between border border-white/10 bg-[#1b1b19]/85 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#e8753a]/70 hover:bg-[#22211f]" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}><div><div className="mb-7 flex items-start justify-between"><span className="font-display text-4xl font-extrabold text-white/[.08]">{String(index + 1).padStart(2, "0")}</span><button aria-label={`حفظ ${tool.name}`} onClick={() => toggleSaved(tool.name)} className={`rounded-full p-2 transition-colors ${saved.includes(tool.name) ? "bg-[#e8753a] text-[#151514]" : "bg-white/[.06] text-[#8d8983] hover:text-[#e8753a]"}`}><Bookmark size={15} fill={saved.includes(tool.name) ? "currentColor" : "none"} /></button></div><div className="mb-3 flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /><span className="text-[11px] font-bold uppercase tracking-[.12em] text-[#e8753a]">{tool.category}</span></div><h3 className="font-display text-xl font-bold text-[#f4efe7]">{tool.name}</h3><p className="mt-2 text-sm leading-6 text-[#9c968e]">{tool.description}</p></div><div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4"><Badge variant="outline" className="rounded-none border-white/15 bg-transparent text-[10px] font-normal text-[#8d8983]">{tool.label}</Badge><a href={tool.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold text-[#c9c2b9] transition-colors hover:text-[#e8753a]">زيارة الموقع <ExternalLink size={14} /></a></div></article>)}</div> : <div className="border border-dashed border-white/15 px-6 py-20 text-center"><Layers3 className="mx-auto mb-4 text-[#e8753a]" size={28} /><h3 className="font-display text-2xl font-bold">لا توجد نتائج بهذه الصيغة</h3><p className="mt-2 text-sm text-[#8d8983]">جرّب كلمة أخرى أو أعد ضبط الفلاتر.</p><Button onClick={() => { setQuery(""); setCategory("الكل"); setShowSaved(false); }} className="mt-6 rounded-none bg-[#e8753a] text-[#151514] hover:bg-[#f38b51]">إظهار الكل</Button></div>}
+            {isLoading ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{Array.from({ length: 6 }).map((_, index) => <div key={index} className="min-h-[220px] animate-pulse border border-white/10 bg-white/[.04] p-5"><div className="h-4 w-1/4 bg-white/10" /><div className="mt-12 h-5 w-2/3 bg-white/10" /><div className="mt-4 h-3 w-full bg-white/10" /><div className="mt-2 h-3 w-4/5 bg-white/10" /></div>)}</div> : loadError ? <div className="border border-dashed border-[#e8753a]/50 px-6 py-20 text-center"><Layers3 className="mx-auto mb-4 text-[#e8753a]" size={28} /><h3 className="font-display text-2xl font-bold">تعذر تحميل الدليل</h3><p className="mt-2 text-sm text-[#8d8983]">{loadError}</p></div> : filtered.length ? <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">{filtered.map((tool, index) => <article key={tool.name} className="group relative flex min-h-[220px] flex-col justify-between border border-white/10 bg-[#1b1b19]/85 p-5 transition-all duration-200 hover:-translate-y-1 hover:border-[#e8753a]/70 hover:bg-[#22211f]" style={{ animationDelay: `${Math.min(index, 8) * 40}ms` }}><div><div className="mb-7 flex items-start justify-between"><span className="font-display text-4xl font-extrabold text-white/[.08]">{String(index + 1).padStart(2, "0")}</span><button aria-label={`حفظ ${tool.name}`} onClick={() => toggleSaved(tool.name)} className={`rounded-full p-2 transition-colors ${saved.includes(tool.name) ? "bg-[#e8753a] text-[#151514]" : "bg-white/[.06] text-[#8d8983] hover:text-[#e8753a]"}`}><Bookmark size={15} fill={saved.includes(tool.name) ? "currentColor" : "none"} /></button></div><div className="mb-3 flex items-center gap-2"><span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /><span className="text-[11px] font-bold uppercase tracking-[.12em] text-[#e8753a]">{tool.category}</span></div><h3 className="font-display text-xl font-bold text-[#f4efe7]">{tool.name}</h3><p className="mt-2 text-sm leading-6 text-[#9c968e]">{tool.description}</p></div><div className="mt-6 flex items-center justify-between border-t border-white/10 pt-4"><Badge variant="outline" className="rounded-none border-white/15 bg-transparent text-[10px] font-normal text-[#8d8983]">{tool.label}</Badge><a href={tool.url} target="_blank" rel="noreferrer" className="flex items-center gap-2 text-xs font-bold text-[#c9c2b9] transition-colors hover:text-[#e8753a]">زيارة الموقع <ExternalLink size={14} /></a></div></article>)}</div> : <div className="border border-dashed border-white/15 px-6 py-20 text-center"><Layers3 className="mx-auto mb-4 text-[#e8753a]" size={28} /><h3 className="font-display text-2xl font-bold">لا توجد نتائج بهذه الصيغة</h3><p className="mt-2 text-sm text-[#8d8983]">جرّب كلمة أخرى أو أعد ضبط الفلاتر.</p><Button onClick={() => { setQuery(""); setCategory("الكل"); setShowSaved(false); }} className="mt-6 rounded-none bg-[#e8753a] text-[#151514] hover:bg-[#f38b51]">إظهار الكل</Button>              </div>}
           </div>
         </div>
       </section>
