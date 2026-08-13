@@ -4,6 +4,7 @@ import { ArrowUpLeft, Bookmark, Check, ExternalLink, Filter, Github, Grid2X2, La
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
+import { Link } from "wouter";
 
 type Tool = { name: string; url: string; category: string; label: string; description: string; featured?: boolean };
 
@@ -54,6 +55,7 @@ export default function Home() {
         <nav className="hidden items-center gap-7 text-sm text-[#aca59d] md:flex">
           <a className="transition-colors hover:text-[#f4efe7]" href="#directory">الفهرس</a>
           <a className="transition-colors hover:text-[#f4efe7]" href="#method">عن الدليل</a>
+          <Link className="transition-colors hover:text-[#e8753a]" href="/add-tool">إضافة أداة</Link>
           <span className="flex items-center gap-2 text-xs"><span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /> يتجدد بالمعرفة</span>
         </nav>
         <a href="https://github.com/imim2009im-a11y/digital-insight-ai" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-[#aca59d] transition-colors hover:text-[#e8753a]"><Github size={16} /> <span className="hidden sm:inline">GitHub</span></a>
