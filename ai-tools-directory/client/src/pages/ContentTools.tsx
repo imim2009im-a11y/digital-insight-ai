@@ -11,8 +11,11 @@ import {
   Search,
   Sparkles,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -38,7 +41,10 @@ export default function ContentTools() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("الكل");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortMode, setSortMode] = useState<"relevance" | "name">("relevance");
   const [saved, setSaved] = useState<string[]>(loadSavedTools);
+  const { theme, toggleTheme } = useTheme();
   const [showSaved, setShowSaved] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -65,18 +71,31 @@ export default function ContentTools() {
     ],
     [tools]
   );
+  const availableTags = useMemo(
+    () =>
+      Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort((a, b) =>
+        a.localeCompare(b, "ar")
+      ),
+    [tools]
+  );
   const filtered = useMemo(
     () =>
-      tools.filter(tool => {
-        const haystack =
-          `${tool.name} ${tool.category} ${tool.label} ${tool.description} ${(tool.tags || []).join(" ")}`.toLowerCase();
-        return (
-          (category === "الكل" || tool.category === category) &&
-          (!query || haystack.includes(query.toLowerCase())) &&
-          (!showSaved || saved.includes(tool.name))
-        );
-      }),
-    [category, query, saved, showSaved, tools]
+      tools
+        .filter(tool => {
+          const haystack =
+            `${tool.name} ${tool.category} ${tool.label} ${tool.description} ${(tool.tags || []).join(" ")}`.toLowerCase();
+          return (
+            (category === "الكل" || tool.category === category) &&
+            (!query || haystack.includes(query.toLowerCase())) &&
+            (selectedTags.length === 0 ||
+              selectedTags.every(tag => tool.tags?.includes(tag))) &&
+            (!showSaved || saved.includes(tool.name))
+          );
+        })
+        .sort((a, b) =>
+          sortMode === "name" ? a.name.localeCompare(b.name, "ar") : 0
+        ),
+    [category, query, selectedTags, saved, showSaved, sortMode, tools]
   );
   useEffect(() => {
     saveSavedTools(saved);
@@ -124,15 +143,27 @@ export default function ContentTools() {
               الدليل العام
             </Link>
           </nav>
-          <a
-            href="https://github.com/imim2009im-a11y/digital-insight-ai"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-sm text-[#aca59d] hover:text-[#e8753a]"
-          >
-            <Github size={16} />
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark" ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الليلي"
+              }
+              className="rounded-full border border-white/10 p-2 text-[#aca59d] transition-colors hover:border-[#e8753a] hover:text-[#e8753a]"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <a
+              href="https://github.com/imim2009im-a11y/digital-insight-ai"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 text-sm text-[#aca59d] hover:text-[#e8753a]"
+            >
+              <Github size={16} />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+          </div>
         </div>
       </header>
       <main className="relative z-10">
@@ -227,6 +258,7 @@ export default function ContentTools() {
                     key={item}
                     onClick={() => {
                       setCategory(item);
+                      setSelectedTags([]);
                       setShowSaved(false);
                     }}
                     className={`whitespace-nowrap border px-3 py-2 text-right text-sm transition-all ${category === item && !showSaved ? "border-[#e8753a] bg-[#e8753a] font-bold text-[#151514]" : "border-white/10 text-[#aaa39b] hover:border-white/35 hover:text-white"}`}
@@ -239,6 +271,36 @@ export default function ContentTools() {
                     </span>
                   </button>
                 ))}
+              </div>
+              <div className="mt-5">
+                <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[.16em] text-[#8d8983]">
+                  <span>الوسوم</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTags([])}
+                    className="text-[#e8753a]"
+                  >
+                    مسح
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableTags.slice(0, 18).map(tag => (
+                    <button
+                      type="button"
+                      key={tag}
+                      onClick={() =>
+                        setSelectedTags(current =>
+                          current.includes(tag)
+                            ? current.filter(item => item !== tag)
+                            : [...current, tag]
+                        )
+                      }
+                      className={`border px-2 py-1 text-xs transition-colors ${selectedTags.includes(tag) ? "border-[#e8753a] bg-[#e8753a] text-[#151514]" : "border-white/10 text-[#aaa39b] hover:border-white/35"}`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
               <button
                 onClick={() => setShowSaved(value => !value)}
@@ -281,6 +343,17 @@ export default function ContentTools() {
                   <Grid2X2 size={15} className="text-[#e8753a]" />{" "}
                   {filtered.length} نتيجة
                 </div>
+                <select
+                  aria-label="ترتيب النتائج"
+                  value={sortMode}
+                  onChange={e =>
+                    setSortMode(e.target.value as "relevance" | "name")
+                  }
+                  className="border border-white/10 bg-transparent px-3 text-sm text-[#8d8983]"
+                >
+                  <option value="relevance">الترتيب الافتراضي</option>
+                  <option value="name">الاسم أبجديًا</option>
+                </select>
               </div>
               {loading ? (
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -366,6 +439,7 @@ export default function ContentTools() {
                     onClick={() => {
                       setQuery("");
                       setCategory("الكل");
+                      setSelectedTags([]);
                       setShowSaved(false);
                     }}
                     className="mt-6 rounded-none bg-[#e8753a] text-[#151514]"

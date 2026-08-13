@@ -6,10 +6,13 @@ import {
   Clipboard,
   ExternalLink,
   Github,
+  Moon,
   RotateCcw,
+  Sun,
   Sparkles,
 } from "lucide-react";
 import { Link } from "wouter";
+import { useTheme } from "@/contexts/ThemeContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -54,6 +57,7 @@ export default function AddTool() {
   const [submitted, setSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);
   const [copyError, setCopyError] = useState(false);
+  const { theme, toggleTheme } = useTheme();
   const json = useMemo(
     () =>
       JSON.stringify(
@@ -139,15 +143,27 @@ export default function AddTool() {
             </Link>
             <span className="font-bold text-[#e8753a]">إضافة أداة</span>
           </nav>
-          <a
-            href="https://github.com/imim2009im-a11y/digital-insight-ai"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-sm text-[#aca59d] transition-colors hover:text-[#e8753a]"
-          >
-            <Github size={16} />
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark" ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الليلي"
+              }
+              className="rounded-full border border-white/10 p-2 text-[#aca59d] transition-colors hover:border-[#e8753a] hover:text-[#e8753a]"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <a
+              href="https://github.com/imim2009im-a11y/digital-insight-ai"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 text-sm text-[#aca59d] transition-colors hover:text-[#e8753a]"
+            >
+              <Github size={16} />
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+          </div>
         </div>
       </header>
       <main className="relative z-10 mx-auto max-w-[1440px] px-5 py-14 lg:px-10 lg:py-24">

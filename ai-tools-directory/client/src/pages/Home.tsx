@@ -12,11 +12,14 @@ import {
   Search,
   Sparkles,
   X,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
+import { useTheme } from "@/contexts/ThemeContext";
 import {
   loadSavedTools,
   parseCatalog,
@@ -40,7 +43,10 @@ export default function Home() {
   const [tools, setTools] = useState<Tool[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("الكل");
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [sortMode, setSortMode] = useState<"relevance" | "name">("relevance");
   const [saved, setSaved] = useState<string[]>(loadSavedTools);
+  const { theme, toggleTheme } = useTheme();
   const [showSaved, setShowSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [loadError, setLoadError] = useState("");
@@ -70,20 +76,35 @@ export default function Home() {
     [tools]
   );
 
+  const availableTags = useMemo(
+    () =>
+      Array.from(new Set(tools.flatMap(tool => tool.tags || []))).sort((a, b) =>
+        a.localeCompare(b, "ar")
+      ),
+    [tools]
+  );
+
   const filtered = useMemo(
     () =>
-      tools.filter(tool => {
-        const matchesCategory =
-          category === "الكل" || tool.category === category;
-        const matchesQuery =
-          !query ||
-          `${tool.name} ${tool.description} ${tool.label} ${tool.category} ${(tool.tags || []).join(" ")}`
-            .toLowerCase()
-            .includes(query.toLowerCase());
-        const matchesSaved = !showSaved || saved.includes(tool.name);
-        return matchesCategory && matchesQuery && matchesSaved;
-      }),
-    [category, query, saved, showSaved, tools]
+      tools
+        .filter(tool => {
+          const matchesCategory =
+            category === "الكل" || tool.category === category;
+          const matchesQuery =
+            !query ||
+            `${tool.name} ${tool.description} ${tool.label} ${tool.category} ${(tool.tags || []).join(" ")}`
+              .toLowerCase()
+              .includes(query.toLowerCase());
+          const matchesTags =
+            selectedTags.length === 0 ||
+            selectedTags.every(tag => tool.tags?.includes(tag));
+          const matchesSaved = !showSaved || saved.includes(tool.name);
+          return matchesCategory && matchesQuery && matchesTags && matchesSaved;
+        })
+        .sort((a, b) =>
+          sortMode === "name" ? a.name.localeCompare(b.name, "ar") : 0
+        ),
+    [category, query, selectedTags, saved, showSaved, sortMode, tools]
   );
 
   useEffect(() => {
@@ -156,15 +177,27 @@ export default function Home() {
               بالمعرفة
             </span>
           </nav>
-          <a
-            href="https://github.com/imim2009im-a11y/digital-insight-ai"
-            target="_blank"
-            rel="noreferrer"
-            className="flex items-center gap-2 text-sm text-[#aca59d] transition-colors hover:text-[#e8753a]"
-          >
-            <Github size={16} />{" "}
-            <span className="hidden sm:inline">GitHub</span>
-          </a>
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={toggleTheme}
+              aria-label={
+                theme === "dark" ? "تفعيل الوضع الفاتح" : "تفعيل الوضع الليلي"
+              }
+              className="rounded-full border border-white/10 p-2 text-[#aca59d] transition-colors hover:border-[#e8753a] hover:text-[#e8753a]"
+            >
+              {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+            </button>
+            <a
+              href="https://github.com/imim2009im-a11y/digital-insight-ai"
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-2 text-sm text-[#aca59d] transition-colors hover:text-[#e8753a]"
+            >
+              <Github size={16} />{" "}
+              <span className="hidden sm:inline">GitHub</span>
+            </a>
+          </div>
         </div>
       </header>
 
@@ -270,6 +303,7 @@ export default function Home() {
                     key={item}
                     onClick={() => {
                       setCategory(item);
+                      setSelectedTags([]);
                       setShowSaved(false);
                     }}
                     className={`whitespace-nowrap border px-3 py-2 text-right text-sm transition-all ${category === item && !showSaved ? "border-[#e8753a] bg-[#e8753a] font-bold text-[#151514]" : "border-white/10 text-[#aaa39b] hover:border-white/35 hover:text-white"}`}
@@ -282,6 +316,36 @@ export default function Home() {
                     </span>
                   </button>
                 ))}
+              </div>
+              <div className="mt-5">
+                <div className="mb-3 flex items-center justify-between text-xs font-bold uppercase tracking-[.16em] text-[#8d8983]">
+                  <span>الوسوم</span>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedTags([])}
+                    className="text-[#e8753a]"
+                  >
+                    مسح
+                  </button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {availableTags.slice(0, 18).map(tag => (
+                    <button
+                      type="button"
+                      key={tag}
+                      onClick={() =>
+                        setSelectedTags(current =>
+                          current.includes(tag)
+                            ? current.filter(item => item !== tag)
+                            : [...current, tag]
+                        )
+                      }
+                      className={`border px-2 py-1 text-xs transition-colors ${selectedTags.includes(tag) ? "border-[#e8753a] bg-[#e8753a] text-[#151514]" : "border-white/10 text-[#aaa39b] hover:border-white/35"}`}
+                    >
+                      {tag}
+                    </button>
+                  ))}
+                </div>
               </div>
               <button
                 onClick={() => setShowSaved(value => !value)}
@@ -324,6 +388,17 @@ export default function Home() {
                   <Grid2X2 size={15} className="text-[#e8753a]" />{" "}
                   {filtered.length} نتيجة
                 </div>
+                <select
+                  aria-label="ترتيب النتائج"
+                  value={sortMode}
+                  onChange={e =>
+                    setSortMode(e.target.value as "relevance" | "name")
+                  }
+                  className="border border-white/10 bg-transparent px-3 text-sm text-[#8d8983]"
+                >
+                  <option value="relevance">الترتيب الافتراضي</option>
+                  <option value="name">الاسم أبجديًا</option>
+                </select>
               </div>
               {isLoading ? (
                 <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
@@ -420,6 +495,7 @@ export default function Home() {
                     onClick={() => {
                       setQuery("");
                       setCategory("الكل");
+                      setSelectedTags([]);
                       setShowSaved(false);
                     }}
                     className="mt-6 rounded-none bg-[#e8753a] text-[#151514] hover:bg-[#f38b51]"

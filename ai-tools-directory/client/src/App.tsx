@@ -12,13 +12,42 @@ const ContentTools = lazy(() => import("./pages/ContentTools"));
 const NotFound = lazy(() => import("./pages/NotFound"));
 
 function RouteFallback() {
-  return <main dir="rtl" className="flex min-h-screen items-center justify-center bg-[#151514] px-6 text-center text-[#f4efe7]"><div role="status" aria-live="polite"><div className="mx-auto mb-5 h-8 w-8 animate-spin rounded-full border-2 border-[#e8753a] border-t-transparent" /><p className="text-sm text-[#c9c2b9]">جارٍ تحميل الصفحة…</p></div></main>;
+  return (
+    <main
+      dir="rtl"
+      className="flex min-h-screen items-center justify-center bg-[#151514] px-6 text-center text-[#f4efe7]"
+    >
+      <div role="status" aria-live="polite">
+        <div className="mx-auto mb-5 h-8 w-8 animate-spin rounded-full border-2 border-[#e8753a] border-t-transparent" />
+        <p className="text-sm text-[#c9c2b9]">جارٍ تحميل الصفحة…</p>
+      </div>
+    </main>
+  );
 }
 
 function Router() {
-  return <Suspense fallback={<RouteFallback />}><Switch><Route path="/" component={Home} /><Route path="/add-tool" component={AddTool} /><Route path="/content-tools" component={ContentTools} /><Route path="/404" component={NotFound} /><Route component={NotFound} /></Switch></Suspense>;
+  return (
+    <Suspense fallback={<RouteFallback />}>
+      <Switch>
+        <Route path="/" component={Home} />
+        <Route path="/add-tool" component={AddTool} />
+        <Route path="/content-tools" component={ContentTools} />
+        <Route path="/404" component={NotFound} />
+        <Route component={NotFound} />
+      </Switch>
+    </Suspense>
+  );
 }
 
 export default function App() {
-  return <ErrorBoundary><ThemeProvider defaultTheme="dark"><TooltipProvider><Toaster /><Router /></TooltipProvider></ThemeProvider></ErrorBoundary>;
+  return (
+    <ErrorBoundary>
+      <ThemeProvider defaultTheme="dark" switchable>
+        <TooltipProvider>
+          <Toaster />
+          <Router />
+        </TooltipProvider>
+      </ThemeProvider>
+    </ErrorBoundary>
+  );
 }

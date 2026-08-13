@@ -1,18 +1,177 @@
 /* Style reminder: neo-editorial utility system — charcoal control-room surfaces, warm paper text, burnt signal orange, crisp RTL-first hierarchy. */
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap');
+@import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@400;500;600;700;800&family=Noto+Sans+Arabic:wght@400;500;600;700&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 @custom-variant dark (&:is(.dark *));
-@theme inline { --font-display: 'IBM Plex Sans Arabic', sans-serif; --font-sans: 'Noto Sans Arabic', sans-serif; --color-background: var(--background); --color-foreground: var(--foreground); --color-card: var(--card); --color-card-foreground: var(--card-foreground); --color-popover: var(--popover); --color-popover-foreground: var(--popover-foreground); --color-primary: var(--primary); --color-primary-foreground: var(--primary-foreground); --color-secondary: var(--secondary); --color-secondary-foreground: var(--secondary-foreground); --color-muted: var(--muted); --color-muted-foreground: var(--muted-foreground); --color-accent: var(--accent); --color-accent-foreground: var(--accent-foreground); --color-border: var(--border); --color-input: var(--input); --color-ring: var(--ring); --radius-sm: calc(var(--radius) - 4px); --radius-md: calc(var(--radius) - 2px); --radius-lg: var(--radius); }
-:root { --radius: 0.2rem; --background: oklch(0.13 0.005 80); --foreground: oklch(0.95 0.015 80); --card: oklch(0.17 0.006 80); --card-foreground: oklch(0.95 0.015 80); --popover: oklch(0.17 0.006 80); --popover-foreground: oklch(0.95 0.015 80); --primary: oklch(0.67 0.16 45); --primary-foreground: oklch(0.13 0.005 80); --secondary: oklch(0.2 0.006 80); --secondary-foreground: oklch(0.86 0.01 80); --muted: oklch(0.2 0.006 80); --muted-foreground: oklch(0.62 0.01 80); --accent: oklch(0.2 0.006 80); --accent-foreground: oklch(0.95 0.015 80); --border: oklch(1 0 0 / 11%); --input: oklch(1 0 0 / 12%); --ring: oklch(0.67 0.16 45); }
-@layer base { * { @apply border-border outline-ring/50; } html { scroll-behavior: smooth; } body { @apply bg-background text-foreground font-sans antialiased; margin: 0; } button, a, input { font: inherit; } a { text-decoration: none; } button:not(:disabled), a[href], input { cursor: pointer; } }
-.font-display { font-family: 'IBM Plex Sans Arabic', sans-serif; }
-@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-article { animation: rise .45s cubic-bezier(.23,1,.32,1) both; }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; transition-duration: .01ms !important; } }
-::selection { background: #e8753a; color: #151514; }
-::-webkit-scrollbar { width: 9px; height: 9px; } ::-webkit-scrollbar-track { background: #151514; } ::-webkit-scrollbar-thumb { background: #45413b; } ::-webkit-scrollbar-thumb:hover { background: #e8753a; }
-.container { width: 100%; margin-left: auto; margin-right: auto; padding-left: 1rem; padding-right: 1rem; }
-@media (min-width: 640px) { .container { padding-left: 1.5rem; padding-right: 1.5rem; } } @media (min-width: 1024px) { .container { padding-left: 2rem; padding-right: 2rem; max-width: 1280px; } }
-.flex { min-width: 0; min-height: 0; }
-.dark { color-scheme: dark; }
+@theme inline {
+  --font-display: "IBM Plex Sans Arabic", sans-serif;
+  --font-sans: "Noto Sans Arabic", sans-serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+}
+:root {
+  --radius: 0.2rem;
+  --background: oklch(0.13 0.005 80);
+  --foreground: oklch(0.95 0.015 80);
+  --card: oklch(0.17 0.006 80);
+  --card-foreground: oklch(0.95 0.015 80);
+  --popover: oklch(0.17 0.006 80);
+  --popover-foreground: oklch(0.95 0.015 80);
+  --primary: oklch(0.67 0.16 45);
+  --primary-foreground: oklch(0.13 0.005 80);
+  --secondary: oklch(0.2 0.006 80);
+  --secondary-foreground: oklch(0.86 0.01 80);
+  --muted: oklch(0.2 0.006 80);
+  --muted-foreground: oklch(0.62 0.01 80);
+  --accent: oklch(0.2 0.006 80);
+  --accent-foreground: oklch(0.95 0.015 80);
+  --border: oklch(1 0 0 / 11%);
+  --input: oklch(1 0 0 / 12%);
+  --ring: oklch(0.67 0.16 45);
+}
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  html {
+    scroll-behavior: smooth;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    margin: 0;
+  }
+  button,
+  a,
+  input {
+    font: inherit;
+  }
+  a {
+    text-decoration: none;
+  }
+  button:not(:disabled),
+  a[href],
+  input {
+    cursor: pointer;
+  }
+}
+.font-display {
+  font-family: "IBM Plex Sans Arabic", sans-serif;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+article {
+  animation: rise 0.45s cubic-bezier(0.23, 1, 0.32, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+::selection {
+  background: #e8753a;
+  color: #151514;
+}
+::-webkit-scrollbar {
+  width: 9px;
+  height: 9px;
+}
+::-webkit-scrollbar-track {
+  background: #151514;
+}
+::-webkit-scrollbar-thumb {
+  background: #45413b;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #e8753a;
+}
+.container {
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
+  padding-left: 1rem;
+  padding-right: 1rem;
+}
+@media (min-width: 640px) {
+  .container {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+@media (min-width: 1024px) {
+  .container {
+    padding-left: 2rem;
+    padding-right: 2rem;
+    max-width: 1280px;
+  }
+}
+.flex {
+  min-width: 0;
+  min-height: 0;
+}
+.dark {
+  color-scheme: dark;
+}
+
+/* Theme toggle layer: preserve the charcoal/orange direction while making the light mode readable and calm. */
+html:not(.dark) body {
+  background: #f3eee6;
+  color: #27231f;
+}
+html:not(.dark) [class*="bg-[#151514]"] {
+  background-color: #f3eee6 !important;
+  color: #27231f !important;
+}
+html:not(.dark) [class*="bg-[#1b1b19]"],
+html:not(.dark) [class*="bg-[#171716]"],
+html:not(.dark) [class*="bg-[#22211f]"] {
+  background-color: #fffaf2 !important;
+}
+html:not(.dark) [class*="text-[#f4efe7]"],
+html:not(.dark) [class*="text-[#c9c2b9]"],
+html:not(.dark) [class*="text-white"] {
+  color: #27231f !important;
+}
+html:not(.dark) [class*="text-[#9c968e]"],
+html:not(.dark) [class*="text-[#8d8983]"],
+html:not(.dark) [class*="text-[#aca59d]"],
+html:not(.dark) [class*="text-[#aaa39b]"],
+html:not(.dark) [class*="text-[#77716b]"] {
+  color: #6e665e !important;
+}
+html:not(.dark) [class*="border-white"] {
+  border-color: rgba(80, 64, 48, 0.18) !important;
+}
+html:not(.dark) [class*="bg-white/[.04]"] {
+  background-color: rgba(80, 64, 48, 0.06) !important;
+}
