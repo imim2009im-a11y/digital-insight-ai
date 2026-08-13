@@ -57,6 +57,7 @@ export const parseCatalog = (payload: unknown): Tool[] => {
 };
 
 const STORAGE_KEY = "ai-tools-directory:saved";
+const SAVED_DATES_KEY = "ai-tools-directory:saved-dates";
 export const loadSavedTools = (): string[] => {
   try {
     const parsed: unknown = JSON.parse(
@@ -76,6 +77,46 @@ export const saveSavedTools = (names: string[]) => {
   } catch {
     /* Storage can be unavailable in private contexts. */
   }
+};
+
+export const loadSavedDates = (): Record<string, number> => {
+  try {
+    const parsed: unknown = JSON.parse(
+      localStorage.getItem(SAVED_DATES_KEY) || "{}"
+    );
+    if (!parsed || typeof parsed !== "object") return {};
+    return Object.fromEntries(
+      Object.entries(parsed as Record<string, unknown>).filter(
+        ([, value]) => typeof value === "number"
+      )
+    ) as Record<string, number>;
+  } catch {
+    return {};
+  }
+};
+export const saveSavedDates = (dates: Record<string, number>) => {
+  try {
+    localStorage.setItem(SAVED_DATES_KEY, JSON.stringify(dates));
+  } catch {
+    /* Storage can be unavailable in private contexts. */
+  }
+};
+export const getPriceKind = (price?: string): "free" | "paid" | "unknown" => {
+  const normalized = (price || "").toLowerCase();
+  if (!normalized) return "unknown";
+  if (/مجاني|free|0\s?(\$|ريال|دولار)?/.test(normalized)) return "free";
+  return "paid";
+};
+export const downloadJson = (filename: string, payload: unknown) => {
+  const blob = new Blob([JSON.stringify(payload, null, 2)], {
+    type: "application/json;charset=utf-8",
+  });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = filename;
+  anchor.click();
+  URL.revokeObjectURL(url);
 };
 
 export const copyText = async (text: string): Promise<boolean> => {

@@ -22,7 +22,9 @@ import { Link } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import {
   loadSavedTools,
+  loadSavedDates,
   parseCatalog,
+  saveSavedDates,
   saveSavedTools,
   type Tool,
 } from "@/lib/catalog";
@@ -46,6 +48,8 @@ export default function Home() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<"relevance" | "name">("relevance");
   const [saved, setSaved] = useState<string[]>(loadSavedTools);
+  const [savedDates, setSavedDates] =
+    useState<Record<string, number>>(loadSavedDates);
   const { theme, toggleTheme } = useTheme();
   const [showSaved, setShowSaved] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -109,14 +113,22 @@ export default function Home() {
 
   useEffect(() => {
     saveSavedTools(saved);
-  }, [saved]);
+    saveSavedDates(savedDates);
+  }, [saved, savedDates]);
 
-  const toggleSaved = (name: string) =>
+  const toggleSaved = (name: string) => {
     setSaved(current =>
       current.includes(name)
         ? current.filter(item => item !== name)
         : [...current, name]
     );
+    setSavedDates(current => {
+      const next = { ...current };
+      if (name in next) delete next[name];
+      else next[name] = Date.now();
+      return next;
+    });
+  };
 
   return (
     <div
@@ -171,6 +183,12 @@ export default function Home() {
               href="/content-tools"
             >
               أدوات المحتوى
+            </Link>
+            <Link
+              className="transition-colors hover:text-[#e8753a]"
+              href="/favorites"
+            >
+              المفضلة
             </Link>
             <span className="flex items-center gap-2 text-xs">
               <span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /> يتجدد

@@ -20,7 +20,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
   loadSavedTools,
+  loadSavedDates,
   parseCatalog,
+  saveSavedDates,
   saveSavedTools,
   type Tool,
 } from "@/lib/catalog";
@@ -44,6 +46,8 @@ export default function ContentTools() {
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortMode, setSortMode] = useState<"relevance" | "name">("relevance");
   const [saved, setSaved] = useState<string[]>(loadSavedTools);
+  const [savedDates, setSavedDates] =
+    useState<Record<string, number>>(loadSavedDates);
   const { theme, toggleTheme } = useTheme();
   const [showSaved, setShowSaved] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -99,13 +103,21 @@ export default function ContentTools() {
   );
   useEffect(() => {
     saveSavedTools(saved);
-  }, [saved]);
-  const toggleSaved = (name: string) =>
+    saveSavedDates(savedDates);
+  }, [saved, savedDates]);
+  const toggleSaved = (name: string) => {
     setSaved(current =>
       current.includes(name)
         ? current.filter(item => item !== name)
         : [...current, name]
     );
+    setSavedDates(current => {
+      const next = { ...current };
+      if (name in next) delete next[name];
+      else next[name] = Date.now();
+      return next;
+    });
+  };
   return (
     <div
       dir="rtl"
@@ -141,6 +153,12 @@ export default function ContentTools() {
             </Link>
             <Link href="/" className="transition-colors hover:text-[#f4efe7]">
               الدليل العام
+            </Link>
+            <Link
+              href="/favorites"
+              className="transition-colors hover:text-[#e8753a]"
+            >
+              المفضلة
             </Link>
           </nav>
           <div className="flex items-center gap-3">
