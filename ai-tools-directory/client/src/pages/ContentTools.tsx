@@ -17,6 +17,7 @@ import {
 import { Link } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import ToolShareButton from "@/components/ToolShareButton";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -41,6 +42,10 @@ const defaults = [
 ];
 
 export default function ContentTools() {
+  usePageMeta(
+    "أدوات الذكاء الاصطناعي لصناعة المحتوى",
+    "دليل متخصص لأدوات الكتابة والتصميم والفيديو والصوت والعروض لصناعة محتوى أفضل."
+  );
   const [tools, setTools] = useState<Tool[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("الكل");

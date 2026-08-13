@@ -17,6 +17,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { copyText, isHttpUrl } from "@/lib/catalog";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const categories = [
   "ذكاء اصطناعي",
@@ -53,6 +54,10 @@ const initialForm: FormData = {
 };
 
 export default function AddTool() {
+  usePageMeta(
+    "إضافة أداة",
+    "أنشئ إدخال JSON منظمًا لإضافة أداة ذكاء اصطناعي إلى دليل الأدوات."
+  );
   const [form, setForm] = useState<FormData>(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [copied, setCopied] = useState(false);

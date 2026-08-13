@@ -21,6 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Link } from "wouter";
 import { useTheme } from "@/contexts/ThemeContext";
 import ToolShareButton from "@/components/ToolShareButton";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import {
   loadSavedTools,
   loadSavedDates,
@@ -43,6 +44,10 @@ const defaultCategories = [
 ];
 
 export default function Home() {
+  usePageMeta(
+    "دليل أدوات الذكاء الاصطناعي",
+    "دليل عربي عملي لاكتشاف أدوات الذكاء الاصطناعي والإنتاجية والتصميم والبحث."
+  );
   const [tools, setTools] = useState<Tool[]>([]);
   const [query, setQuery] = useState("");
   const [category, setCategory] = useState("الكل");

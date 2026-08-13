@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useTheme } from "@/contexts/ThemeContext";
 import { copyText, downloadJson, isHttpUrl } from "@/lib/catalog";
+import { usePageMeta } from "@/hooks/usePageMeta";
 
 const categories = [
   "ذكاء اصطناعي",
@@ -40,6 +41,10 @@ const initialForm: Suggestion = {
 };
 
 export default function SuggestTool() {
+  usePageMeta(
+    "اقتراح أداة",
+    "اقترح أداة ذكاء اصطناعي جديدة عبر نموذج منظم قابل للمراجعة والإضافة إلى الدليل."
+  );
   const [form, setForm] = useState(initialForm);
   const [submitted, setSubmitted] = useState(false);
   const [copyState, setCopyState] = useState<"idle" | "copied" | "error">(

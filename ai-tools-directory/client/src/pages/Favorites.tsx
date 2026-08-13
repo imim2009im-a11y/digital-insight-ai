@@ -13,6 +13,7 @@ import { Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/contexts/ThemeContext";
 import ToolShareButton from "@/components/ToolShareButton";
+import { usePageMeta } from "@/hooks/usePageMeta";
 import {
   downloadJson,
   getPriceKind,
@@ -34,6 +35,10 @@ type PriceFilter = (typeof priceOptions)[number]["value"];
 type SortMode = "date" | "name";
 
 export default function Favorites() {
+  usePageMeta(
+    "أدواتك المفضلة",
+    "صفحة تجمع أدوات الذكاء الاصطناعي التي حفظتها محليًا للرجوع إليها لاحقًا."
+  );
   const [tools, setTools] = useState<Tool[]>([]);
   const [saved, setSaved] = useState<string[]>(loadSavedTools);
   const [savedDates, setSavedDates] =

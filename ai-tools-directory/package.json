@@ -9,7 +9,7 @@
     "start": "NODE_ENV=production node dist/index.js",
     "preview": "vite preview --host",
     "check": "tsc --noEmit",
-    "lint": "prettier --check client/index.html client/src/index.css client/src/App.tsx client/src/components/ToolShareButton.tsx client/src/contexts/ThemeContext.tsx client/src/lib/catalog.ts client/src/pages/Home.tsx client/src/pages/AddTool.tsx client/src/pages/ContentTools.tsx client/src/pages/Favorites.tsx client/src/pages/SuggestTool.tsx server/index.ts client/public/tools.json client/public/content-tools.json scripts/quality-check.mjs package.json",
+    "lint": "prettier --check client/index.html client/src/index.css client/src/App.tsx client/src/components/ToolShareButton.tsx client/src/contexts/ThemeContext.tsx client/src/hooks/usePageMeta.ts client/src/lib/catalog.ts client/src/pages/Home.tsx client/src/pages/AddTool.tsx client/src/pages/ContentTools.tsx client/src/pages/Favorites.tsx client/src/pages/SuggestTool.tsx server/index.ts client/public/tools.json client/public/content-tools.json scripts/quality-check.mjs package.json",
     "test": "node scripts/quality-check.mjs",
     "format": "prettier --write ."
   },
