@@ -277,9 +277,9 @@ export default function Home() {
                     {tools.length}
                   </span>
                   <span className="mb-2 max-w-[100px] text-sm leading-5 text-[#c9c2b9]">
-                    أداة وموقعًا
+                    خيارًا
                     <br />
-                    جاهز للاكتشاف
+                    جاهزًا للاكتشاف
                   </span>
                 </div>
                 <div className="mt-6 h-px w-full bg-white/15" />
