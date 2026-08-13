@@ -1,0 +1,24 @@
+{
+  "tools": [
+    {"name":"ChatGPT","url":"https://chatgpt.com","category":"كتابة ومحادثة","label":"مساعد","description":"مساعد عام للكتابة، العصف الذهني، التحليل، والتعامل مع الملفات.","tags":["كتابة","تحليل","أفكار"],"featured":true},
+    {"name":"Claude","url":"https://claude.ai","category":"كتابة ومحادثة","label":"تحرير","description":"مساعد للكتابة والتحليل وصياغة المسودات الطويلة بوضوح.","tags":["تحرير","تحليل","بحث"],"featured":true},
+    {"name":"Gemini","url":"https://gemini.google.com","category":"كتابة ومحادثة","label":"أفكار","description":"مساعد متعدد الاستخدامات للعصف الذهني والكتابة والبحث الأولي.","tags":["أفكار","بحث","كتابة"]},
+    {"name":"Perplexity","url":"https://www.perplexity.ai","category":"بحث ومصادر","label":"بحث","description":"محرك بحث بالمحادثة يساعد على استكشاف موضوع مع إسناد للمصادر.","tags":["مصادر","بحث","أسئلة"],"featured":true},
+    {"name":"Jasper","url":"https://www.jasper.ai","category":"تسويق ومحتوى","label":"تسويق","description":"منصة لمساعدة فرق التسويق على إعداد مسودات المحتوى والحملات.","tags":["تسويق","حملات","علامة تجارية"]},
+    {"name":"Copy.ai","url":"https://www.copy.ai","category":"تسويق ومحتوى","label":"نسخ إعلانية","description":"أداة لتوليد مسودات النصوص التسويقية وسير عمل فرق المحتوى.","tags":["إعلانات","تسويق","مبيعات"]},
+    {"name":"Grammarly","url":"https://www.grammarly.com","category":"كتابة ومحادثة","label":"تدقيق","description":"مساعد لتحسين الوضوح والنبرة والقواعد أثناء الكتابة.","tags":["لغة","تدقيق","تحرير"]},
+    {"name":"Notion AI","url":"https://www.notion.so/product/ai","category":"إنتاجية المحتوى","label":"تنظيم","description":"ميزات ذكاء اصطناعي داخل مساحة عمل لتنظيم الملاحظات والمشاريع.","tags":["ملاحظات","تنظيم","فرق"]},
+    {"name":"Canva AI","url":"https://www.canva.com/ai-image-generator/","category":"تصميم بصري","label":"تصميم","description":"أدوات تصميم وتوليد مرئيات مناسبة للمحتوى الرقمي والعروض.","tags":["تصميم","عروض","اجتماعي"],"featured":true},
+    {"name":"Adobe Firefly","url":"https://firefly.adobe.com","category":"تصميم بصري","label":"صور","description":"أدوات Adobe التوليدية لإنشاء وتحرير الصور والمرئيات.","tags":["صور","تحرير","Adobe"]},
+    {"name":"Midjourney","url":"https://www.midjourney.com","category":"تصميم بصري","label":"صور","description":"منصة إبداعية لتوليد صور من أوصاف نصية ومراجع بصرية.","tags":["صور","فن","مرئيات"]},
+    {"name":"Ideogram","url":"https://ideogram.ai","category":"تصميم بصري","label":"تصميم","description":"أداة لتوليد الصور والتصاميم مع اهتمام خاص بالنصوص داخل الصور.","tags":["صور","نصوص","تصميم"]},
+    {"name":"Leonardo AI","url":"https://leonardo.ai","category":"تصميم بصري","label":"صور","description":"منصة لإنشاء مرئيات وأصول إبداعية باستخدام النماذج التوليدية.","tags":["أصول","صور","أفكار"]},
+    {"name":"Runway","url":"https://runwayml.com","category":"فيديو وحركة","label":"فيديو","description":"أدوات لإنشاء وتحرير الفيديو والمرئيات المتحركة بمساعدة AI.","tags":["فيديو","تحرير","حركة"],"featured":true},
+    {"name":"HeyGen","url":"https://www.heygen.com","category":"فيديو وحركة","label":"أفاتار","description":"منصة لإنشاء فيديوهات تقديمية باستخدام أفاتارات وأصوات رقمية.","tags":["فيديو","أفاتار","تقديم"]},
+    {"name":"Descript","url":"https://www.descript.com","category":"فيديو وحركة","label":"تحرير","description":"تحرير الصوت والفيديو من خلال نص قابل للتحرير وأدوات إنتاجية.","tags":["بودكاست","فيديو","نص"]},
+    {"name":"ElevenLabs","url":"https://elevenlabs.io","category":"صوت وموسيقى","label":"صوت","description":"أدوات صوتية للقراءة الاصطناعية وتحويل النص إلى صوت.","tags":["صوت","تعليق","بودكاست"]},
+    {"name":"CapCut","url":"https://www.capcut.com","category":"فيديو وحركة","label":"مونتاج","description":"محرر فيديو يضم أدوات سريعة للمحتوى القصير والاجتماعي.","tags":["مونتاج","قصير","اجتماعي"]},
+    {"name":"Gamma","url":"https://gamma.app","category":"عروض ومستندات","label":"عروض","description":"إنشاء عروض ومستندات وصفحات قابلة للمشاركة من فكرة أو مخطط.","tags":["عروض","مستندات","عرض"]},
+    {"name":"Suno","url":"https://suno.com","category":"صوت وموسيقى","label":"موسيقى","description":"تجربة لإنشاء مقاطع موسيقية من أوصاف نصية.","tags":["موسيقى","صوت","إبداع"]}
+  ]
+}

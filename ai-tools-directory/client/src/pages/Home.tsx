@@ -56,6 +56,7 @@ export default function Home() {
           <a className="transition-colors hover:text-[#f4efe7]" href="#directory">الفهرس</a>
           <a className="transition-colors hover:text-[#f4efe7]" href="#method">عن الدليل</a>
           <Link className="transition-colors hover:text-[#e8753a]" href="/add-tool">إضافة أداة</Link>
+          <Link className="transition-colors hover:text-[#e8753a]" href="/content-tools">أدوات المحتوى</Link>
           <span className="flex items-center gap-2 text-xs"><span className="h-1.5 w-1.5 rounded-full bg-[#e8753a]" /> يتجدد بالمعرفة</span>
         </nav>
         <a href="https://github.com/imim2009im-a11y/digital-insight-ai" target="_blank" rel="noreferrer" className="flex items-center gap-2 text-sm text-[#aca59d] transition-colors hover:text-[#e8753a]"><Github size={16} /> <span className="hidden sm:inline">GitHub</span></a>
