@@ -19,6 +19,9 @@ RUN set -eux; \
     unzip -q "$PLUGIN" -d /usr/src/wordpress/wp-content/plugins; \
     test -f /usr/src/wordpress/wp-content/themes/digital-insight-ai/style.css; \
     test -f /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core/digital-insight-ai-core.php; \
+    chown -R www-data:www-data /usr/src/wordpress/wp-content/themes/digital-insight-ai /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core; \
     rm -rf /tmp/dia-package /tmp/dia-package.zip
+
+EXPOSE 80
 
 # Keep the official WordPress ENTRYPOINT/CMD intact so first-run initialization works.
