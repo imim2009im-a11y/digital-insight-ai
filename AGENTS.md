@@ -4,6 +4,13 @@
 
 Digital Insight AI is a static Arabic GitHub Pages website focused on practical AI-tool discovery, comparisons, affiliate content, and lead generation.
 
+## Repository source of truth
+
+- This repository is the production source for the legacy/static GitHub Pages site at `/digital-insight-ai/`.
+- The nested `ai-tools-directory/` directory is a **legacy snapshot** and must not receive new product development.
+- Active development of the modern AI tools/blog application belongs in the separate repository `imim2009im-a11y/ai-tools-directory`.
+- Do not copy changes back and forth between the nested snapshot and the standalone repository. If a migration is needed, compare deliberately and document the migration.
+
 ## Non-negotiable rules
 
 1. Preserve Arabic language quality and right-to-left layout.
@@ -16,6 +23,7 @@ Digital Insight AI is a static Arabic GitHub Pages website focused on practical 
 8. Keep pages usable on mobile devices and accessible by keyboard.
 9. Prefer small, reviewable changes over broad rewrites.
 10. Update sitemap files when public pages are added, renamed, or removed.
+11. Do not modify `ai-tools-directory/` except for an explicitly approved migration or removal task.
 
 ## Required checks before merging
 
