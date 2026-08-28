@@ -1,0 +1,105 @@
+name: Static Site Quality Gate
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: static-quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Validate required public files and local links
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          from urllib.parse import urlsplit, unquote
+          import sys
+
+          root = Path('.').resolve()
+          required = [
+              'index.html',
+              'tools.html',
+              'contact.html',
+              'privacy-policy.html',
+              'robots.txt',
+              'sitemap.xml',
+          ]
+          missing_required = [p for p in required if not (root / p).is_file()]
+          if missing_required:
+              print('Missing required files:', ', '.join(missing_required), file=sys.stderr)
+              sys.exit(1)
+
+          html_files = [p for p in root.rglob('*.html') if '.git' not in p.parts]
+          broken = []
+
+          class LinkParser(HTMLParser):
+              def __init__(self):
+                  super().__init__()
+                  self.refs = []
+              def handle_starttag(self, tag, attrs):
+                  values = dict(attrs)
+                  for key in ('href', 'src'):
+                      if key in values:
+                          self.refs.append(values[key])
+
+          for html in html_files:
+              parser = LinkParser()
+              parser.feed(html.read_text(encoding='utf-8', errors='strict'))
+              for raw in parser.refs:
+                  if not raw or raw.startswith(('#', 'mailto:', 'tel:', 'data:', 'javascript:')):
+                      continue
+                  parsed = urlsplit(raw)
+                  if parsed.scheme or parsed.netloc:
+                      continue
+                  path = unquote(parsed.path)
+                  if not path or path == '/':
+                      continue
+                  if path.startswith('/digital-insight-ai/'):
+                      path = path[len('/digital-insight-ai/'):]
+                  elif path.startswith('/'):
+                      continue
+                  target = (html.parent / path).resolve()
+                  try:
+                      target.relative_to(root)
+                  except ValueError:
+                      broken.append((html.relative_to(root), raw, 'escapes repository root'))
+                      continue
+                  if path.endswith('/'):
+                      target = target / 'index.html'
+                  if not target.exists():
+                      broken.append((html.relative_to(root), raw, 'target missing'))
+
+          if broken:
+              for source, ref, reason in broken:
+                  print(f'{source}: {ref} ({reason})', file=sys.stderr)
+              sys.exit(1)
+
+          print(f'Validated {len(html_files)} HTML files with no broken local href/src targets.')
+          PY
+
+      - name: Reject sensitive deployment material
+        shell: bash
+        run: |
+          set -euo pipefail
+          if find . -path './.git' -prune -o -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) -print | grep -q .; then
+            echo 'Sensitive deployment material detected in repository.' >&2
+            exit 1
+          fi
