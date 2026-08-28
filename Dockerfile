@@ -17,7 +17,9 @@ RUN set -eux; \
     unzip -q /tmp/wp-assets/digital-insight-ai-core.zip -d /usr/src/wordpress/wp-content/plugins; \
     test -f /usr/src/wordpress/wp-content/themes/digital-insight-ai/style.css; \
     test -f /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core/digital-insight-ai-core.php; \
-    chown -R www-data:www-data /usr/src/wordpress/wp-content/themes/digital-insight-ai /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core; \
+    mkdir -p /usr/src/wordpress/health; \
+    printf 'ok\n' > /usr/src/wordpress/health/index.html; \
+    chown -R www-data:www-data /usr/src/wordpress/wp-content/themes/digital-insight-ai /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core /usr/src/wordpress/health; \
     chmod +x /usr/local/bin/dia-entrypoint.sh; \
     rm -rf /tmp/deploy-bin /tmp/wp-assets /tmp/wp-assets.tar.gz
 
