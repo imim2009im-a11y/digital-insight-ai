@@ -17,9 +17,16 @@ RUN set -eux; \
     unzip -q /tmp/wp-assets/digital-insight-ai-core.zip -d /usr/src/wordpress/wp-content/plugins; \
     test -f /usr/src/wordpress/wp-content/themes/digital-insight-ai/style.css; \
     test -f /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core/digital-insight-ai-core.php; \
-    rm -rf /usr/src/wordpress/health; \
-    printf 'ok\n' > /usr/src/wordpress/health; \
-    chown www-data:www-data /usr/src/wordpress/health; \
+    printf 'ok\n' > /var/www/dia-health.txt; \
+    chown www-data:www-data /var/www/dia-health.txt; \
+    printf '%s\n' \
+      'ServerName 0.0.0.0' \
+      'AliasMatch "^/health/?$" "/var/www/dia-health.txt"' \
+      '<Directory "/var/www">' \
+      '    Require all granted' \
+      '</Directory>' \
+      > /etc/apache2/conf-available/dia-runtime.conf; \
+    a2enconf dia-runtime; \
     chown -R www-data:www-data /usr/src/wordpress/wp-content/themes/digital-insight-ai /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core; \
     chmod +x /usr/local/bin/dia-entrypoint.sh; \
     rm -rf /tmp/deploy-bin /tmp/wp-assets /tmp/wp-assets.tar.gz
