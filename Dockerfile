@@ -3,6 +3,7 @@ FROM wordpress:latest
 USER root
 
 COPY deploy-bin/ /tmp/deploy-bin/
+COPY dia-entrypoint.sh /usr/local/bin/dia-entrypoint.sh
 
 RUN set -eux; \
     apt-get update; \
@@ -17,11 +18,10 @@ RUN set -eux; \
     test -f /usr/src/wordpress/wp-content/themes/digital-insight-ai/style.css; \
     test -f /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core/digital-insight-ai-core.php; \
     chown -R www-data:www-data /usr/src/wordpress/wp-content/themes/digital-insight-ai /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core; \
-    a2dismod mpm_event || true; \
-    a2dismod mpm_worker || true; \
-    a2enmod mpm_prefork; \
+    chmod +x /usr/local/bin/dia-entrypoint.sh; \
     rm -rf /tmp/deploy-bin /tmp/wp-assets /tmp/wp-assets.tar.gz
 
 EXPOSE 80
 
-# Official WordPress ENTRYPOINT/CMD remain intact; Apache uses prefork only.
+ENTRYPOINT ["/usr/local/bin/dia-entrypoint.sh"]
+CMD ["apache2-foreground"]
