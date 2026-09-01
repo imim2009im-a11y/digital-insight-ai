@@ -21,21 +21,22 @@ Digital Insight AI is an Arabic website by Ibrahim Albalawi for discovering and 
 
 ## Main pages
 
-- Home: https://imim2009im-a11y.github.io/digital-insight-ai/
-- Start: https://imim2009im-a11y.github.io/digital-insight-ai/start.html
-- Tools: https://imim2009im-a11y.github.io/digital-insight-ai/tools.html
-- Methodology: https://imim2009im-a11y.github.io/digital-insight-ai/methodology.html
-- Best AI video tools: https://imim2009im-a11y.github.io/digital-insight-ai/best-ai-video-tools.html
-- Kling AI vs Runway: https://imim2009im-a11y.github.io/digital-insight-ai/kling-vs-runway.html
-- Lovable vs v0: https://imim2009im-a11y.github.io/digital-insight-ai/lovable-vs-v0.html
-- AI tools guide: https://imim2009im-a11y.github.io/digital-insight-ai/article-ai-tools.html
-- About: https://imim2009im-a11y.github.io/digital-insight-ai/about.html
-- Contact: https://imim2009im-a11y.github.io/digital-insight-ai/contact.html
-- Privacy: https://imim2009im-a11y.github.io/digital-insight-ai/privacy-policy.html
+- Home: https://digitalinsightai.com/
+- Start: https://digitalinsightai.com/start.html
+- Tools: https://digitalinsightai.com/tools.html
+- Methodology: https://digitalinsightai.com/methodology.html
+- Best AI video tools: https://digitalinsightai.com/best-ai-video-tools.html
+- Kling AI vs Runway: https://digitalinsightai.com/kling-vs-runway.html
+- Lovable vs v0: https://digitalinsightai.com/lovable-vs-v0.html
+- AI tools guide: https://digitalinsightai.com/article-ai-tools.html
+- About: https://digitalinsightai.com/about.html
+- Contact: https://digitalinsightai.com/contact.html
+- Privacy: https://digitalinsightai.com/privacy-policy.html
 
 ## Technical profile
 
 - Hosting: GitHub Pages
+- Custom domain: digitalinsightai.com
 - Repository: imim2009im-a11y/digital-insight-ai
 - Primary language: Arabic
 - Site type: Static website
@@ -46,4 +47,4 @@ Digital Insight AI is an Arabic website by Ibrahim Albalawi for discovering and 
 
 Ibrahim Albalawi
 
-Last updated: 2026-06-17
+Last updated: 2026-09-02

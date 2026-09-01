@@ -4,27 +4,27 @@
 
 ## Primary pages
 
-- [Home](https://imim2009im-a11y.github.io/digital-insight-ai/): Main introduction and latest recommendations.
-- [Start here](https://imim2009im-a11y.github.io/digital-insight-ai/start.html): Guided entry point for new visitors.
-- [AI tools directory](https://imim2009im-a11y.github.io/digital-insight-ai/tools.html): Categorized AI tools and practical use cases.
-- [Methodology](https://imim2009im-a11y.github.io/digital-insight-ai/methodology.html): How tools and comparisons are evaluated.
-- [About](https://imim2009im-a11y.github.io/digital-insight-ai/about.html): Project purpose and author information.
-- [Contact](https://imim2009im-a11y.github.io/digital-insight-ai/contact.html): Contact and newsletter forms.
-- [Privacy and affiliate disclosure](https://imim2009im-a11y.github.io/digital-insight-ai/privacy-policy.html): Privacy terms and affiliate disclosure.
+- [Home](https://digitalinsightai.com/): Main introduction and latest recommendations.
+- [Start here](https://digitalinsightai.com/start.html): Guided entry point for new visitors.
+- [AI tools directory](https://digitalinsightai.com/tools.html): Categorized AI tools and practical use cases.
+- [Methodology](https://digitalinsightai.com/methodology.html): How tools and comparisons are evaluated.
+- [About](https://digitalinsightai.com/about.html): Project purpose and author information.
+- [Contact](https://digitalinsightai.com/contact.html): Contact and newsletter forms.
+- [Privacy and affiliate disclosure](https://digitalinsightai.com/privacy-policy.html): Privacy terms and affiliate disclosure.
 
 ## Featured comparisons and guides
 
-- [Best AI video tools](https://imim2009im-a11y.github.io/digital-insight-ai/best-ai-video-tools.html)
-- [Kling AI vs Runway](https://imim2009im-a11y.github.io/digital-insight-ai/kling-vs-runway.html)
-- [Lovable vs v0](https://imim2009im-a11y.github.io/digital-insight-ai/lovable-vs-v0.html)
-- [AI tools guide](https://imim2009im-a11y.github.io/digital-insight-ai/article-ai-tools.html)
+- [Best AI video tools](https://digitalinsightai.com/best-ai-video-tools.html)
+- [Kling AI vs Runway](https://digitalinsightai.com/kling-vs-runway.html)
+- [Lovable vs v0](https://digitalinsightai.com/lovable-vs-v0.html)
+- [AI tools guide](https://digitalinsightai.com/article-ai-tools.html)
 
 ## Machine-readable resources
 
-- [Full project context](https://imim2009im-a11y.github.io/digital-insight-ai/llms-full.txt)
-- [Markdown sitemap](https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.md)
-- [XML sitemap](https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.xml)
-- [Robots rules](https://imim2009im-a11y.github.io/digital-insight-ai/robots.txt)
+- [Full project context](https://digitalinsightai.com/llms-full.txt)
+- [Markdown sitemap](https://digitalinsightai.com/sitemap.md)
+- [XML sitemap](https://digitalinsightai.com/sitemap.xml)
+- [Robots rules](https://digitalinsightai.com/robots.txt)
 
 ## Notes
 
