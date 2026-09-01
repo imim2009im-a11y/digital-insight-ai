@@ -8,12 +8,12 @@
 
 ## روابط التشغيل
 
-- الصفحة الرئيسية: `https://imim2009im-a11y.github.io/digital-insight-ai/`
-- صفحة الأدوات: `https://imim2009im-a11y.github.io/digital-insight-ai/tools.html`
-- رابط قصير للأدوات: `https://imim2009im-a11y.github.io/digital-insight-ai/go/`
-- نموذج التواصل: `https://imim2009im-a11y.github.io/digital-insight-ai/contact.html`
-- لوحة النقرات المحلية: `https://imim2009im-a11y.github.io/digital-insight-ai/analytics.html`
-- صفحة الحملة: `https://imim2009im-a11y.github.io/digital-insight-ai/launch.html`
+- الصفحة الرئيسية: `https://digitalinsightai.com/`
+- صفحة الأدوات: `https://digitalinsightai.com/tools.html`
+- رابط قصير للأدوات: `https://digitalinsightai.com/go/`
+- نموذج التواصل: `https://digitalinsightai.com/contact.html`
+- لوحة النقرات المحلية: `https://digitalinsightai.com/analytics.html`
+- صفحة الحملة: `https://digitalinsightai.com/launch.html`
 
 ## ما تم إنجازه
 
@@ -53,7 +53,7 @@
 - إنشاء Google Analytics GA4.
 - إنشاء Google Search Console.
 - إرسال sitemap.xml.
-- شراء دومين قصير لاحقاً إذا أثبتت الحملة وجود اهتمام.
+- التحقق دوريًا من إعدادات النطاق المخصص وHTTPS.
 - كتابة مقال جديد بناءً على أكثر أداة حصلت على نقرات.
 
 ## تحذير مهم

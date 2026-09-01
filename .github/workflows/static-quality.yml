@@ -42,6 +42,7 @@ jobs:
               'privacy-policy.html',
               'robots.txt',
               'sitemap.xml',
+              'CNAME',
           ]
           missing_required = [p for p in required if not (root / p).is_file()]
           if missing_required:
@@ -97,6 +98,56 @@ jobs:
               sys.exit(1)
 
           print(f'Validated {len(html_files)} HTML files with no broken local href/src targets.')
+          PY
+
+      - name: Validate custom-domain references
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import sys
+
+          root = Path('.')
+          custom_domain = 'digitalinsightai.com'
+          legacy_origin = 'https://imim2009im-a11y.github.io/digital-insight-ai'
+
+          cname = (root / 'CNAME').read_text(encoding='utf-8').strip()
+          if cname != custom_domain:
+              print(f'CNAME must be {custom_domain!r}; found {cname!r}.', file=sys.stderr)
+              sys.exit(1)
+
+          active_files = list(root.glob('*.html'))
+          active_files.extend((root / 'go').rglob('*.html'))
+          for name in (
+              '_config.yml',
+              'robots.txt',
+              'sitemap.xml',
+              'google-sitemap.xml',
+              'sitemap.txt',
+              'sitemap.md',
+              'llms.txt',
+              'llms-full.txt',
+              'README.md',
+              'LAUNCH-CAMPAIGN.md',
+              'LAUNCH-REPORT.md',
+          ):
+              path = root / name
+              if path.is_file():
+                  active_files.append(path)
+
+          stale = []
+          for path in active_files:
+              text = path.read_text(encoding='utf-8', errors='strict')
+              if legacy_origin in text:
+                  stale.append(str(path))
+
+          if stale:
+              print('Legacy GitHub Pages origin found in active production files:', file=sys.stderr)
+              for path in sorted(set(stale)):
+                  print(f'  - {path}', file=sys.stderr)
+              sys.exit(1)
+
+          print(f'Custom-domain guard passed for {len(active_files)} active files.')
           PY
 
       - name: Reject sensitive deployment material
