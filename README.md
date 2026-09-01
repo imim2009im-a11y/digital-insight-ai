@@ -4,11 +4,11 @@
 
 الموقع منشور الآن ومتاح للتجربة:
 
-👉 **الموقع الرئيسي:** https://imim2009im-a11y.github.io/digital-insight-ai/
+👉 **الموقع الرئيسي:** https://digitalinsightai.com/
 
-👉 **صفحة الأدوات:** https://imim2009im-a11y.github.io/digital-insight-ai/tools.html
+👉 **صفحة الأدوات:** https://digitalinsightai.com/tools.html
 
-👉 **رابط قصير للنشر:** https://imim2009im-a11y.github.io/digital-insight-ai/go/
+👉 **رابط قصير للنشر:** https://digitalinsightai.com/go/
 
 ---
 
@@ -43,13 +43,13 @@
 
 | الصفحة | الرابط |
 |---|---|
-| الرئيسية | https://imim2009im-a11y.github.io/digital-insight-ai/ |
-| الأدوات | https://imim2009im-a11y.github.io/digital-insight-ai/tools.html |
-| رابط قصير للأدوات | https://imim2009im-a11y.github.io/digital-insight-ai/go/ |
-| التواصل | https://imim2009im-a11y.github.io/digital-insight-ai/contact.html |
-| الخصوصية والإفصاح | https://imim2009im-a11y.github.io/digital-insight-ai/privacy-policy.html |
-| لوحة النقرات المحلية | https://imim2009im-a11y.github.io/digital-insight-ai/analytics.html |
-| صفحة الحملة | https://imim2009im-a11y.github.io/digital-insight-ai/launch.html |
+| الرئيسية | https://digitalinsightai.com/ |
+| الأدوات | https://digitalinsightai.com/tools.html |
+| رابط قصير للأدوات | https://digitalinsightai.com/go/ |
+| التواصل | https://digitalinsightai.com/contact.html |
+| الخصوصية والإفصاح | https://digitalinsightai.com/privacy-policy.html |
+| لوحة النقرات المحلية | https://digitalinsightai.com/analytics.html |
+| صفحة الحملة | https://digitalinsightai.com/launch.html |
 
 ---
 
@@ -103,4 +103,4 @@ GitHub: [@imim2009im-a11y](https://github.com/imim2009im-a11y)
 
 ---
 
-**آخر تحديث:** 2026-08-28
+**آخر تحديث:** 2026-09-02
