@@ -11,6 +11,7 @@ from pathlib import Path
 from urllib.parse import unquote, urlsplit
 
 ROOT = Path(__file__).resolve().parents[1]
+CANONICAL_ORIGIN = "https://digitalinsightai.com/"
 PUBLIC_PAGES = [
     "index.html",
     "start.html",
@@ -138,7 +139,7 @@ def main() -> int:
         namespace = {"sm": "http://www.sitemaps.org/schemas/sitemap/0.9"}
         locations = [node.text.strip() for node in sitemap.findall("sm:url/sm:loc", namespace) if node.text]
         expected = {
-            "https://imim2009im-a11y.github.io/digital-insight-ai/" + ("" if page == "index.html" else page)
+            CANONICAL_ORIGIN + ("" if page == "index.html" else page)
             for page in PUBLIC_PAGES
         }
         if set(locations) != expected:
@@ -165,7 +166,7 @@ def main() -> int:
 
     robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
     sitemap_lines = [line for line in robots.splitlines() if line.lower().startswith("sitemap:")]
-    if sitemap_lines != ["Sitemap: https://imim2009im-a11y.github.io/digital-insight-ai/sitemap.xml"]:
+    if sitemap_lines != [f"Sitemap: {CANONICAL_ORIGIN}sitemap.xml"]:
         errors.append("robots.txt must advertise only the canonical sitemap.xml")
 
     if errors:
