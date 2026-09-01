@@ -7,7 +7,7 @@
 صفحة الأدوات:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=social&utm_medium=post&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=social&utm_medium=post&utm_campaign=launch_tools
 ```
 
 ## روابط اختبار حسب القناة
@@ -15,31 +15,31 @@ https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=socia
 سناب شات:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=snapchat&utm_medium=story&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=snapchat&utm_medium=story&utm_campaign=launch_tools
 ```
 
 إنستغرام:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=instagram&utm_medium=bio&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=instagram&utm_medium=bio&utm_campaign=launch_tools
 ```
 
 واتساب:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=whatsapp&utm_medium=share&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=whatsapp&utm_medium=share&utm_campaign=launch_tools
 ```
 
 إكس:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=x&utm_medium=post&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=x&utm_medium=post&utm_campaign=launch_tools
 ```
 
 لينكدإن:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=linkedin&utm_medium=post&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=linkedin&utm_medium=post&utm_campaign=launch_tools
 ```
 
 ## منشور عربي قصير
@@ -51,7 +51,7 @@ https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=linke
 صفحة الأدوات:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=social&utm_medium=post&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=social&utm_medium=post&utm_campaign=launch_tools
 ```
 
 ## منشور عربي مباشر للتحويل
@@ -61,7 +61,7 @@ https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=socia
 ابدأ من هذا الدليل المختصر، قارن الأدوات، ثم اختر حسب استخدامك:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=social&utm_medium=conversion_post&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=social&utm_medium=conversion_post&utm_campaign=launch_tools
 ```
 
 ## منشور إنجليزي
@@ -73,7 +73,7 @@ It covers AI video tools, productivity tools, and no-code AI builders with clear
 Start here:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=social&utm_medium=english_post&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=social&utm_medium=english_post&utm_campaign=launch_tools
 ```
 
 ## رسالة واتساب قصيرة
@@ -81,7 +81,7 @@ https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=socia
 هذا موقع بسيط جمعت فيه أدوات ذكاء اصطناعي مفيدة للفيديو، التسويق، وبناء التطبيقات. جرب صفحة الأدوات وأرسل لي رأيك:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=whatsapp&utm_medium=direct&utm_campaign=launch_tools
+https://digitalinsightai.com/tools.html?utm_source=whatsapp&utm_medium=direct&utm_campaign=launch_tools
 ```
 
 ## خطة 7 أيام
@@ -100,7 +100,7 @@ https://imim2009im-a11y.github.io/digital-insight-ai/tools.html?utm_source=whats
 رابط المقال:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/kling-vs-runway.html?utm_source=social&utm_medium=post&utm_campaign=kling_runway
+https://digitalinsightai.com/kling-vs-runway.html?utm_source=social&utm_medium=post&utm_campaign=kling_runway
 ```
 
 ### اليوم 3
@@ -111,7 +111,7 @@ https://imim2009im-a11y.github.io/digital-insight-ai/kling-vs-runway.html?utm_so
 رابط المقال:
 
 ```text
-https://imim2009im-a11y.github.io/digital-insight-ai/lovable-vs-v0.html?utm_source=social&utm_medium=post&utm_campaign=lovable_v0
+https://digitalinsightai.com/lovable-vs-v0.html?utm_source=social&utm_medium=post&utm_campaign=lovable_v0
 ```
 
 ### اليوم 4
