@@ -5,18 +5,18 @@ github:
 title: Digital Insight AI
 description: منصة ذكية للحصول على رؤى وتحليلات قيمة باستخدام الذكاء الاصطناعي
 
-# إعدادات SEO
-url: https://imim2009im-a11y.github.io/digital-insight-ai
-baseurl: /digital-insight-ai
+# إعدادات SEO للنطاق المخصص
+url: https://digitalinsightai.com
+baseurl: ""
 
 # محرك التتبع
-google_analytics: G-XXXXXXXXXX
+# اتركه فارغًا حتى يتم إعداد معرف GA4 حقيقي؛ لا تستخدم قيمة تجريبية في الإنتاج.
+google_analytics: ""
 
 # البيانات الهيكلية
 company_name: Digital Insight AI
 company_description: منصة تحليلات ذكية متقدمة
-company_url: https://imim2009im-a11y.github.io/digital-insight-ai
-company_logo: https://imim2009im-a11y.github.io/digital-insight-ai/logo.png
+company_url: https://digitalinsightai.com
 
 # وسائل التواصل
 social:
