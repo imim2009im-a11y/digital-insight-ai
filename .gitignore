@@ -1,0 +1,18 @@
+# Local/managed environment dependencies
+node_modules/
+
+# Local build outputs and caches
+dist/
+build/
+.cache/
+
+# Local environment and sensitive files
+.env
+.env.*
+*.pem
+*.key
+*.p12
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
