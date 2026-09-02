@@ -27,6 +27,20 @@
     return form.elements[name] ? String(form.elements[name].value || '').trim() : '';
   }
 
+  function requireConsent(form) {
+    const checkbox = form.querySelector('input[name="privacy_consent"]');
+    if (checkbox && checkbox.checked) {
+      checkbox.removeAttribute('aria-invalid');
+      return true;
+    }
+    if (checkbox) {
+      checkbox.setAttribute('aria-invalid', 'true');
+      checkbox.focus();
+    }
+    status(form, 'يلزم الموافقة على سياسة الخصوصية قبل الإرسال.', 'error');
+    return false;
+  }
+
   function readClicks() {
     try {
       const value = JSON.parse(localStorage.getItem(CLICK_KEY) || '[]');
@@ -86,6 +100,7 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (form.getAttribute('aria-busy') === 'true') return;
+      if (!requireConsent(form)) return;
       const email = field(form, 'email');
       if (!EMAIL_RE.test(email)) {
         status(form, 'اكتب بريداً إلكترونياً صحيحاً أولاً.', 'error');
@@ -115,6 +130,7 @@
     form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (form.getAttribute('aria-busy') === 'true') return;
+      if (!requireConsent(form)) return;
       const name = field(form, 'name');
       const email = field(form, 'email');
       const message = field(form, 'message');
@@ -197,7 +213,7 @@
     const label = document.querySelector('.short-link');
     if (image) image.src = 'https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=' + encodeURIComponent(shortUrl);
     if (label) {
-      label.textContent = 'digital-insight-ai/go/';
+      label.textContent = 'digitalinsightai.com/go/';
       label.title = shortUrl;
     }
   }
