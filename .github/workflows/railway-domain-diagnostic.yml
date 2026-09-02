@@ -1,0 +1,49 @@
+name: Railway Domain Diagnostic
+
+on:
+  push:
+    branches:
+      - ops/railway-domain-diagnostic
+
+permissions:
+  contents: read
+
+jobs:
+  domain-status:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PROJECT_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+      API_TOKEN: ${{ secrets.RAILWAY_API_TOKEN }}
+    steps:
+      - name: Install Railway CLI
+        shell: bash
+        run: npm install --global @railway/cli@5.47.2 >/dev/null 2>&1
+
+      - name: Query domain status without printing credentials
+        shell: bash
+        run: |
+          set -euo pipefail
+          unset RAILWAY_TOKEN RAILWAY_API_TOKEN || true
+          if [ -n "${PROJECT_TOKEN:-}" ]; then
+            export RAILWAY_TOKEN="$PROJECT_TOKEN"
+          elif [ -n "${API_TOKEN:-}" ]; then
+            export RAILWAY_API_TOKEN="$API_TOKEN"
+          else
+            printf '%s\n' '{"auth":"missing","message":"No Railway token secret is configured in this repository."}' > railway-domain-status.json
+            exit 0
+          fi
+
+          railway domain status digitalinsightai.com \
+            --project 5702000f-158b-4c94-b2de-0dda31a0305f \
+            --service DigitalInsightProduction \
+            --environment production \
+            --json > railway-domain-status.json
+
+      - name: Upload diagnostic artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: railway-domain-status
+          path: railway-domain-status.json
+          retention-days: 1
+          if-no-files-found: error
