@@ -16,9 +16,12 @@ Before any non-trivial change, read:
 1. `AGENTS.md`
 2. `README.md`
 3. `PRODUCTION-ARCHITECTURE.md`
-4. the relevant deployment or source files for the task
+4. `AGENT-OPERATING-SYSTEM.md`
+5. the relevant deployment or source files for the task
 
 If these files disagree with observed live infrastructure, stop and report the conflict before changing production behavior.
+
+`AGENT-OPERATING-SYSTEM.md` defines the project-local plan/test/review workflow and specialized role responsibilities. External agent frameworks may strengthen execution, but they do not override this repository's production rules.
 
 ## Source-of-truth model
 
@@ -59,12 +62,15 @@ Do not deploy it as a public Railway web service merely because a project named 
 
 1. Start from `main` unless the task explicitly targets another ref.
 2. Use a dedicated branch such as `codex/<short-task-name>` for non-trivial changes.
-3. Never force-push or rewrite shared history.
-4. Never delete working services, routes, pages, data, or deployment resources without explicit approval and dependency verification.
-5. Keep changes focused and reviewable.
-6. Inspect relevant Git history/config before editing deployment-sensitive files.
-7. Verify production-impacting changes before merge.
-8. Summarize files changed, checks run, deployment impact, and remaining risks.
+3. Define an observable success condition and risk level before implementation.
+4. Use the specialized roles in `AGENT-OPERATING-SYSTEM.md` when they materially improve the task; do not dispatch overlapping agents to edit the same production-sensitive file concurrently.
+5. Never force-push or rewrite shared history.
+6. Never delete working services, routes, pages, data, or deployment resources without explicit approval and dependency verification.
+7. Keep changes focused and reviewable.
+8. Inspect relevant Git history/config before editing deployment-sensitive files.
+9. Verify production-impacting changes before merge.
+10. Run an independent review for non-trivial changes before declaring completion.
+11. Summarize files changed, checks run, deployment impact, and remaining risks.
 
 ## Non-negotiable product rules
 
@@ -168,17 +174,21 @@ When adding or materially changing a public route/page:
 - Do not add analytics or third-party collection without documenting privacy impact.
 - Avoid inline secrets and private endpoints in client-side code.
 - Prefer least-privilege integrations.
+- Review external agent plugins, hooks, MCP servers, and setup scripts before granting shell, filesystem, credential, or production permissions.
 - If a task touches authentication, payments, personal data, DNS, deployment credentials, or third-party account access, state the risk before irreversible changes.
 
 ## Reliability
 
-Use `scripts/production-smoke.sh` for public endpoint validation. The scheduled `Production Smoke Monitor` workflow checks the canonical domain, Railway production, Railway `/health/`, and the GitHub Pages fallback.
+Use `scripts/agent-verify.sh` as the consolidated source-verification entrypoint for agent-driven changes. Use `scripts/production-smoke.sh` for public endpoint validation when live verification is relevant and authorized.
+
+The scheduled `Production Smoke Monitor` workflow checks the canonical domain, Railway production, Railway `/health/`, and the GitHub Pages fallback.
 
 The production smoke workflow is separate from the source quality gate: an outage must be visible without weakening code-quality validation.
 
 ## Git and review discipline
 
 - Prefer pull requests for non-trivial changes.
+- Use `.github/pull_request_template.md` to record outcome, risk, verification evidence, architecture impact, and remaining limitations.
 - Do not merge with failing required checks.
 - Do not mix unrelated cleanup or dependency work into focused production changes.
 - Keep historical branches unless the task explicitly requires cleanup.
@@ -190,10 +200,11 @@ A task is complete only when:
 
 1. the requested change is implemented, not merely described;
 2. relevant files and infrastructure were inspected for side effects;
-3. appropriate checks were run where available;
-4. CI/deployment impact is understood;
-5. remaining limitations are reported precisely;
-6. the final response identifies the branch/commit or PR and changed files.
+3. appropriate checks were actually run where available, or blocked verification is reported as blocked;
+4. an independent review was completed for non-trivial work;
+5. CI/deployment impact is understood;
+6. remaining limitations are reported precisely;
+7. the final response identifies the branch/commit or PR and changed files.
 
 ## Change-control trigger
 
