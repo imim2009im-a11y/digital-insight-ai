@@ -35,10 +35,8 @@ if ($dbHost !== false && $dbHost !== '' && function_exists('fsockopen')) {
 
         if (is_resource($socket)) {
             fclose($socket);
-            if ($attempts > 1) {
-                $waitedMs = (int) round((microtime(true) - $startedAt) * 1000);
-                error_log(sprintf('[DIA] Database became reachable after %d ms (%d attempts).', $waitedMs, $attempts));
-            }
+            // A sleeping Railway database waking successfully is an expected path,
+            // not an application error. Keep stderr reserved for actual failures.
             break;
         }
 
