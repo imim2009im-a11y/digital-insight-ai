@@ -1,7 +1,9 @@
 <?php
 declare(strict_types=1);
 
-// Runtime health endpoint: this file is intentionally watched by Railway auto-deploy.
+// Runtime liveness endpoint. Railway should restart this service only when the
+// web/PHP runtime itself is unhealthy. MariaDB is allowed to sleep, so database
+// reachability is reported as metadata rather than making liveness fail.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
@@ -10,12 +12,16 @@ $dbName = getenv('WORDPRESS_DB_NAME') ?: '';
 $dbUser = getenv('WORDPRESS_DB_USER') ?: '';
 $dbPassword = getenv('WORDPRESS_DB_PASSWORD') ?: '';
 
+$response = [
+    'status' => 'ok',
+    'php' => 'ok',
+    'database' => 'unknown',
+];
+
 if ($dbHost === '' || $dbName === '' || $dbUser === '') {
-    http_response_code(503);
-    echo json_encode([
-        'status' => 'unhealthy',
-        'database' => 'configuration_missing',
-    ], JSON_UNESCAPED_SLASHES);
+    $response['database'] = 'configuration_missing';
+    http_response_code(200);
+    echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
 
@@ -39,43 +45,24 @@ mysqli_report(MYSQLI_REPORT_OFF);
 $mysqli = mysqli_init();
 
 if ($mysqli === false) {
-    http_response_code(503);
-    echo json_encode([
-        'status' => 'unhealthy',
-        'database' => 'client_init_failed',
-    ], JSON_UNESCAPED_SLASHES);
+    $response['database'] = 'client_init_failed';
+    http_response_code(200);
+    echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
 
-$mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, 3);
+$mysqli->options(MYSQLI_OPT_CONNECT_TIMEOUT, 2);
 $connected = @$mysqli->real_connect($host, $dbUser, $dbPassword, $dbName, $port);
 
 if (!$connected) {
-    error_log('[DIA] Health check could not establish a MariaDB connection.');
-    http_response_code(503);
-    echo json_encode([
-        'status' => 'unhealthy',
-        'database' => 'unreachable',
-    ], JSON_UNESCAPED_SLASHES);
+    $response['database'] = 'sleeping_or_unreachable';
+    http_response_code(200);
+    echo json_encode($response, JSON_UNESCAPED_SLASHES);
     exit;
 }
 
-$ping = @$mysqli->ping();
+$response['database'] = @$mysqli->ping() ? 'reachable' : 'ping_failed';
 $mysqli->close();
 
-if (!$ping) {
-    error_log('[DIA] Health check connected to MariaDB but ping failed.');
-    http_response_code(503);
-    echo json_encode([
-        'status' => 'unhealthy',
-        'database' => 'ping_failed',
-    ], JSON_UNESCAPED_SLASHES);
-    exit;
-}
-
 http_response_code(200);
-echo json_encode([
-    'status' => 'ok',
-    'php' => 'ok',
-    'database' => 'reachable',
-], JSON_UNESCAPED_SLASHES);
+echo json_encode($response, JSON_UNESCAPED_SLASHES);
