@@ -30,6 +30,7 @@ Service contract:
 
 - HTTP target port: `80`
 - Health path: `/health/`
+- Health contract: execute PHP and establish a real MariaDB connection; return `200` only when the database is reachable
 - Application: WordPress with the Digital Insight AI theme/plugin bundle
 - Source repository: `imim2009im-a11y/digital-insight-ai`
 - Database: Railway MariaDB
@@ -113,7 +114,8 @@ The exact implementation may change, but route ownership must remain singular: o
 5. Do not delete legacy Railway services until production dependencies, variables, volumes, and domain ownership are verified.
 6. Do not expose secrets in GitHub, logs, documentation, or client-side code.
 7. Every production change must preserve `/health/` and pass the repository quality gate.
-8. Public URL migrations require canonical, sitemap, robots, Open Graph, and Search Console review.
+8. `/health/` must not be a static file-only response; it must validate PHP execution and MariaDB reachability without exposing credentials or connection details.
+9. Public URL migrations require canonical, sitemap, robots, Open Graph, and Search Console review.
 
 ## Reliability and monitoring
 
@@ -123,6 +125,8 @@ The repository contains `scripts/production-smoke.sh` and a scheduled GitHub Act
 - Railway production fallback
 - Railway `/health/`
 - GitHub Pages fallback
+
+The Railway `/health/` endpoint is database-aware. The request-level database wake gate runs first, then the health endpoint attempts a real MariaDB connection and returns a sanitized `503` response when the database is unavailable. This means Railway deployment health represents the application dependency chain more accurately than an Apache-only static response.
 
 The smoke monitor is intentionally separate from the static quality gate. A production outage should be visible without blocking unrelated source validation.
 
@@ -149,7 +153,7 @@ Projects such as `baiti-mvp`, `star-arena-ai`, `smart-cv-ai`, `it-asset-manager`
 ## Recovery order during an outage
 
 1. Check `DigitalInsightProduction` deployment status.
-2. Check Railway `/health/`.
+2. Check Railway `/health/`; a failure now means PHP or MariaDB dependency health is not good enough for production.
 3. Check MariaDB availability/wake behavior.
 4. Check custom-domain verification, DNS records, and SSL.
 5. Check the Railway fallback URL directly.
