@@ -9,6 +9,9 @@ on:
       - 'dia-entrypoint.sh'
       - 'dia-db-gate.php'
       - 'dia-health.php'
+      - 'tools.html'
+      - 'style.css'
+      - 'script.js'
       - '.github/workflows/wordpress-runtime-check.yml'
   workflow_dispatch:
 
@@ -37,9 +40,9 @@ jobs:
         shell: bash
         run: |
           docker run --rm --entrypoint bash digital-insight-ai-runtime-check -lc \
-            'php -l /usr/local/bin/dia-db-gate.php && php -l /var/www/dia-health.php && test -f /usr/src/wordpress/tools/index.html && grep -q "/tools/assets/" /usr/src/wordpress/tools/index.html && apache2ctl -t'
+            'php -l /usr/local/bin/dia-db-gate.php && php -l /var/www/dia-health.php && test -f /usr/src/wordpress/tools/index.html && test -f /usr/src/wordpress/tools/style.css && test -f /usr/src/wordpress/tools/script.js && grep -q "AI Tools Directory" /usr/src/wordpress/tools/index.html && grep -q "https://digitalinsightai.com/tools/" /usr/src/wordpress/tools/index.html && apache2ctl -t'
 
-      - name: Smoke test embedded /tools routes
+      - name: Smoke test embedded /tools assets
         shell: bash
         run: |
           set -euo pipefail
@@ -54,7 +57,7 @@ jobs:
 
           ready=0
           for _ in $(seq 1 45); do
-            if curl -fsS http://127.0.0.1:18080/tools/ | grep -q '/tools/assets/'; then
+            if curl -fsS http://127.0.0.1:18080/tools/ | grep -q 'AI Tools Directory'; then
               ready=1
               break
             fi
@@ -66,4 +69,6 @@ jobs:
             exit 1
           fi
 
-          curl -fsS http://127.0.0.1:18080/tools/resources | grep -q '/tools/assets/'
+          curl -fsS http://127.0.0.1:18080/tools/style.css | grep -q 'site-header'
+          curl -fsS http://127.0.0.1:18080/tools/script.js | grep -q 'affiliate_click'
+          curl -fsSI http://127.0.0.1:18080/tools | grep -q '308'
