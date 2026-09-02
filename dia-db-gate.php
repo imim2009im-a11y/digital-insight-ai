@@ -1,6 +1,14 @@
 <?php
 declare(strict_types=1);
 
+// Railway's /health probe is a liveness check. Do not make it wait for a
+// deliberately sleeping MariaDB instance; dia-health.php reports DB state
+// separately without turning a healthy web runtime into a restart candidate.
+$requestPath = parse_url($_SERVER['REQUEST_URI'] ?? '', PHP_URL_PATH);
+if ($requestPath === '/health' || $requestPath === '/health/') {
+    return;
+}
+
 $dbHost = getenv('WORDPRESS_DB_HOST');
 
 if ($dbHost !== false && $dbHost !== '' && function_exists('fsockopen')) {
