@@ -4,10 +4,11 @@ USER root
 
 COPY deploy-bin/ /tmp/deploy-bin/
 COPY dia-entrypoint.sh /usr/local/bin/dia-entrypoint.sh
+COPY dia-db-gate.php /usr/local/bin/dia-db-gate.php
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends unzip ca-certificates socat; \
+    apt-get install -y --no-install-recommends unzip ca-certificates; \
     rm -rf /var/lib/apt/lists/*; \
     cat /tmp/deploy-bin/part-* > /tmp/wp-assets.tar.gz; \
     echo 'b603077fdcadd616acf4ca15d2580769d68ea2ba4e57428f85c3a2c518437297  /tmp/wp-assets.tar.gz' | sha256sum -c -; \
@@ -17,6 +18,8 @@ RUN set -eux; \
     unzip -q /tmp/wp-assets/digital-insight-ai-core.zip -d /usr/src/wordpress/wp-content/plugins; \
     test -f /usr/src/wordpress/wp-content/themes/digital-insight-ai/style.css; \
     test -f /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core/digital-insight-ai-core.php; \
+    php -l /usr/local/bin/dia-db-gate.php; \
+    printf '%s\n' 'auto_prepend_file=/usr/local/bin/dia-db-gate.php' > /usr/local/etc/php/conf.d/zz-dia-db-gate.ini; \
     printf 'ok\n' > /var/www/dia-health.txt; \
     chown www-data:www-data /var/www/dia-health.txt; \
     printf '%s\n' \
