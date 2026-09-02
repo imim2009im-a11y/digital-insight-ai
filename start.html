@@ -144,6 +144,7 @@
           <input id="start-name" name="name" type="text" placeholder="الاسم" autocomplete="name">
           <label class="sr-only" for="start-email">البريد الإلكتروني</label>
           <input id="start-email" name="email" type="email" placeholder="البريد الإلكتروني" autocomplete="email" required>
+          <label class="consent-field" for="start-consent"><input id="start-consent" name="privacy_consent" type="checkbox" value="yes" required><span>أوافق على استخدام بياناتي لإرسال النشرة وفق <a href="privacy-policy.html">سياسة الخصوصية</a>.</span></label>
           <button type="submit">اشترك الآن</button>
           <p class="form-status" role="status" aria-live="polite"></p>
           <p class="mini-note">لا ترسل أي معلومات حساسة. يمكنك التواصل معنا من صفحة التواصل.</p>
@@ -178,7 +179,7 @@
       const list = selected.length ? selected : tools.slice(0, 3);
       box.innerHTML = list.map((tool, index) => {
         const link = addCampaignParams(tool.url, tool.name);
-        return `<article class="recommendation"><span>${index === 0 ? 'الاختيار الأول' : tool.label}</span><h3>${tool.name}</h3><p>${tool.bestFor}</p><p><strong>نقطة القوة:</strong> ${tool.strength}</p><p class="warning"><strong>تنبيه:</strong> ${tool.caution}</p><a class="js-affiliate-link" data-tool="${tool.name}" href="${link}" target="_blank" rel="sponsored noopener">جرّب بحذر</a></article>`;
+        return `<article class="recommendation"><span>${index === 0 ? 'الاختيار الأول' : tool.label}</span><h3>${tool.name}</h3><p>${tool.bestFor}</p><p><strong>نقطة القوة:</strong> ${tool.strength}</p><p class="warning"><strong>تنبيه:</strong> ${tool.caution}</p><a class="js-affiliate-link" data-tool="${tool.name}" href="${link}" target="_blank" rel="sponsored nofollow noopener noreferrer">جرّب بحذر</a></article>`;
       }).join('');
     };
     const boot = async () => {
