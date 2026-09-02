@@ -42,6 +42,36 @@ fi
 log "Checking Python syntax"
 python3 -m py_compile scripts/check_site.py
 
+log "Validating Codex agent TOML files"
+python3 - <<'PY'
+from pathlib import Path
+import sys
+
+try:
+    import tomllib
+except ModuleNotFoundError:
+    print("Python tomllib is unavailable; Codex TOML validation was skipped.")
+    sys.exit(0)
+
+required = {"name", "description", "developer_instructions"}
+paths = sorted(Path("codex-agents").glob("*.toml"))
+if not paths:
+    raise SystemExit("No Codex agent TOML files found")
+
+for path in paths:
+    with path.open("rb") as handle:
+        data = tomllib.load(handle)
+    missing = sorted(required - data.keys())
+    if missing:
+        raise SystemExit(f"{path}: missing required keys: {', '.join(missing)}")
+    for key in required:
+        value = data[key]
+        if not isinstance(value, str) or not value.strip():
+            raise SystemExit(f"{path}: {key} must be a non-empty string")
+
+print(f"Validated {len(paths)} Codex agent definitions")
+PY
+
 log "Running static site quality checks"
 bash scripts/check_site.sh
 
