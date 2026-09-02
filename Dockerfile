@@ -5,6 +5,7 @@ USER root
 COPY deploy-bin/ /tmp/deploy-bin/
 COPY dia-entrypoint.sh /usr/local/bin/dia-entrypoint.sh
 COPY dia-db-gate.php /usr/local/bin/dia-db-gate.php
+COPY dia-health.php /var/www/dia-health.php
 
 RUN set -eux; \
     apt-get update; \
@@ -19,12 +20,12 @@ RUN set -eux; \
     test -f /usr/src/wordpress/wp-content/themes/digital-insight-ai/style.css; \
     test -f /usr/src/wordpress/wp-content/plugins/digital-insight-ai-core/digital-insight-ai-core.php; \
     php -l /usr/local/bin/dia-db-gate.php; \
+    php -l /var/www/dia-health.php; \
     printf '%s\n' 'auto_prepend_file=/usr/local/bin/dia-db-gate.php' > /usr/local/etc/php/conf.d/zz-dia-db-gate.ini; \
-    printf 'ok\n' > /var/www/dia-health.txt; \
-    chown www-data:www-data /var/www/dia-health.txt; \
+    chown www-data:www-data /var/www/dia-health.php; \
     printf '%s\n' \
       'ServerName 0.0.0.0' \
-      'AliasMatch "^/health/?$" "/var/www/dia-health.txt"' \
+      'AliasMatch "^/health/?$" "/var/www/dia-health.php"' \
       '<Directory "/var/www">' \
       '    Require all granted' \
       '</Directory>' \
