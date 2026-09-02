@@ -7,7 +7,7 @@ COPY dia-entrypoint.sh /usr/local/bin/dia-entrypoint.sh
 
 RUN set -eux; \
     apt-get update; \
-    apt-get install -y --no-install-recommends unzip ca-certificates; \
+    apt-get install -y --no-install-recommends unzip ca-certificates socat; \
     rm -rf /var/lib/apt/lists/*; \
     cat /tmp/deploy-bin/part-* > /tmp/wp-assets.tar.gz; \
     echo 'b603077fdcadd616acf4ca15d2580769d68ea2ba4e57428f85c3a2c518437297  /tmp/wp-assets.tar.gz' | sha256sum -c -; \
