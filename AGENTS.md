@@ -18,13 +18,31 @@ Codex should improve this repository conservatively: preserve what works, valida
 
 1. Read this file and `README.md` before making changes.
 2. Inspect the relevant files and existing Git history before editing.
-3. Start new work from `main` unless the task explicitly targets another branch.
-4. Use a dedicated work branch for non-trivial changes, preferably `codex/<short-task-name>`.
+3. Start new work from `main` unless the task explicitly targets another branch. In a managed Codex Cloud checkout, a verified ephemeral `work` branch created from the requested `main` revision is an acceptable equivalent baseline.
+4. Use a dedicated work branch for non-trivial changes, preferably `codex/<short-task-name>`, when the environment persists Git branches to GitHub. An ephemeral managed `work` branch does not by itself violate this rule.
 5. Never force-push, rewrite shared history, or delete working features without an explicit task requiring it.
 6. Do not merge unrelated cleanup into a focused task.
-7. If repository state conflicts with the task, stop and report the conflict instead of guessing.
+7. If repository state genuinely conflicts with the task, stop and report the conflict instead of guessing. Do not treat normal managed-environment bootstrap behavior as a conflict.
 8. When a change affects production behavior, verify it locally before proposing merge.
 9. Summarize changed files, checks run, remaining risks, and deployment impact at the end of each task.
+
+### Managed Codex Cloud checkout behavior
+
+Codex Cloud may intentionally prepare the workspace differently from a normal developer clone. Treat the following state as expected when the task was launched from `main` and the checked-out HEAD matches the requested base revision:
+
+- the local branch is named `work` instead of `main`;
+- there is no local `main` ref after bootstrap;
+- the temporary `origin` remote has been removed after fetching the requested revision;
+- environment auto-setup may create untracked dependency directories such as `ai-tools-directory/node_modules/`.
+
+In that managed state:
+
+1. Do **not** stop solely because `main` is not a local branch or because no remote is configured.
+2. Use the checked-out HEAD as the task baseline when its provenance is established by the task bootstrap/logs.
+3. Ignore auto-generated untracked dependency directories. Do not add, commit, edit, or delete them unless the task explicitly targets that dependency tree.
+4. Do not modify the frozen `ai-tools-directory/` snapshot merely because auto-setup installed dependencies there.
+5. Continue the requested audit and local checks against tracked production files.
+6. Stop only when tracked files contain unexplained pre-existing modifications, the checked-out revision cannot be tied to the requested base, or the task explicitly requires GitHub operations that the managed environment cannot perform.
 
 ## Non-negotiable product rules
 
@@ -109,7 +127,7 @@ When adding or materially changing a public page:
 
 ## Git and review discipline
 
-- Base normal feature/fix work on `main`.
+- Base normal feature/fix work on `main`, or on a managed Codex Cloud checkout proven to originate from the requested `main` revision.
 - Use descriptive commits focused on one logical change.
 - Prefer pull requests for non-trivial work.
 - Do not merge a PR with failing required checks.
