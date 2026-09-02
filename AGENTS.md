@@ -2,148 +2,205 @@
 
 ## Mission
 
-Digital Insight AI is the production repository for a static Arabic GitHub Pages website focused on practical AI-tool discovery, comparisons, affiliate content, lead generation, and trustworthy original analysis.
+Digital Insight AI is a production-sensitive repository for one commercial product with two temporary delivery surfaces:
 
-Codex should improve this repository conservatively: preserve what works, validate every meaningful change, and prefer small reviewable patches over broad rewrites.
+1. the primary WordPress application built and deployed to Railway from this repository; and
+2. the legacy/static Arabic GitHub Pages surface retained as a fallback/reference layer during consolidation.
 
-## Repository source of truth
+Agents must improve the product conservatively, preserve working production behavior, and prevent the two surfaces from evolving into competing products.
 
-- This repository is the production source for the legacy/static GitHub Pages site at `/digital-insight-ai/`.
-- The nested `ai-tools-directory/` directory is a **legacy snapshot** and must not receive new product development.
-- Active development of the modern AI tools/blog application belongs in the separate repository `imim2009im-a11y/ai-tools-directory`.
-- Do not copy changes automatically between the nested snapshot and the standalone repository.
-- If a migration is required, compare deliberately, document the migration, and keep one clear source of truth.
+## Required reading
 
-## Codex operating protocol
+Before any non-trivial change, read:
 
-1. Read this file and `README.md` before making changes.
-2. Inspect the relevant files and existing Git history before editing.
-3. Start new work from `main` unless the task explicitly targets another branch. In a managed Codex Cloud checkout, a verified ephemeral `work` branch created from the requested `main` revision is an acceptable equivalent baseline.
-4. Use a dedicated work branch for non-trivial changes, preferably `codex/<short-task-name>`, when the environment persists Git branches to GitHub. An ephemeral managed `work` branch does not by itself violate this rule.
-5. Never force-push, rewrite shared history, or delete working features without an explicit task requiring it.
-6. Do not merge unrelated cleanup into a focused task.
-7. If repository state genuinely conflicts with the task, stop and report the conflict instead of guessing. Do not treat normal managed-environment bootstrap behavior as a conflict.
-8. When a change affects production behavior, verify it locally before proposing merge.
-9. Summarize changed files, checks run, remaining risks, and deployment impact at the end of each task.
+1. `AGENTS.md`
+2. `README.md`
+3. `PRODUCTION-ARCHITECTURE.md`
+4. the relevant deployment or source files for the task
 
-### Managed Codex Cloud checkout behavior
+If these files disagree with observed live infrastructure, stop and report the conflict before changing production behavior.
 
-Codex Cloud may intentionally prepare the workspace differently from a normal developer clone. Treat the following state as expected when the task was launched from `main` and the checked-out HEAD matches the requested base revision:
+## Source-of-truth model
 
-- the local branch is named `work` instead of `main`;
-- there is no local `main` ref after bootstrap;
-- the temporary `origin` remote has been removed after fetching the requested revision;
-- environment auto-setup may create untracked dependency directories such as `ai-tools-directory/node_modules/`.
+### Canonical product
 
-In that managed state:
+The product is **Digital Insight AI** under the canonical domain `digitalinsightai.com`.
 
-1. Do **not** stop solely because `main` is not a local branch or because no remote is configured.
-2. Use the checked-out HEAD as the task baseline when its provenance is established by the task bootstrap/logs.
-3. Ignore auto-generated untracked dependency directories. Do not add, commit, edit, or delete them unless the task explicitly targets that dependency tree.
-4. Do not modify the frozen `ai-tools-directory/` snapshot merely because auto-setup installed dependencies there.
-5. Continue the requested audit and local checks against tracked production files.
-6. Stop only when tracked files contain unexplained pre-existing modifications, the checked-out revision cannot be tied to the requested base, or the task explicitly requires GitHub operations that the managed environment cannot perform.
+### Railway production
+
+- Railway project: `Digital Insight AI WordPress`
+- Production service: `DigitalInsightProduction`
+- Source repository: this repository
+- Runtime: WordPress
+- Health path: `/health/`
+- Database: Railway MariaDB
+
+Railway owns the canonical custom domain during the current WordPress cutover. Do not attach the same domain to GitHub Pages, Vercel, Render, or another host as a quick workaround.
+
+### Static GitHub Pages fallback
+
+The root static HTML/CSS/JS site remains a fallback/reference surface. It must stay usable on the repository GitHub Pages path, but it is not a second independent editorial product.
+
+The `CNAME` file must remain absent while Railway owns the custom domain. The repository quality gate enforces this.
+
+### Modern tools application
+
+The standalone repository `imim2009im-a11y/ai-tools-directory` is the source of truth for modern tools-directory application development.
+
+The nested `ai-tools-directory/` directory in this repository is a frozen legacy snapshot. Do not develop it or copy changes into it automatically.
+
+### Content automation
+
+The standalone repository `imim2009im-a11y/digital-insight-opus-content-pipeline` is the review-first content/publishing pipeline. It is automation infrastructure, not a public website.
+
+Do not deploy it as a public Railway web service merely because a project named `Digital Insight AI Publisher` exists. First establish a runtime contract, scheduling model, required variables, and publish target.
+
+## Operating protocol
+
+1. Start from `main` unless the task explicitly targets another ref.
+2. Use a dedicated branch such as `codex/<short-task-name>` for non-trivial changes.
+3. Never force-push or rewrite shared history.
+4. Never delete working services, routes, pages, data, or deployment resources without explicit approval and dependency verification.
+5. Keep changes focused and reviewable.
+6. Inspect relevant Git history/config before editing deployment-sensitive files.
+7. Verify production-impacting changes before merge.
+8. Summarize files changed, checks run, deployment impact, and remaining risks.
 
 ## Non-negotiable product rules
 
-1. Preserve high-quality Arabic and correct right-to-left layout.
+1. Preserve high-quality Arabic and correct RTL behavior where Arabic is used.
 2. Do not publish exaggerated income claims, guaranteed results, fake testimonials, or unverified performance claims.
-3. Keep affiliate disclosures visible, accurate, and close enough to relevant commercial content.
-4. Never commit API keys, tokens, passwords, private email data, cookies, `.env` files, private keys, certificates, or service secrets.
-5. Preserve the GitHub Pages base path `/digital-insight-ai/` in internal asset and navigation handling.
+3. Keep affiliate disclosures visible and accurate near commercial content.
+4. Never commit API keys, tokens, passwords, cookies, `.env` files, private keys, certificates, database credentials, or other secrets.
+5. Preserve the GitHub Pages base path `/digital-insight-ai/` for the static fallback where required.
 6. Do not remove `robots.txt`, `sitemap.xml`, `llms.txt`, `llms-full.txt`, or `sitemap.md` without a documented replacement.
 7. Validate links and page paths before deployment.
-8. Keep pages usable on mobile devices and accessible by keyboard.
-9. Preserve semantic HTML, readable contrast, useful alt text, and visible focus states.
-10. Update sitemap files when public pages are added, renamed, or removed.
-11. Do not modify `ai-tools-directory/` except for an explicitly approved migration or removal task.
-12. Avoid introducing unnecessary frameworks or build systems into the static root without a clear benefit and explicit task scope.
+8. Keep pages mobile-usable, keyboard-accessible, and semantically structured.
+9. Preserve readable contrast, useful alt text, and visible focus states.
+10. Update sitemap/discovery files when public routes change.
+11. Do not modify the frozen nested `ai-tools-directory/` snapshot except for an explicitly approved migration/removal task.
+12. Do not introduce a new hosting platform or framework without a clear architectural benefit and explicit scope.
 
-## Static-site architecture
+## Production boundary rules
 
-- Root production pages are static HTML/CSS/JS served by GitHub Pages.
-- `.nojekyll` and `CNAME` are deployment-sensitive files; do not remove or rewrite them casually.
-- `_config.yml` may affect Pages/Jekyll metadata even though `.nojekyll` is present; inspect before changing.
-- `.github/workflows/static-quality.yml` is the repository quality gate for `main` and pull requests.
-- Keep public paths compatible with both direct GitHub Pages hosting and the configured custom domain when possible.
+### Domain ownership
 
-## Required checks before merge
+- `digitalinsightai.com` has exactly one production owner at a time.
+- Current owner: Railway `DigitalInsightProduction`.
+- Do not recreate a GitHub Pages `CNAME` while Railway owns the domain.
+- DNS changes must be made only after the target service is verified healthy.
 
-For any modified public page or asset:
+### Railway
 
-- Open the main page and all modified pages locally.
-- Confirm there are no broken local `href` or `src` targets.
-- Confirm Arabic text renders correctly and RTL layout remains intact.
-- Confirm forms keep their intended endpoint and client-side validation.
-- Confirm affiliate links are clearly disclosed where relevant.
-- Confirm public pages are represented in `sitemap.xml` and `sitemap.md` when applicable.
-- Confirm `robots.txt`, `llms.txt`, and `llms-full.txt` remain accurate after structural/content changes.
-- Confirm mobile layout at narrow viewport widths.
-- Confirm keyboard navigation and visible focus for interactive elements.
-- Confirm no secrets or sensitive deployment files were added.
+Before changing Railway-related code or config:
 
-### Recommended local preview
+1. inspect the current service configuration;
+2. preserve `/health/`;
+3. preserve database wake/startup behavior unless deliberately replacing it;
+4. avoid exposing environment-variable values;
+5. verify the Railway fallback URL after deployment.
 
-From the repository root:
+Do not delete legacy Railway services simply because they are currently failed. First confirm they do not own required volumes, variables, data, domains, or rollback state.
+
+### GitHub Pages
+
+The static site must continue passing `.github/workflows/static-quality.yml`.
+
+The quality gate checks required files, local links/assets, Railway cutover boundaries, and sensitive deployment material. Do not weaken these checks merely to make a failing change pass.
+
+### Vercel / Render
+
+Neither platform is part of the current production path. Do not create duplicate production deployments there unless an explicit migration plan defines ownership, rollback, DNS, and verification.
+
+## Static-site requirements
+
+For modified public static pages/assets:
+
+- confirm all local `href`/`src` targets exist;
+- confirm Arabic text and RTL layout remain correct;
+- confirm forms retain intended endpoints and validation;
+- confirm affiliate disclosure remains clear;
+- confirm sitemap/discovery files remain accurate;
+- confirm mobile layout and keyboard navigation;
+- confirm no secrets or private deployment material were introduced.
+
+Recommended local preview:
 
 ```bash
 python3 -m http.server 8000
 ```
 
-Then inspect the relevant pages through the local server instead of relying only on file previews.
+## WordPress/Railway requirements
 
-### CI expectation
+When editing files that affect the Docker/WordPress deployment:
 
-The GitHub Actions workflow `.github/workflows/static-quality.yml` must remain green. It validates required public files, local links/assets, and rejects sensitive deployment material.
+- inspect `Dockerfile`, entrypoint/database-gate files, and deployment configuration together;
+- preserve WordPress asset integrity checks unless intentionally replacing the delivery mechanism;
+- preserve port/health behavior expected by Railway;
+- avoid hard-coding credentials or private service hostnames into tracked files;
+- validate that the container can start when MariaDB is sleeping/waking;
+- verify both `/health/` and a representative public page after deployment.
 
 ## Content standards
 
 - State limitations as clearly as advantages.
 - Separate verified facts from opinion, estimates, and future plans.
+- Prefer original analysis over vendor-marketing rewrites.
 - Use concrete examples and practical recommendations.
-- Avoid copying vendor marketing language.
-- Prefer original analysis and comparison over rewritten announcements.
-- Record a real update date when materially changing a comparison or product review.
-- For time-sensitive claims such as pricing, features, availability, or model capabilities, verify the claim before publication.
+- Record real update dates for materially changed reviews/comparisons.
+- Verify time-sensitive pricing, features, availability, and model claims before publication.
 
 ## SEO and discoverability
 
-When adding or materially changing a public page:
+When adding or materially changing a public route/page:
 
-- Use a unique, descriptive `<title>` and meta description.
-- Keep one clear primary heading.
-- Add canonical metadata when appropriate.
-- Preserve useful Open Graph/social metadata when present.
-- Use internal links naturally; do not create keyword-stuffed navigation.
-- Update sitemap and machine-readable summaries when the page should be discoverable.
+- use a unique descriptive title and meta description;
+- keep one clear primary heading;
+- use canonical metadata deliberately;
+- preserve useful Open Graph/social metadata;
+- avoid keyword-stuffed navigation;
+- update sitemap and machine-readable discovery files where applicable;
+- ensure migrations do not create competing canonical origins.
 
 ## Security and privacy
 
-- Treat all user-submitted form data as private.
-- Do not add analytics or third-party scripts that collect personal data without documenting the privacy impact.
-- Avoid inline secrets, private endpoints, or credentials in HTML/JS.
-- Prefer least-privilege integrations and public-safe identifiers.
-- If a task touches authentication, payments, personal data, DNS, deployment credentials, or third-party account access, describe the risk before making an irreversible change.
+- Treat user-submitted form data as private.
+- Do not add analytics or third-party collection without documenting privacy impact.
+- Avoid inline secrets and private endpoints in client-side code.
+- Prefer least-privilege integrations.
+- If a task touches authentication, payments, personal data, DNS, deployment credentials, or third-party account access, state the risk before irreversible changes.
+
+## Reliability
+
+Use `scripts/production-smoke.sh` for public endpoint validation. The scheduled `Production Smoke Monitor` workflow checks the canonical domain, Railway production, Railway `/health/`, and the GitHub Pages fallback.
+
+The production smoke workflow is separate from the source quality gate: an outage must be visible without weakening code-quality validation.
 
 ## Git and review discipline
 
-- Base normal feature/fix work on `main`, or on a managed Codex Cloud checkout proven to originate from the requested `main` revision.
-- Use descriptive commits focused on one logical change.
-- Prefer pull requests for non-trivial work.
-- Do not merge a PR with failing required checks.
-- Do not mix Dependabot/security branches into unrelated feature work.
-- Keep old audit/security branches as historical work unless the task specifically asks to continue them.
+- Prefer pull requests for non-trivial changes.
+- Do not merge with failing required checks.
+- Do not mix unrelated cleanup or dependency work into focused production changes.
+- Keep historical branches unless the task explicitly requires cleanup.
+- Never force-update `main`.
 
 ## Definition of done
 
-A Codex task is complete only when:
+A task is complete only when:
 
-1. The requested change is implemented, not merely described.
-2. Relevant files were inspected for unintended side effects.
-3. Appropriate local checks were run where the environment permits.
-4. CI impact is understood and any failures are reported precisely.
-5. The final response lists the branch/commit or PR, files changed, checks performed, and any remaining limitation.
+1. the requested change is implemented, not merely described;
+2. relevant files and infrastructure were inspected for side effects;
+3. appropriate checks were run where available;
+4. CI/deployment impact is understood;
+5. remaining limitations are reported precisely;
+6. the final response identifies the branch/commit or PR and changed files.
 
-## Deployment
+## Change-control trigger
 
-The production site is hosted from this repository through GitHub Pages. Changes merged into the default publishing branch may deploy automatically depending on repository workflow and Pages settings. Treat `main` as production-sensitive.
+Any change that moves the canonical domain, production platform, database, or source repository must update `PRODUCTION-ARCHITECTURE.md` in the same change with:
+
+- old owner;
+- new owner;
+- migration date;
+- rollback path;
+- verification evidence.
