@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
 
+// Runtime health endpoint: this file is intentionally watched by Railway auto-deploy.
 header('Content-Type: application/json; charset=utf-8');
 header('Cache-Control: no-store');
 
