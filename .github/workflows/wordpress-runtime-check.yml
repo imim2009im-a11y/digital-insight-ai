@@ -1,0 +1,40 @@
+name: WordPress Runtime Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - 'Dockerfile'
+      - 'deploy-bin/**'
+      - 'dia-entrypoint.sh'
+      - 'dia-db-gate.php'
+      - 'dia-health.php'
+      - '.github/workflows/wordpress-runtime-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: wordpress-runtime-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Build production WordPress image
+        shell: bash
+        run: docker build --pull --tag digital-insight-ai-runtime-check .
+
+      - name: Verify health files exist in image
+        shell: bash
+        run: |
+          docker run --rm --entrypoint bash digital-insight-ai-runtime-check -lc \
+            'php -l /usr/local/bin/dia-db-gate.php && php -l /var/www/dia-health.php && apache2ctl -t'
