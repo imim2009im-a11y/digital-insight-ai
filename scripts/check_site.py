@@ -39,6 +39,11 @@ class PageParser(HTMLParser):
         self.has_description = False
         self.html_lang = ""
         self.html_dir = ""
+        self.h1_count = 0
+        self.canonicals: list[str] = []
+        self.form_count = 0
+        self.privacy_consent_count = 0
+        self.affiliate_links: list[tuple[str, str, set[str]]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
         values = dict(attrs)
@@ -47,8 +52,24 @@ class PageParser(HTMLParser):
             self.html_dir = values.get("dir", "") or ""
         if tag == "title":
             self.in_title = True
+        if tag == "h1":
+            self.h1_count += 1
+        if tag == "form":
+            self.form_count += 1
+        if tag == "input" and (values.get("name") or "") == "privacy_consent":
+            if (values.get("type") or "").lower() == "checkbox":
+                self.privacy_consent_count += 1
         if tag == "meta" and (values.get("name") or "").lower() == "description":
             self.has_description = bool((values.get("content") or "").strip())
+        if tag == "link":
+            rel_tokens = set((values.get("rel") or "").lower().split())
+            if "canonical" in rel_tokens and values.get("href"):
+                self.canonicals.append((values.get("href") or "").strip())
+        if tag == "a":
+            rel_tokens = set((values.get("rel") or "").lower().split())
+            classes = set((values.get("class") or "").split())
+            if "sponsored" in rel_tokens or "js-affiliate-link" in classes:
+                self.affiliate_links.append((values.get("href") or "", values.get("target") or "", rel_tokens))
         if values.get("id"):
             self.ids.append(values["id"] or "")
         for attr in ("href", "src"):
@@ -94,6 +115,10 @@ def local_target(source: Path, link: str) -> tuple[Path | None, str]:
     return target.resolve(), parsed.fragment
 
 
+def expected_canonical(relative: str) -> str:
+    return CANONICAL_ORIGIN if relative == "index.html" else CANONICAL_ORIGIN + relative
+
+
 def main() -> int:
     errors: list[str] = []
     parsed_pages: dict[Path, PageParser] = {}
@@ -111,6 +136,20 @@ def main() -> int:
             errors.append(f"{relative}: missing title")
         if relative != "go/index.html" and not parser.has_description:
             errors.append(f"{relative}: missing meta description")
+        if relative in PUBLIC_PAGES:
+            if parser.h1_count != 1:
+                errors.append(f"{relative}: expected exactly one h1, found {parser.h1_count}")
+            canonical = expected_canonical(relative)
+            if parser.canonicals != [canonical]:
+                errors.append(f"{relative}: canonical must be exactly {canonical}")
+        if parser.form_count and parser.privacy_consent_count != parser.form_count:
+            errors.append(
+                f"{relative}: every form must include one privacy_consent checkbox "
+                f"({parser.privacy_consent_count}/{parser.form_count})"
+            )
+        for href, target, rel_tokens in parser.affiliate_links:
+            if target == "_blank" and "noopener" not in rel_tokens:
+                errors.append(f"{relative}: affiliate link opened in new tab lacks noopener: {href}")
         duplicates = sorted({item for item in parser.ids if parser.ids.count(item) > 1})
         if duplicates:
             errors.append(f"{relative}: duplicate ids: {', '.join(duplicates)}")
