@@ -9,7 +9,6 @@ failures=0
 check_url() {
   local name="$1"
   local url="$2"
-  local expected_kind="${3:-page}"
   local status
 
   status=$(curl \
@@ -34,12 +33,48 @@ check_url() {
   failures=$((failures + 1))
 }
 
+check_health_ready() {
+  local name="$1"
+  local url="$2"
+  local body_file=/tmp/dia-smoke-health.json
+  local status
+
+  status=$(curl \
+    --silent \
+    --show-error \
+    --location \
+    --connect-timeout 10 \
+    --max-time 25 \
+    --output "$body_file" \
+    --write-out '%{http_code}' \
+    "$url" 2>/tmp/dia-smoke-curl.err || true)
+
+  if [[ "$status" == "200" ]] && grep -Eq '"status"[[:space:]]*:[[:space:]]*"ok"' "$body_file" && grep -Eq '"database"[[:space:]]*:[[:space:]]*"reachable"' "$body_file"; then
+    printf 'PASS  %-24s %s (%s, database reachable)\n' "$name" "$url" "$status"
+    return 0
+  fi
+
+  printf 'FAIL  %-24s %s (%s, readiness mismatch)\n' "$name" "$url" "${status:-000}" >&2
+  if [[ -s "$body_file" ]]; then
+    sed 's/^/      /' "$body_file" >&2
+    printf '\n' >&2
+  fi
+  if [[ -s /tmp/dia-smoke-curl.err ]]; then
+    sed 's/^/      /' /tmp/dia-smoke-curl.err >&2
+  fi
+  failures=$((failures + 1))
+}
+
 printf 'Digital Insight AI production smoke check\n'
 printf 'UTC: %s\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
+# Hit the application pages first. This both validates routing and gives a
+# sleeping MariaDB service a chance to wake before the explicit readiness check.
 check_url 'Primary domain' 'https://digitalinsightai.com/'
+check_url 'Primary tools' 'https://digitalinsightai.com/tools/'
 check_url 'Railway production' 'https://digitalinsightproduction-production.up.railway.app/'
-check_url 'Railway health' 'https://digitalinsightproduction-production.up.railway.app/health/' 'health'
+check_url 'Railway tools' 'https://digitalinsightproduction-production.up.railway.app/tools/'
+check_health_ready 'Railway readiness' 'https://digitalinsightproduction-production.up.railway.app/health/'
 check_url 'GitHub Pages fallback' 'https://imim2009im-a11y.github.io/digital-insight-ai/'
 
 printf '\n'
