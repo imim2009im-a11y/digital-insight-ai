@@ -1,6 +1,9 @@
 name: Digital Insight Publisher Ops
 
 on:
+  push:
+    paths:
+      - '.github/workflows/digital-insight-publisher-ops.yml'
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
