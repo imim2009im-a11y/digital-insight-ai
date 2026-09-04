@@ -1,0 +1,27 @@
+{
+  "status": "READY_FOR_REVIEW",
+  "duration_seconds": 48.8,
+  "streams": {
+    "programs": [],
+    "streams": [
+      {
+        "codec_name": "h264",
+        "codec_type": "video",
+        "width": 1280,
+        "height": 720
+      },
+      {
+        "codec_name": "aac",
+        "codec_type": "audio"
+      }
+    ]
+  },
+  "checks": {
+    "mp4_exists": true,
+    "audio_present": true,
+    "h264_video": true,
+    "no_on_screen_text": true,
+    "official_sources_recorded": true,
+    "auto_publish": false
+  }
+}

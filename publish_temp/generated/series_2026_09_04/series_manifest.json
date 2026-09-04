@@ -1,0 +1,20 @@
+[
+  {
+    "slug": "gemini-3-8-flash",
+    "video": "/home/runner/work/digital-insight-ai/digital-insight-ai/publish_temp/generated/series_2026_09_04/gemini-3-8-flash/gemini-3-8-flash.mp4",
+    "duration": 51.168,
+    "qa": "READY_FOR_REVIEW"
+  },
+  {
+    "slug": "claude-fable-5-1",
+    "video": "/home/runner/work/digital-insight-ai/digital-insight-ai/publish_temp/generated/series_2026_09_04/claude-fable-5-1/claude-fable-5-1.mp4",
+    "duration": 48.8,
+    "qa": "READY_FOR_REVIEW"
+  },
+  {
+    "slug": "chatgpt-healthcare-sources",
+    "video": "/home/runner/work/digital-insight-ai/digital-insight-ai/publish_temp/generated/series_2026_09_04/chatgpt-healthcare-sources/chatgpt-healthcare-sources.mp4",
+    "duration": 47.496,
+    "qa": "READY_FOR_REVIEW"
+  }
+]
