@@ -29,7 +29,7 @@ jobs:
             --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
             -X POST https://digital-insight-publisher.onrender.com/api/run-due
 
-      - name: Verify production health
+      - name: Verify production health and auth configuration
         id: health
         continue-on-error: true
         run: |
@@ -39,9 +39,22 @@ jobs:
           echo "$response"
           echo "$response" | grep -q '"ok":true'
           echo "$response" | grep -q 'Digital Insight Publisher'
+          echo "$response" | grep -q '"authConfigured":true'
+
+      - name: Verify protected API rejects anonymous access
+        id: auth_guard
+        continue-on-error: true
+        run: |
+          code="$(curl --silent --show-error \
+            --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
+            -o /tmp/state-body -w '%{http_code}' \
+            https://digital-insight-publisher.onrender.com/api/state)"
+          cat /tmp/state-body
+          test "$code" = "401"
+          grep -q 'authentication_required' /tmp/state-body
 
       - name: Open one incident issue on failure
-        if: steps.run_due.outcome == 'failure' || steps.health.outcome == 'failure'
+        if: steps.run_due.outcome == 'failure' || steps.health.outcome == 'failure' || steps.auth_guard.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -50,17 +63,17 @@ jobs:
           if [ -z "$existing" ]; then
             gh issue create --repo "$GITHUB_REPOSITORY" \
               --title "$title" \
-              --body "Automated production check failed. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+              --body "Automated production or security check failed. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
           fi
           exit 1
 
       - name: Close incident after recovery
-        if: steps.run_due.outcome == 'success' && steps.health.outcome == 'success'
+        if: steps.run_due.outcome == 'success' && steps.health.outcome == 'success' && steps.auth_guard.outcome == 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           title='Digital Insight Publisher production health failure'
           existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
           if [ -n "$existing" ]; then
-            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment 'Production health check recovered automatically.'
+            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment 'Production health and security checks recovered automatically.'
           fi
