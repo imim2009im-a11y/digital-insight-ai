@@ -1,0 +1,24 @@
+{
+  "posts": [],
+  "jobs": [],
+  "audit": [],
+  "settings": {
+    "timezone": "Asia/Riyadh",
+    "safeMode": true,
+    "brandName": "Digital Insight AI",
+    "language": "ar"
+  },
+  "providers": {
+    "telegram": {"connected": false, "mode": "ENV_REQUIRED"},
+    "discord": {"connected": false, "mode": "ENV_REQUIRED"},
+    "youtube": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "instagram": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "facebook": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "tiktok": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "x": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "linkedin": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "pinterest": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "threads": {"connected": false, "mode": "NOT_CONFIGURED"},
+    "bluesky": {"connected": false, "mode": "NOT_CONFIGURED"}
+  }
+}
