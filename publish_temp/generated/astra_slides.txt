@@ -1,0 +1,15 @@
+file 'astra_slide_01.png'
+duration 9.206
+file 'astra_slide_02.png'
+duration 9.206
+file 'astra_slide_03.png'
+duration 9.206
+file 'astra_slide_04.png'
+duration 9.206
+file 'astra_slide_05.png'
+duration 9.206
+file 'astra_slide_06.png'
+duration 9.206
+file 'astra_slide_07.png'
+duration 9.206
+file 'astra_slide_07.png'
