@@ -1,0 +1,63 @@
+name: Digital Insight Publisher Ops
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: digital-insight-publisher-ops
+  cancel-in-progress: false
+
+jobs:
+  scheduler-health:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Run due publishing jobs
+        id: run_due
+        continue-on-error: true
+        run: |
+          curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
+            -X POST https://digital-insight-publisher.onrender.com/api/run-due
+
+      - name: Verify production health
+        id: health
+        continue-on-error: true
+        run: |
+          response="$(curl --fail-with-body --silent --show-error \
+            --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
+            https://digital-insight-publisher.onrender.com/api/health)"
+          echo "$response"
+          echo "$response" | grep -q '"ok":true'
+          echo "$response" | grep -q 'Digital Insight Publisher'
+
+      - name: Open one incident issue on failure
+        if: steps.run_due.outcome == 'failure' || steps.health.outcome == 'failure'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title='Digital Insight Publisher production health failure'
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
+          if [ -z "$existing" ]; then
+            gh issue create --repo "$GITHUB_REPOSITORY" \
+              --title "$title" \
+              --body "Automated production check failed. Run: $GITHUB_SERVER_URL/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID"
+          fi
+          exit 1
+
+      - name: Close incident after recovery
+        if: steps.run_due.outcome == 'success' && steps.health.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          title='Digital Insight Publisher production health failure'
+          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
+          if [ -n "$existing" ]; then
+            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment 'Production health check recovered automatically.'
+          fi
