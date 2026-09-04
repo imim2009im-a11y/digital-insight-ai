@@ -1,8 +1,10 @@
-name: Production Smoke Monitor
+name: Production & App Reliability Monitor
 
 on:
   schedule:
-    - cron: '17 */6 * * *'
+    # GitHub's minimum scheduled interval is 5 minutes. Offset from minute 0
+    # to reduce the chance of queue delays at the top of the hour.
+    - cron: '3-58/5 * * * *'
   workflow_dispatch:
   push:
     branches:
@@ -13,6 +15,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 concurrency:
   group: production-smoke
@@ -31,3 +34,42 @@ jobs:
       - name: Check public production endpoints
         shell: bash
         run: bash scripts/production-smoke.sh
+
+      - name: Open incident issue on failure
+        if: failure()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          title='[monitor] Production smoke failure'
+          existing="$(gh issue list \
+            --state open \
+            --search "$title in:title" \
+            --json number,title \
+            --jq '.[] | select(.title == "[monitor] Production smoke failure") | .number' \
+            | head -n1)"
+
+          if [[ -z "$existing" ]]; then
+            gh issue create \
+              --title "$title" \
+              --body "Automated production/app smoke checks failed. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}. The monitor is read-only and does not deploy, change DNS, secrets, or databases."
+          fi
+
+      - name: Close incident issue after recovery
+        if: success()
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+          gh issue list \
+            --state open \
+            --search '[monitor] Production smoke failure in:title' \
+            --json number,title \
+            --jq '.[] | select(.title == "[monitor] Production smoke failure") | .number' \
+          | while read -r number; do
+              [[ -n "$number" ]] || continue
+              gh issue close "$number" \
+                --comment "Recovered in ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}."
+            done
