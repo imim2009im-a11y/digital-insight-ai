@@ -1,0 +1,15 @@
+file 'astra_audioonly_scene_01.png'
+duration 8.376
+file 'astra_audioonly_scene_02.png'
+duration 8.376
+file 'astra_audioonly_scene_03.png'
+duration 8.376
+file 'astra_audioonly_scene_04.png'
+duration 8.376
+file 'astra_audioonly_scene_05.png'
+duration 8.376
+file 'astra_audioonly_scene_06.png'
+duration 8.376
+file 'astra_audioonly_scene_07.png'
+duration 8.376
+file 'astra_audioonly_scene_07.png'
