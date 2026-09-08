@@ -1,0 +1,41 @@
+name: Codex Preflight
+
+on:
+  push:
+    branches:
+      - 'codex/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: codex-preflight-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Verify branch scope
+        shell: bash
+        run: |
+          case "${GITHUB_REF_NAME}" in
+            codex/*) ;;
+            *) echo "Refusing to run outside codex/*" >&2; exit 1 ;;
+          esac
+
+      - name: Run consolidated source verification
+        shell: bash
+        run: bash scripts/agent-verify.sh
+
+      - name: Validate production smoke script syntax only
+        shell: bash
+        run: bash -n scripts/production-smoke.sh
