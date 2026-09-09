@@ -1,8 +1,8 @@
-name: Publisher Watchdog
+name: Publisher Availability Monitor
 
 on:
   schedule:
-    - cron: '3,13,23,33,43,53 * * * *'
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
   push:
     paths:
@@ -10,48 +10,55 @@ on:
 
 permissions:
   contents: read
-  id-token: write
+  issues: write
 
 concurrency:
-  group: digital-insight-publisher-watchdog
-  cancel-in-progress: false
+  group: digital-insight-publisher-availability-monitor
+  cancel-in-progress: true
 
 jobs:
-  watchdog:
+  monitor:
     runs-on: ubuntu-latest
     timeout-minutes: 3
+    env:
+      APP_URL: 'https://digital-insight-publisher-zisqk8.v2.appdeploy.ai/'
+      INCIDENT_TITLE: '[Publisher Monitor] Availability failure'
+      GH_TOKEN: ${{ github.token }}
     steps:
-      - name: Verify scheduler and trigger failover when needed
+      - name: Check public application availability
+        id: check
         shell: bash
-        env:
-          WATCHDOG_URL: 'https://digital-insight-publisher-zisqk8.v2.appdeploy.ai/api/automation/watchdog'
-          WATCHDOG_AUDIENCE: 'digital-insight-publisher-watchdog'
+        continue-on-error: true
         run: |
           set -euo pipefail
+          body="$(curl --fail --silent --show-error --location --max-time 20 "${APP_URL}")"
+          grep -q 'Digital Insight Publisher' <<<"${body}"
+          curl --fail --silent --show-error --location --max-time 20 "${APP_URL}app-icon.svg" >/dev/null
+          printf 'result=healthy\n' >>"${GITHUB_OUTPUT}"
 
-          encoded_audience="$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["WATCHDOG_AUDIENCE"], safe=""))')"
-          separator='&'
-          if [[ "${ACTIONS_ID_TOKEN_REQUEST_URL}" != *'?'* ]]; then separator='?'; fi
+      - name: Open one incident when unavailable
+        if: steps.check.outcome == 'failure'
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing="$(gh issue list --repo "${GITHUB_REPOSITORY}" --state open --search "${INCIDENT_TITLE} in:title" --json number --jq '.[0].number // empty')"
+          if [[ -z "${existing}" ]]; then
+            gh issue create --repo "${GITHUB_REPOSITORY}" \
+              --title "${INCIDENT_TITLE}" \
+              --body "The external availability monitor could not load Digital Insight Publisher or its app icon. This monitor checks public reachability only; it does not claim that social-platform OAuth or publishing is healthy. Run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+          else
+            echo "Open incident already exists: #${existing}"
+          fi
+          exit 1
 
-          oidc_json="$(curl --fail --silent --show-error \
-            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
-            "${ACTIONS_ID_TOKEN_REQUEST_URL}${separator}audience=${encoded_audience}")"
-
-          oidc_token="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<<"${oidc_json}")"
-          test -n "${oidc_token}"
-
-          response="$(curl --fail-with-body --silent --show-error \
-            --request POST \
-            --header "Authorization: Bearer ${oidc_token}" \
-            --header 'Content-Type: application/json' \
-            --data '{}' \
-            "${WATCHDOG_URL}")"
-
-          printf '%s\n' "${response}"
-          python3 - "${response}" <<'PY'
-          import json, sys
-          payload = json.loads(sys.argv[1])
-          assert payload.get('ok') is True, payload
-          assert payload.get('action') in {'primary_healthy', 'failover_processed'}, payload
-          print('watchdog_contract=ok')
-          PY
+      - name: Close resolved availability incident
+        if: steps.check.outcome == 'success'
+        shell: bash
+        run: |
+          set -euo pipefail
+          existing="$(gh issue list --repo "${GITHUB_REPOSITORY}" --state open --search "${INCIDENT_TITLE} in:title" --json number --jq '.[0].number // empty')"
+          if [[ -n "${existing}" ]]; then
+            gh issue comment "${existing}" --repo "${GITHUB_REPOSITORY}" --body "Availability recovered automatically. Monitor run: ${GITHUB_SERVER_URL}/${GITHUB_REPOSITORY}/actions/runs/${GITHUB_RUN_ID}"
+            gh issue close "${existing}" --repo "${GITHUB_REPOSITORY}" --reason completed
+          fi
+          echo 'availability_monitor=healthy'
