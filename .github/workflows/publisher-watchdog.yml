@@ -1,0 +1,57 @@
+name: Publisher Watchdog
+
+on:
+  schedule:
+    - cron: '3,13,23,33,43,53 * * * *'
+  workflow_dispatch:
+  push:
+    paths:
+      - '.github/workflows/publisher-watchdog.yml'
+
+permissions:
+  contents: read
+  id-token: write
+
+concurrency:
+  group: digital-insight-publisher-watchdog
+  cancel-in-progress: false
+
+jobs:
+  watchdog:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Verify scheduler and trigger failover when needed
+        shell: bash
+        env:
+          WATCHDOG_URL: 'https://digital-insight-publisher-zisqk8.v2.appdeploy.ai/api/automation/watchdog'
+          WATCHDOG_AUDIENCE: 'digital-insight-publisher-watchdog'
+        run: |
+          set -euo pipefail
+
+          encoded_audience="$(python3 -c 'import os, urllib.parse; print(urllib.parse.quote(os.environ["WATCHDOG_AUDIENCE"], safe=""))')"
+          separator='&'
+          if [[ "${ACTIONS_ID_TOKEN_REQUEST_URL}" != *'?'* ]]; then separator='?'; fi
+
+          oidc_json="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer ${ACTIONS_ID_TOKEN_REQUEST_TOKEN}" \
+            "${ACTIONS_ID_TOKEN_REQUEST_URL}${separator}audience=${encoded_audience}")"
+
+          oidc_token="$(python3 -c 'import json,sys; print(json.load(sys.stdin)["value"])' <<<"${oidc_json}")"
+          test -n "${oidc_token}"
+
+          response="$(curl --fail-with-body --silent --show-error \
+            --request POST \
+            --header "Authorization: Bearer ${oidc_token}" \
+            --header 'Content-Type: application/json' \
+            --data '{}' \
+            "${WATCHDOG_URL}")"
+
+          printf '%s\n' "${response}"
+          python3 - "${response}" <<'PY'
+          import json, sys
+          payload = json.loads(sys.argv[1])
+          assert payload.get('ok') is True, payload
+          assert payload.get('action') in {'primary_healthy', 'failover_processed'}, payload
+          print('watchdog_contract=ok')
+          PY
