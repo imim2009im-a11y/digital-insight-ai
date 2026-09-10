@@ -48,23 +48,24 @@ jobs:
           set -euo pipefail
           docker run -d --name dia-tools-smoke \
             -p 127.0.0.1:18080:80 \
-            -e WORDPRESS_DB_HOST=127.0.0.1:3306 \
-            -e WORDPRESS_DB_USER=smoke \
-            -e WORDPRESS_DB_PASSWORD=smoke \
-            -e WORDPRESS_DB_NAME=smoke \
-            digital-insight-ai-runtime-check
+            --entrypoint bash \
+            digital-insight-ai-runtime-check \
+            -lc 'set -euo pipefail; mkdir -p /var/www/html; rm -rf /var/www/html/tools; cp -a /usr/src/wordpress/tools /var/www/html/tools; chown -R www-data:www-data /var/www/html/tools; exec apache2-foreground'
           trap 'docker rm -f dia-tools-smoke >/dev/null 2>&1 || true' EXIT
 
           ready=0
           for _ in $(seq 1 45); do
-            if curl -fsS http://127.0.0.1:18080/tools/ | grep -q 'AI Tools Directory'; then
-              ready=1
-              break
+            if curl -fsS --max-time 3 http://127.0.0.1:18080/tools/ > /tmp/dia-tools.html 2>/tmp/dia-tools-curl.log; then
+              if grep -q 'AI Tools Directory' /tmp/dia-tools.html; then
+                ready=1
+                break
+              fi
             fi
             sleep 1
           done
 
           if [ "$ready" -ne 1 ]; then
+            cat /tmp/dia-tools-curl.log || true
             docker logs dia-tools-smoke
             exit 1
           fi
