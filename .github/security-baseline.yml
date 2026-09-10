@@ -1,0 +1,37 @@
+version: 1
+policy: security-first-without-breaking-functionality
+
+source-control:
+  protected-branch: main
+  direct-push: discouraged
+  force-push: prohibited
+  pull-request-review: required-when-platform-supports-it
+
+actions:
+  default-permissions: contents-read
+  pin-actions-by: full-commit-sha
+  untrusted-pull-request-secrets: prohibited
+  pull-request-target: prohibited-unless-documented
+
+dependencies:
+  critical-vulnerabilities: block
+  high-vulnerabilities: require-explicit-expiring-exception
+  lockfile-install: frozen
+
+secrets:
+  source-secrets: prohibited
+  public-environment-prefixes: [VITE_, NEXT_PUBLIC_, EXPO_PUBLIC_, PUBLIC_]
+  history-audit: required
+
+application:
+  server-side-authorization: required
+  client-service-role-keys: prohibited
+  production-debug-collectors: disabled-by-default
+
+verification:
+  secret-scan: required
+  dependency-audit: required
+  type-check: when-available
+  test: when-available
+  build: when-available
+  second-security-pass: required
