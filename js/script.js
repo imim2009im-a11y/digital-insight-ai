@@ -67,7 +67,8 @@ faqItems.forEach(item => {
 const contactForm = document.querySelector('.contact-form');
 const notification = document.getElementById('notification');
 
-function showNotification(message, type = 'success') {\n    if (!notification) return;
+function showNotification(message, type = 'success') {
+    if (!notification) return;
     notification.textContent = message;
     notification.className = `notification show ${type}`;
     setTimeout(() => {
@@ -78,8 +79,8 @@ function showNotification(message, type = 'success') {\n    if (!notification) r
 if (contactForm) {
     contactForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const name = document.querySelector('input[id=\"name\"]')?.value;
-        const email = document.querySelector('input[type=\"email\"]')?.value;
+        const name = document.querySelector('input[id="name"]')?.value;
+        const email = document.querySelector('input[type="email"]')?.value;
         const message = document.querySelector('textarea')?.value;
 
         if (!name || !email || !message) {
@@ -87,7 +88,7 @@ if (contactForm) {
             return;
         }
 
-        const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email)) {
             showNotification('بريد إلكتروني غير صحيح', 'error');
             return;
