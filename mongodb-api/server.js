@@ -3,7 +3,10 @@ import { URL } from "node:url";
 import { MongoClient, ServerApiVersion } from "mongodb";
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
-const MONGODB_URI = process.env.MONGODB_URI;
+const SOURCE_MONGODB_URI = process.env.MONGODB_URI;
+const TARGET_MONGODB_URI = process.env.TARGET_MONGODB_URI;
+const MIGRATE_ON_START = process.env.MIGRATE_ON_START === "true";
+const ACTIVE_MONGODB_URI = TARGET_MONGODB_URI || SOURCE_MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB || "digitalinsightai";
 const DEFAULT_ORIGINS = "https://digitalinsightai.com,https://www.digitalinsightai.com";
 const allowedOrigins = new Set(
@@ -16,12 +19,12 @@ const allowedOrigins = new Set(
 let clientPromise;
 
 function getClient() {
-  if (!MONGODB_URI) {
-    throw new Error("MONGODB_URI is not configured");
+  if (!ACTIVE_MONGODB_URI) {
+    throw new Error("MongoDB connection is not configured");
   }
 
   if (!clientPromise) {
-    const client = new MongoClient(MONGODB_URI, {
+    const client = new MongoClient(ACTIVE_MONGODB_URI, {
       serverApi: {
         version: ServerApiVersion.v1,
         strict: true,
@@ -41,6 +44,103 @@ function getClient() {
 async function getDatabase() {
   const client = await getClient();
   return client.db(MONGODB_DB);
+}
+
+function createMigrationClient(uri) {
+  return new MongoClient(uri, {
+    serverApi: {
+      version: ServerApiVersion.v1,
+      strict: true,
+      deprecationErrors: true,
+    },
+  });
+}
+
+async function migrateDatabaseIfRequested() {
+  if (!MIGRATE_ON_START) return;
+  if (!SOURCE_MONGODB_URI || !TARGET_MONGODB_URI) {
+    throw new Error("Migration requires both source and target MongoDB connections");
+  }
+  if (SOURCE_MONGODB_URI === TARGET_MONGODB_URI) {
+    console.log("Migration skipped because source and target are identical");
+    return;
+  }
+
+  const sourceClient = createMigrationClient(SOURCE_MONGODB_URI);
+  const targetClient = createMigrationClient(TARGET_MONGODB_URI);
+  const collections = [
+    "users",
+    "content",
+    "tools",
+    "affiliate_links",
+    "analytics_events",
+    "app_config",
+  ];
+
+  try {
+    await Promise.all([sourceClient.connect(), targetClient.connect()]);
+    const sourceDb = sourceClient.db(MONGODB_DB);
+    const targetDb = targetClient.db(MONGODB_DB);
+
+    for (const name of collections) {
+      const documents = await sourceDb.collection(name).find({}).toArray();
+      const target = targetDb.collection(name);
+      await target.deleteMany({});
+      if (documents.length) {
+        await target.insertMany(documents, { ordered: true });
+      }
+      console.log(`Migrated ${name}: ${documents.length} documents`);
+    }
+
+    await Promise.all([
+      targetDb.collection("users").createIndex({ email: 1 }, { name: "idx_users_email" }),
+      targetDb.collection("users").createIndex({ createdAt: -1 }, { name: "idx_users_createdAt" }),
+      targetDb.collection("content").createIndex({ slug: 1 }, { name: "idx_content_slug" }),
+      targetDb
+        .collection("content")
+        .createIndex({ status: 1, publishedAt: -1 }, { name: "idx_content_status_publishedAt" }),
+      targetDb.collection("tools").createIndex({ slug: 1 }, { name: "idx_tools_slug" }),
+      targetDb
+        .collection("tools")
+        .createIndex({ category: 1, status: 1 }, { name: "idx_tools_category_status" }),
+      targetDb
+        .collection("affiliate_links")
+        .createIndex({ provider: 1, active: 1 }, { name: "idx_affiliate_provider_active" }),
+      targetDb
+        .collection("affiliate_links")
+        .createIndex({ slug: 1 }, { name: "idx_affiliate_slug" }),
+      targetDb
+        .collection("affiliate_links")
+        .createIndex({ toolId: 1 }, { name: "idx_affiliate_toolId" }),
+      targetDb
+        .collection("analytics_events")
+        .createIndex({ event: 1, occurredAt: -1 }, { name: "idx_analytics_event_time" }),
+      targetDb
+        .collection("analytics_events")
+        .createIndex({ sessionId: 1, occurredAt: -1 }, { name: "idx_analytics_session_time" }),
+    ]);
+
+    await targetDb.collection("app_config").updateOne(
+      { key: "project" },
+      {
+        $set: {
+          databaseStatus: "secure-cutover-ready",
+          secureProject: true,
+          migratedAt: new Date(),
+        },
+      },
+      { upsert: true },
+    );
+
+    const sourceTools = await sourceDb.collection("tools").countDocuments({});
+    const targetTools = await targetDb.collection("tools").countDocuments({});
+    if (sourceTools !== targetTools) {
+      throw new Error(`Migration verification failed for tools: ${sourceTools} != ${targetTools}`);
+    }
+    console.log(`Migration verified: tools=${targetTools}`);
+  } finally {
+    await Promise.allSettled([sourceClient.close(), targetClient.close()]);
+  }
 }
 
 function applySecurityHeaders(res) {
@@ -249,8 +349,18 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, "0.0.0.0", () => {
-  console.log(`digital-insight-mongodb-api listening on port ${PORT}`);
+async function startServer() {
+  await migrateDatabaseIfRequested();
+  const db = await getDatabase();
+  await db.command({ ping: 1 });
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`digital-insight-mongodb-api listening on port ${PORT}`);
+  });
+}
+
+startServer().catch((error) => {
+  console.error("Startup failed", error);
+  process.exit(1);
 });
 
 async function shutdown(signal) {
