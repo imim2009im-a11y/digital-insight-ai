@@ -20,140 +20,80 @@ jobs:
     timeout-minutes: 8
     steps:
       - name: Checkout
-        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           persist-credentials: false
 
-      - name: Validate required public files and local links
+      - name: Validate static production target
         shell: bash
         run: |
           python3 - <<'PY'
           from html.parser import HTMLParser
           from pathlib import Path
-          from urllib.parse import urlsplit, unquote
-          import re
+          from urllib.parse import urlsplit
           import sys
 
-          root = Path('.').resolve()
+          root = Path("site")
           required = [
-              'index.html',
-              'tools.html',
-              'contact.html',
-              'privacy-policy.html',
-              'robots.txt',
-              'sitemap.xml',
+              "index.html", "tools/index.html", "reviews/index.html",
+              "guides/index.html", "about/index.html", "privacy/index.html",
+              "404.html", "robots.txt", "sitemap.xml", "_headers", "_redirects"
           ]
-          missing_required = [p for p in required if not (root / p).is_file()]
-          if missing_required:
-              print('Missing required files:', ', '.join(missing_required), file=sys.stderr)
+          missing = [p for p in required if not (root / p).is_file()]
+          if missing:
+              print("Missing static production files:", ", ".join(missing), file=sys.stderr)
               sys.exit(1)
 
-          html_files = [p for p in root.rglob('*.html') if '.git' not in p.parts]
-          broken = []
-          vite_placeholder = re.compile(r'%VITE_[A-Z0-9_]+%')
-
-          class LinkParser(HTMLParser):
+          class Parser(HTMLParser):
               def __init__(self):
-                  super().__init__()
-                  self.refs = []
+                  super().__init__(); self.refs=[]
               def handle_starttag(self, tag, attrs):
-                  values = dict(attrs)
-                  for key in ('href', 'src'):
-                      if key in values:
-                          self.refs.append(values[key])
+                  d=dict(attrs)
+                  for key in ("href","src"):
+                      if key in d: self.refs.append(d[key])
 
-          for html in html_files:
-              parser = LinkParser()
-              parser.feed(html.read_text(encoding='utf-8', errors='strict'))
-              for raw in parser.refs:
-                  if not raw or raw.startswith(('#', 'mailto:', 'tel:', 'data:', 'javascript:')):
+          broken=[]
+          for html in root.rglob("*.html"):
+              p=Parser(); p.feed(html.read_text(encoding="utf-8"))
+              for raw in p.refs:
+                  if not raw or raw.startswith(("#","mailto:","tel:","data:","javascript:")):
                       continue
-                  if vite_placeholder.search(raw):
+                  u=urlsplit(raw)
+                  if u.scheme or u.netloc:
                       continue
-                  parsed = urlsplit(raw)
-                  if parsed.scheme or parsed.netloc:
+                  path=u.path
+                  if not path:
                       continue
-                  path = unquote(parsed.path)
-                  if not path or path == '/':
-                      continue
-                  if path.startswith('/digital-insight-ai/'):
-                      path = path[len('/digital-insight-ai/'):]
-                  elif path.startswith('/'):
-                      continue
-                  target = (html.parent / path).resolve()
-                  try:
-                      target.relative_to(root)
-                  except ValueError:
-                      broken.append((html.relative_to(root), raw, 'escapes repository root'))
-                      continue
-                  if path.endswith('/'):
-                      target = target / 'index.html'
+                  if path == "/":
+                      target=root/"index.html"
+                  elif path.startswith("/"):
+                      rel=path.lstrip("/")
+                      target=(root/rel) if "." in Path(rel).name else (root/rel/"index.html")
+                  else:
+                      target=(html.parent/path)
                   if not target.exists():
-                      broken.append((html.relative_to(root), raw, 'target missing'))
-
+                      broken.append((str(html),raw))
           if broken:
-              for source, ref, reason in broken:
-                  print(f'{source}: {ref} ({reason})', file=sys.stderr)
+              for f,ref in broken: print(f"{f}: {ref}", file=sys.stderr)
               sys.exit(1)
-
-          print(f'Validated {len(html_files)} HTML files with no broken local href/src targets.')
+          print("Static production target validated.")
           PY
 
-      - name: Validate Railway cutover boundary
-        shell: bash
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import sys
-
-          root = Path('.')
-          legacy_origin = 'https://imim2009im-a11y.github.io/digital-insight-ai'
-
-          # Production custom-domain ownership belongs to Railway/WordPress now.
-          # Keep GitHub Pages available only on its github.io fallback URL.
-          if (root / 'CNAME').exists():
-              print('CNAME must remain absent: digitalinsightai.com is owned by Railway production.', file=sys.stderr)
-              sys.exit(1)
-
-          active_files = list(root.glob('*.html'))
-          active_files.extend((root / 'go').rglob('*.html'))
-          for name in (
-              '_config.yml',
-              'robots.txt',
-              'sitemap.xml',
-              'google-sitemap.xml',
-              'sitemap.txt',
-              'sitemap.md',
-              'llms.txt',
-              'llms-full.txt',
-              'README.md',
-              'LAUNCH-CAMPAIGN.md',
-              'LAUNCH-REPORT.md',
-          ):
-              path = root / name
-              if path.is_file():
-                  active_files.append(path)
-
-          stale = []
-          for path in active_files:
-              text = path.read_text(encoding='utf-8', errors='strict')
-              if legacy_origin in text:
-                  stale.append(str(path))
-
-          if stale:
-              print('Legacy GitHub Pages origin found in active production files:', file=sys.stderr)
-              for path in sorted(set(stale)):
-                  print(f'  - {path}', file=sys.stderr)
-              sys.exit(1)
-
-          print(f'Railway cutover guard passed for {len(active_files)} active files.')
-          PY
-
-      - name: Reject sensitive deployment material
+      - name: Reject runtime coupling and secrets
         shell: bash
         run: |
           set -euo pipefail
-          if find . -path './.git' -prune -o -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) -print | grep -q .; then
-            echo 'Sensitive deployment material detected in repository.' >&2
+          if grep -RniE 'railway\.app|WORDPRESS_DB_|MONGODB_URI|mariadb' site --exclude=DEPLOY.md; then
+            echo 'Runtime infrastructure coupling detected under site/.' >&2
             exit 1
           fi
+          if find . -path './.git' -prune -o -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) -print | grep -q .; then
+            echo 'Sensitive deployment material detected.' >&2
+            exit 1
+          fi
+
+      - name: Guard DNS cutover
+        shell: bash
+        run: |
+          test ! -f CNAME || { echo 'Do not claim the custom domain from GitHub Pages staging.' >&2; exit 1; }
+          test ! -f site/CNAME || { echo 'Do not claim the custom domain from staging.' >&2; exit 1; }

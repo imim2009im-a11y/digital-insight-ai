@@ -1,0 +1,52 @@
+name: Pages Staging Deploy
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - ".github/workflows/pages-staging.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages-staging
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+
+      - name: Prepare staging artifact
+        shell: bash
+        run: |
+          rm -rf _pages
+          cp -a site _pages
+          python3 - <<'PY'
+          from pathlib import Path
+          base="/digital-insight-ai/"
+          for f in Path("_pages").rglob("*.html"):
+              s=f.read_text(encoding="utf-8")
+              s=s.replace('href="/', f'href="{base}')
+              s=s.replace('src="/', f'src="{base}')
+              f.write_text(s, encoding="utf-8")
+          PY
+
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _pages
+      - name: Deploy staging
+        id: deployment
+        uses: actions/deploy-pages@v4
