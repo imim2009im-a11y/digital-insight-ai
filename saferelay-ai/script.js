@@ -12,10 +12,10 @@ const blockedTerms = [
 ];
 
 const riskyPatterns = [
-  /\b05\d{8}\b/g,
-  /\b\d{10,}\b/g,
-  /@\w{3,}/g,
-  /https?:\/\//g
+  /\b05\d{8}\b/,
+  /\b\d{10,}\b/,
+  /@\w{3,}/,
+  /https?:\/\//
 ];
 
 function analyzeMessage(text) {
