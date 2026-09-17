@@ -1,11 +1,11 @@
 import http from "node:http";
 import { URL } from "node:url";
-import { MongoClient, ServerApiVersion } from "mongodb";
+import { MongoClient, ServerApiVersion } from "mongodb";\nimport { validateMigrationRequest } from "./migration-safety.js";
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
 const SOURCE_MONGODB_URI = process.env.MONGODB_URI;
 const TARGET_MONGODB_URI = process.env.TARGET_MONGODB_URI;
-const MIGRATE_ON_START = process.env.MIGRATE_ON_START === "true";
+const MIGRATE_ON_START = process.env.MIGRATE_ON_START === "true";\nconst MIGRATION_CONFIRM = process.env.MIGRATION_CONFIRM;
 const ACTIVE_MONGODB_URI = TARGET_MONGODB_URI || SOURCE_MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB || "digitalinsightai";
 const DEFAULT_ORIGINS = "https://digitalinsightai.com,https://www.digitalinsightai.com";
@@ -57,11 +57,16 @@ function createMigrationClient(uri) {
 }
 
 async function migrateDatabaseIfRequested() {
+  const migration = validateMigrationRequest({
+    migrateOnStart: MIGRATE_ON_START,
+    sourceUri: SOURCE_MONGODB_URI,
+    targetUri: TARGET_MONGODB_URI,
+    dbName: MONGODB_DB,
+    confirmation: MIGRATION_CONFIRM,
+  });
+
   if (!MIGRATE_ON_START) return;
-  if (!SOURCE_MONGODB_URI || !TARGET_MONGODB_URI) {
-    throw new Error("Migration requires both source and target MongoDB connections");
-  }
-  if (SOURCE_MONGODB_URI === TARGET_MONGODB_URI) {
+  if (migration.identical) {
     console.log("Migration skipped because source and target are identical");
     return;
   }
