@@ -1,0 +1,48 @@
+name: Static Rebuild Check
+on:
+  pull_request:
+    paths:
+      - "site/**"
+      - ".github/workflows/static-rebuild-check.yml"
+  push:
+    branches: ["codex/static-rebuild"]
+    paths:
+      - "site/**"
+      - ".github/workflows/static-rebuild-check.yml"
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify required files
+        run: |
+          test -f site/index.html
+          test -f site/tools/index.html
+          test -f site/robots.txt
+          test -f site/sitemap.xml
+          test -f site/_headers
+          test -f site/_redirects
+      - name: Reject infrastructure coupling
+        run: |
+          if grep -RniE 'railway\.app|mariadb|wordpress_db_|mongodb_uri' site --exclude=DEPLOY.md; then
+            echo "Static site must not depend on paid/runtime infrastructure."
+            exit 1
+          fi
+      - name: Validate internal absolute paths
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re, sys
+          root=Path("site")
+          bad=[]
+          for f in root.rglob("*.html"):
+              text=f.read_text(encoding="utf-8")
+              for href in re.findall(r'href="(/[^"#?]*)"', text):
+                  if href in ("/",): target=root/"index.html"
+                  elif "." in Path(href).name: target=root/href.lstrip("/")
+                  else: target=root/href.lstrip("/")/"index.html"
+                  if not target.exists(): bad.append((str(f),href))
+          if bad:
+              print("\n".join(f"{f}: {h}" for f,h in bad)); sys.exit(1)
+          print("internal links: ok")
+          PY
