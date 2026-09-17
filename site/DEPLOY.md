@@ -1,13 +1,23 @@
 # Static production target
 
-This directory is intentionally independent from WordPress, MariaDB, Railway, MongoDB, and server-side runtimes.
+`site/` هو هدف الإنتاج الجديد للموقع العام، وهو مستقل عن WordPress وMariaDB وRailway وMongoDB.
 
-## Cloudflare Pages
+## Staging — GitHub Pages
+يتم النشر آليًا عبر `.github/workflows/pages-staging.yml`.
+
+الهدف: معاينة وفحص النسخة قبل أي تعديل على DNS.
+
+## Production — preferred
+Cloudflare Pages هو الهدف المفضل عند توفر اتصال الحساب:
+
 - Framework preset: None
-- Build command: leave empty
-- Build output directory: site
-- Production branch: main after the pull request is verified
-- Custom domain: digitalinsightai.com only after preview validation
+- Build command: فارغ
+- Output directory: `site`
+- Production branch: `main`
+- Custom domain: `digitalinsightai.com` بعد نجاح staging فقط
 
-## Safety
-Do not remove the existing production service until the static preview passes HTTP, link, mobile, SEO, and custom-domain checks.
+## Cutover safety
+- لا تغيّر DNS قبل نجاح staging.
+- لا تضف CNAME للمستودع أثناء staging.
+- لا تحذف Railway أو MariaDB قبل نجاح HTTPS والمسارات على الدومين النهائي.
+- احتفظ بخطة rollback عبر DNS إلى Railway حتى استقرار النسخة الجديدة.
