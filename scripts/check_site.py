@@ -203,6 +203,26 @@ def main() -> int:
     except (json.JSONDecodeError, OSError) as exc:
         errors.append(f"Invalid tools-data.json: {exc}")
 
+    tools_page = (ROOT / "tools.html").read_text(encoding="utf-8")
+    calculator_contract = {
+        'id="roi-calculator"': "calculator section",
+        'data-roi-input="cost"': "monthly cost input",
+        'data-roi-input="hourly"': "hourly value input",
+        'data-roi-input="minutes"': "minutes saved input",
+        'data-roi-input="uses"': "monthly uses input",
+        "data-roi-results": "accessible calculator results",
+        "ليست وعداً بدخل أو ربح": "earnings disclaimer",
+        "لا نرسل الأرقام التي تدخلها": "local-calculation privacy notice",
+    }
+    for token, label in calculator_contract.items():
+        if token not in tools_page:
+            errors.append(f"tools.html: missing ROI {label}")
+
+    site_script = (ROOT / "script.js").read_text(encoding="utf-8")
+    for token in ("setupRoiCalculator", "roi_calculator_complete", "outcome_bucket"):
+        if token not in site_script:
+            errors.append(f"script.js: missing ROI calculator contract token: {token}")
+
     robots = (ROOT / "robots.txt").read_text(encoding="utf-8")
     sitemap_lines = [line for line in robots.splitlines() if line.lower().startswith("sitemap:")]
     if sitemap_lines != [f"Sitemap: {CANONICAL_ORIGIN}sitemap.xml"]:
