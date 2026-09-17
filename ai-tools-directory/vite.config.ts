@@ -6,6 +6,10 @@ import path from "node:path";
 import { defineConfig, type Plugin, type ViteDevServer } from "vite";
 import { vitePluginManusRuntime } from "vite-plugin-manus-runtime";
 
+// Manus diagnostics are opt-in and development-only.
+// Production builds must never inject the browser collector or expose its endpoint.
+const ENABLE_MANUS_DEBUG = process.env.MANUS_DEBUG_COLLECTOR === "true" && process.env.NODE_ENV !== "production";
+
 // =============================================================================
 // Manus Debug Collector - Vite Plugin
 // Writes browser logs directly to files, trimmed when exceeding size limit
@@ -50,7 +54,7 @@ function trimLogFile(logPath: string, maxSize: number) {
 }
 
 function writeToLogFile(source: LogSource, entries: unknown[]) {
-  if (entries.length === 0) return;
+  if (!ENABLE_MANUS_DEBUG || entries.length === 0) return;
 
   ensureLogDir();
   const logPath = path.join(LOG_DIR, `${source}.log`);
@@ -79,7 +83,7 @@ function vitePluginManusDebugCollector(): Plugin {
     name: "manus-debug-collector",
 
     transformIndexHtml(html) {
-      if (process.env.NODE_ENV === "production") {
+      if (!ENABLE_MANUS_DEBUG) {
         return html;
       }
       return {
@@ -98,6 +102,10 @@ function vitePluginManusDebugCollector(): Plugin {
     },
 
     configureServer(server: ViteDevServer) {
+      if (!ENABLE_MANUS_DEBUG) {
+        return;
+      }
+
       // POST /__manus__/logs: Browser sends logs (written directly to files)
       server.middlewares.use("/__manus__/logs", (req, res, next) => {
         if (req.method !== "POST") {
