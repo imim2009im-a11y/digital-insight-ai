@@ -1,0 +1,11 @@
+{
+  "id":"prototype-001",
+  "objective":"Prove the orchestration contract on a bounded repository-inspection workflow",
+  "scope":"Read-only inspection plus evidence recording; no production mutation",
+  "success_criteria":["Task record passes deterministic validation","Successful state contains verification evidence"],
+  "risk":"low",
+  "capabilities_required":["engineering/source","engineering/test"],
+  "state":"SUCCEEDED",
+  "evidence":[{"type":"test","check":"python3 scripts/agent-platform/validate_task.py examples/agent-platform/prototype-task.json","result":"passed","timestamp":"2026-09-18T07:30:00Z","reference":"local-or-ci"}],
+  "blockers":[]
+}
