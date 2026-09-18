@@ -81,14 +81,15 @@ check_health_ready() {
 printf 'Digital Insight AI production smoke check\n'
 printf 'UTC: %s\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-# Hit the application pages first. This both validates routing and gives a
-# sleeping MariaDB service a chance to wake before the explicit readiness check.
+# Validate the static production surface. Railway is intentionally not a
+# success dependency after the GitHub Pages cutover.
 check_url 'Primary domain' 'https://digitalinsightai.com/'
 check_url 'Primary tools' 'https://digitalinsightai.com/tools/'
-check_url 'Railway production' 'https://digitalinsightproduction-production.up.railway.app/'
-check_url 'Railway tools' 'https://digitalinsightproduction-production.up.railway.app/tools/'
-check_health_ready 'Railway readiness' 'https://digitalinsightproduction-production.up.railway.app/health/'
-check_url 'GitHub Pages fallback' 'https://imim2009im-a11y.github.io/digital-insight-ai/'
+check_url 'Primary reviews' 'https://digitalinsightai.com/reviews/'
+check_url 'Primary guides' 'https://digitalinsightai.com/guides/'
+check_url 'Primary robots' 'https://digitalinsightai.com/robots.txt'
+check_url 'Primary sitemap' 'https://digitalinsightai.com/sitemap.xml'
+check_url 'GitHub Pages' 'https://imim2009im-a11y.github.io/digital-insight-ai/'
 
 printf '\n'
 if (( failures > 0 )); then
