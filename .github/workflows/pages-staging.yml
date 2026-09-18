@@ -1,4 +1,4 @@
-name: Pages Staging Deploy
+name: Pages Production Deploy
 
 on:
   push:
@@ -14,7 +14,7 @@ permissions:
   id-token: write
 
 concurrency:
-  group: pages-staging
+  group: pages-production
   cancel-in-progress: true
 
 jobs:
@@ -28,25 +28,12 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Prepare staging artifact
-        shell: bash
-        run: |
-          rm -rf _pages
-          cp -a site _pages
-          python3 - <<'PY'
-          from pathlib import Path
-          base="/digital-insight-ai/"
-          for f in Path("_pages").rglob("*.html"):
-              s=f.read_text(encoding="utf-8")
-              s=s.replace('href="/', f'href="{base}')
-              s=s.replace('src="/', f'src="{base}')
-              f.write_text(s, encoding="utf-8")
-          PY
-
       - uses: actions/configure-pages@v5
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _pages
-      - name: Deploy staging
+          path: site
+
+      - name: Deploy production
         id: deployment
         uses: actions/deploy-pages@v4
