@@ -1,6 +1,6 @@
 # Digital Insight AI — Production Architecture
 
-Last verified: 2026-09-17
+Last verified: 2026-09-18
 
 ## القرار المعماري
 
@@ -8,18 +8,20 @@ Last verified: 2026-09-17
 
 - `https://digitalinsightai.com/`
 
-تم تغيير الهدف الإنتاجي من WordPress/Railway إلى **موقع ثابت host-agnostic** مصدره `site/`.
+تم تغيير الهدف الإنتاجي من WordPress/Railway إلى **GitHub Pages** لموقع ثابت مصدره `site/`.
 
 السبب: الصفحات العامة لا تحتاج PHP أو MariaDB لكي تعمل، وربطها بخادم وقاعدة بيانات مدفوعة خلق تكلفة وتعقيدًا ونقاط توقف غير ضرورية.
 
 ## الحالة الانتقالية
 
-حتى اكتمال قطع DNS:
+قرار 2026-09-18 هو جعل GitHub Pages مالك الاستضافة العامة الوحيد، مع إبقاء Railway كمسار رجوع مؤقت فقط أثناء القطع.
 
-- `DigitalInsightProduction` على Railway يبقى **legacy/rollback**.
-- الدومين قد يظل متصلًا بـRailway مؤقتًا أثناء تجهيز واختبار البديل.
-- لا تُحذف MariaDB أو الخدمات القديمة قبل التحقق من النسخة الثابتة وحفظ مسار الرجوع.
-- GitHub Pages يستخدم staging فقط ولا يصبح مالك الدومين تلقائيًا.
+- المالك السابق: Railway `DigitalInsightProduction`.
+- المالك المستهدف: GitHub Pages للمستودع `imim2009im-a11y/digital-insight-ai`.
+- دليل DNS عند الفحص: سجل A للجذر ما زال يشير إلى `69.46.46.103`، لذلك القطع لم يكتمل بعد.
+- رابط GitHub Pages الافتراضي يستجيب، لكن يجب أن يعرض artifact من `site/` عبر GitHub Actions قبل تحويل DNS.
+- لا تُحذف MariaDB أو خدمات Railway ضمن هذا التغيير.
+- لا يُعلن نجاح النقل قبل نجاح HTTPS على `digitalinsightai.com` وتحميل المسارات والأصول من GitHub Pages.
 
 ## مصدر الحقيقة
 
@@ -44,13 +46,10 @@ Repository: `imim2009im-a11y/digital-insight-opus-content-pipeline`
 
 ## الاستضافة
 
-### Staging
-GitHub Pages يستخدم لمعاينة النسخة الثابتة واختبارها بدون تغيير DNS.
-
 ### Production target
-الهدف هو استضافة static/CDN مجانية أو منخفضة التكلفة لا تتطلب runtime دائمًا. **Cloudflare Pages هو الخيار المفضل للقطع النهائي** عند توفر الاتصال بالحساب، مع بقاء ملفات `site/` قابلة للنقل إلى أي static host آخر.
+GitHub Pages هو هدف الإنتاج للموقع العام الثابت. يتم نشر `site/` عبر GitHub Actions دون خادم تطبيق أو قاعدة بيانات.
 
-الاستضافة ليست مصدر الحقيقة؛ GitHub هو مصدر الحقيقة.
+GitHub repository هو مصدر الحقيقة، وGitHub Pages هو طبقة التقديم العامة المستهدفة.
 
 ## Route ownership
 
@@ -86,17 +85,23 @@ GitHub Pages يستخدم لمعاينة النسخة الثابتة واختب�
 - نجح `Agent Governance Verification`.
 - PR #44 دُمج إلى `main` بعد نجاح الفحوص.
 
+في 2026-09-18:
+
+- الفحص العام لـ`digitalinsightai.com` أعاد صفحة Railway 404.
+- DNS الجذر ما زال `69.46.46.103`.
+- لا يوجد CNAME عام لـ`www.digitalinsightai.com`.
+- رابط GitHub Pages الافتراضي يستجيب HTTP 200 لكنه يعرض السطح القديم، لذلك مصدر Pages الحالي يحتاج التحويل إلى GitHub Actions قبل قطع DNS.
+
 ## Cutover sequence
 
-1. نشر `site/` على staging.
-2. تنفيذ smoke checks على staging.
-3. مراجعة التصميم على الهاتف وسطح المكتب.
-4. تجهيز static production host.
-5. نقل DNS من Railway إلى المضيف الجديد مرة واحدة.
-6. التحقق من TLS للدومين.
-7. اختبار `/`, `/tools/`, `/reviews/`, `/guides/`, `/robots.txt`, `/sitemap.xml`.
-8. مراقبة الاستقرار.
-9. بعد نجاح النافذة، إيقاف موارد Railway المدفوعة غير اللازمة.
+1. نشر `site/` مباشرة عبر GitHub Pages Actions.
+2. التحقق من رابط Pages الافتراضي والمسارات والأصول.
+3. تفعيل `digitalinsightai.com` كـCustom Domain في GitHub Pages.
+4. نقل DNS من Railway إلى سجلات GitHub Pages الرسمية.
+5. التحقق من TLS للدومين.
+6. اختبار `/`, `/tools/`, `/reviews/`, `/guides/`, `/robots.txt`, `/sitemap.xml`.
+7. مراقبة الاستقرار.
+8. بعد نجاح نافذة الرجوع، يمكن إيقاف موارد Railway غير اللازمة في تغيير منفصل.
 
 ## Rollback
 
