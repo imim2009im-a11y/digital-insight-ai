@@ -1,0 +1,19 @@
+{
+  "id":"prototype-001",
+  "objective":"Prove the orchestration contract on a bounded repository-inspection workflow",
+  "scope":"Read-only inspection plus evidence recording; no production mutation",
+  "success_criteria":["Task record passes deterministic validation","Successful state contains verification evidence"],
+  "risk":"low",
+  "capabilities_required":["engineering/source","engineering/test"],
+  "state":"SUCCEEDED",
+  "evidence":[
+    {
+      "type":"ci",
+      "check":"Agent Platform Contract / run 35319479068",
+      "result":"success",
+      "timestamp":"2026-09-18T07:27:00Z",
+      "reference":"https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/35319479068"
+    }
+  ],
+  "blockers":[]
+}
