@@ -6,6 +6,14 @@
   "risk":"low",
   "capabilities_required":["engineering/source","engineering/test"],
   "state":"SUCCEEDED",
-  "evidence":[{"type":"test","check":"python3 scripts/agent-platform/validate_task.py examples/agent-platform/prototype-task.json","result":"passed","timestamp":"2026-09-18T07:30:00Z","reference":"local-or-ci"}],
+  "evidence":[
+    {
+      "type":"ci",
+      "check":"Agent Platform Contract / run 35319479068",
+      "result":"success",
+      "timestamp":"2026-09-18T07:27:00Z",
+      "reference":"https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/35319479068"
+    }
+  ],
   "blockers":[]
 }
