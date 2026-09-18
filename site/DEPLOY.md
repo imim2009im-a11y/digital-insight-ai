@@ -1,23 +1,23 @@
 # Static production target
 
-`site/` هو هدف الإنتاج الجديد للموقع العام، وهو مستقل عن WordPress وMariaDB وRailway وMongoDB.
+`site/` هو مصدر الموقع العام الإنتاجي، وهو مستقل عن WordPress وMariaDB وRailway وMongoDB.
 
-## Staging — GitHub Pages
-يتم النشر آليًا عبر `.github/workflows/pages-staging.yml`.
+## Production — GitHub Pages
 
-الهدف: معاينة وفحص النسخة قبل أي تعديل على DNS.
+يتم النشر آليًا عبر `.github/workflows/pages-staging.yml` من الفرع `main`.
 
-## Production — preferred
-Cloudflare Pages هو الهدف المفضل عند توفر اتصال الحساب:
-
-- Framework preset: None
-- Build command: فارغ
-- Output directory: `site`
+- Build command: لا يوجد؛ الموقع ثابت.
+- Artifact directory: `site`
 - Production branch: `main`
-- Custom domain: `digitalinsightai.com` بعد نجاح staging فقط
+- Custom domain: `digitalinsightai.com`
+- المسارات داخل `site/` تستخدم الجذر `/` لأن الدومين المخصص هو مسار الإنتاج.
+
+عند النشر عبر GitHub Actions، إعداد الدومين المخصص يتم من إعدادات GitHub Pages؛ ملف `CNAME` داخل الـartifact غير مطلوب.
 
 ## Cutover safety
-- لا تغيّر DNS قبل نجاح staging.
-- لا تضف CNAME للمستودع أثناء staging.
-- لا تحذف Railway أو MariaDB قبل نجاح HTTPS والمسارات على الدومين النهائي.
-- احتفظ بخطة rollback عبر DNS إلى Railway حتى استقرار النسخة الجديدة.
+
+- لا تعتبر عملية النقل مكتملة قبل أن يعرض رابط GitHub Pages النسخة الموجودة في `site/` بنجاح.
+- لا تغيّر DNS إلا إلى سجلات GitHub Pages الرسمية وبعد تفعيل GitHub Actions كمصدر Pages.
+- احتفظ بـRailway كمسار رجوع مؤقت فقط حتى نجاح DNS وTLS والمسارات العامة.
+- لا تحذف Railway أو MariaDB ضمن هذا التغيير.
+- بعد القطع، يجب ألا يعتمد الموقع العام على Railway أو قاعدة بيانات.
