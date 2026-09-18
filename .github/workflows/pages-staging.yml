@@ -28,14 +28,6 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Configure Pages production settings
-        shell: bash
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          set -euo pipefail
-          gh api             --method PUT             -H "Accept: application/vnd.github+json"             -H "X-GitHub-Api-Version: 2026-03-10"             "repos/${GITHUB_REPOSITORY}/pages"             -f build_type=workflow             -f cname=digitalinsightai.com
-
       - uses: actions/configure-pages@v5
 
       - uses: actions/upload-pages-artifact@v3
