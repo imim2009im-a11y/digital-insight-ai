@@ -3,6 +3,7 @@ set -uo pipefail
 
 # Digital Insight AI production smoke checks.
 # This script intentionally uses only public endpoints and never reads secrets.
+# Transient CDN/TCP resets are retried briefly to avoid false production alarms.
 
 failures=0
 
@@ -18,6 +19,10 @@ check_url() {
     --location \
     --connect-timeout 10 \
     --max-time 25 \
+    --retry 2 \
+    --retry-delay 1 \
+    --retry-max-time 12 \
+    --retry-all-errors \
     --output /dev/null \
     --write-out '%{http_code} %{time_total}' \
     "$url" 2>/tmp/dia-smoke-curl.err || true)
@@ -52,6 +57,10 @@ check_health_ready() {
     --location \
     --connect-timeout 10 \
     --max-time 25 \
+    --retry 2 \
+    --retry-delay 1 \
+    --retry-max-time 12 \
+    --retry-all-errors \
     --output "$body_file" \
     --write-out '%{http_code} %{time_total}' \
     "$url" 2>/tmp/dia-smoke-curl.err || true)
