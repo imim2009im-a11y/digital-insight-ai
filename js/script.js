@@ -67,7 +67,8 @@ faqItems.forEach(item => {
 const contactForm = document.querySelector('.contact-form');
 const notification = document.getElementById('notification');
 
-function showNotification(message, type = 'success') {\n    if (!notification) return;
+function showNotification(message, type = 'success') {
+    if (!notification) return;
     notification.textContent = message;
     notification.className = `notification show ${type}`;
     setTimeout(() => {
