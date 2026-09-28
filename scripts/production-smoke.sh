@@ -7,6 +7,37 @@ set -uo pipefail
 
 failures=0
 
+check_https_redirect() {
+  local name="$1"
+  local url="$2"
+  local expected="$3"
+  local status location
+
+  status=$(curl \
+    --silent \
+    --show-error \
+    --head \
+    --connect-timeout 10 \
+    --max-time 25 \
+    --retry 2 \
+    --retry-delay 1 \
+    --retry-max-time 12 \
+    --retry-all-errors \
+    --output /tmp/dia-smoke-http-headers.txt \
+    --write-out '%{http_code}' \
+    "$url" 2>/tmp/dia-smoke-curl.err || true)
+
+  location=$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/\r$/, "", $2); print $2; exit}' /tmp/dia-smoke-http-headers.txt)
+
+  if [[ "$status" =~ ^30[1278]$ ]] && [[ "$location" == "$expected" ]]; then
+    printf 'PASS  %-24s %s (%s -> %s)\n' "$name" "$url" "$status" "$location"
+    return 0
+  fi
+
+  printf 'FAIL  %-24s %s (%s -> %s; expected %s)\n' \
+    "$name" "$url" "${status:-000}" "${location:-none}" "$expected" >&2
+  failures=$((failures + 1))
+}
 check_url() {
   local name="$1"
   local url="$2"
@@ -89,6 +120,9 @@ check_health_ready() {
 
 printf 'Digital Insight AI production smoke check\n'
 printf 'UTC: %s\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+
+# Validate HTTPS enforcement before checking the production surface.
+check_https_redirect 'Primary HTTPS redirect' 'http://digitalinsightai.com/' 'https://digitalinsightai.com/'
 
 # Validate the static production surface. Railway is intentionally not a
 # success dependency after the GitHub Pages cutover.
