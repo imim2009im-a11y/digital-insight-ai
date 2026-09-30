@@ -38,6 +38,17 @@ log "Checking JavaScript syntax"
 if [[ -f script.js ]]; then
   node --check script.js
 fi
+if [[ -f mongodb-api/server.js ]]; then
+  node --check mongodb-api/server.js
+fi
+if [[ -f mongodb-api/migration-safety.js ]]; then
+  node --check mongodb-api/migration-safety.js
+fi
+
+log "Running MongoDB API safety tests"
+if [[ -f mongodb-api/migration-safety.test.js ]]; then
+  node --test mongodb-api/migration-safety.test.js
+fi
 
 log "Checking Python syntax"
 python3 -m py_compile scripts/check_site.py
