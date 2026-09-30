@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://digitalinsightai.com/schemas/agent-task-v1.json",
+  "title": "Agent Platform Task v1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id","objective","scope","success_criteria","risk","capabilities_required","state","evidence","blockers"],
+  "properties": {
+    "id": {"type":"string","minLength":1},
+    "objective": {"type":"string","minLength":1},
+    "scope": {"type":"string","minLength":1},
+    "success_criteria": {"type":"array","minItems":1,"items":{"type":"string","minLength":1}},
+    "risk": {"enum":["low","medium","high"]},
+    "capabilities_required": {"type":"array","uniqueItems":true,"items":{"type":"string","minLength":1}},
+    "state": {"enum":["RECEIVED","INSPECTED","PLANNED","RISK_CHECKED","EXECUTING","VERIFYING","REVIEWING","SUCCEEDED","BLOCKED","FAILED"]},
+    "evidence": {
+      "type":"array",
+      "items":{
+        "type":"object",
+        "additionalProperties":false,
+        "required":["type","check","result","timestamp"],
+        "properties":{
+          "type":{"type":"string","minLength":1},
+          "check":{"type":"string","minLength":1},
+          "result":{"type":"string","minLength":1},
+          "timestamp":{"type":"string","format":"date-time"},
+          "reference":{"type":"string"}
+        }
+      }
+    },
+    "blockers":{"type":"array","items":{"type":"string"}}
+  }
+}
