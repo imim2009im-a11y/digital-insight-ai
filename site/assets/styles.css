@@ -106,7 +106,8 @@ body{min-width:300px}
 .contact-card .privacy-check input{width:19px;height:19px;flex:none;margin-top:7px;accent-color:#6ee7ff}
 .contact-card .btn{font-size:1rem;margin-top:10px}
 .contact-card .form-note{font-size:.9rem;color:var(--muted)}
-.contact-card{position:relative}\n.honey-field{position:absolute!important;inset-inline-start:0!important;top:0!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;pointer-events:none!important}
+.contact-card{position:relative}
+.honey-field{position:absolute!important;inset-inline-start:0!important;top:0!important;width:1px!important;height:1px!important;overflow:hidden!important;clip-path:inset(50%)!important;white-space:nowrap!important;pointer-events:none!important}
 .contact-side ul{padding-inline-start:20px}
 .contact-side li{margin-bottom:14px}
 @media(max-width:1000px){.nav{flex-wrap:wrap;gap:8px;padding:10px 0}.global-nav{width:100%;justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;scrollbar-width:thin}.global-nav a{background:rgba(31,49,74,.6)}.footer-inner{grid-template-columns:1fr 1fr}.footer-inner small{grid-column:1/-1}}
