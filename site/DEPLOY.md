@@ -19,3 +19,9 @@
 - احتفظ بـRailway كمسار رجوع مؤقت فقط حتى نجاح DNS وTLS والمسارات العامة.
 - لا تحذف Railway أو MariaDB ضمن هذا التغيير.
 - بعد القطع، يجب ألا يعتمد الموقع العام على Railway أو قاعدة بيانات.
+
+## GitHub Pages compatibility — 2026-10-06
+- GitHub Pages does **not** implement the Netlify/Cloudflare-style `_headers` or `_redirects` directives. Keep these files for portability/quality gates, but do not claim that they enforce browser security headers or redirects in this hosting environment.
+- The legacy `/contact.html` redirect is implemented using an explicit HTML fallback under `site/contact.html`; it is not an HTTP 301 redirect.
+- The contact form posts to the previously published Formspree endpoint. It has not been end-to-end delivery-tested in the new static site, so do not claim message delivery until it is manually checked using a test submission with consent.
+- No API keys, databases, runtime processes or third-party JavaScript frameworks are needed for the new static UX.

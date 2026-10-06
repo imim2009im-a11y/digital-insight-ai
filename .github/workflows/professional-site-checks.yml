@@ -1,0 +1,30 @@
+name: Professional Site Checks
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/site-professional-check.py"
+      - ".github/workflows/professional-site-checks.yml"
+  push:
+    branches: [main]
+    paths:
+      - "site/**"
+      - "scripts/site-professional-check.py"
+      - ".github/workflows/professional-site-checks.yml"
+permissions:
+  contents: read
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Check static content / metadata / links / sitemap
+        run: python3 scripts/site-professional-check.py
+      - name: JavaScript syntax
+        run: |
+          node --check site/assets/app.js
+          node --check site/assets/directory.js
+          node --check site/assets/site.js
