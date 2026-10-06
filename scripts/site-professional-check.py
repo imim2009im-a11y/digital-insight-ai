@@ -37,6 +37,9 @@ class Tags(HTMLParser):
 
 canonical = set()
 for f in sorted(ROOT.rglob("*.html")):
+    # Google Search Console verification payload is intentionally not a web page.
+    if f.name == "googlef5993c7e5ddbe3c2.html":
+        continue
     text = f.read_text(encoding="utf-8")
     parser = Tags()
     parser.feed(text)
