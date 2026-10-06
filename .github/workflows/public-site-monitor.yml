@@ -5,11 +5,6 @@ on:
     paths:
       - "scripts/public-site-smoke.py"
       - ".github/workflows/public-site-monitor.yml"
-  push:
-    branches: [main]
-    paths:
-      - "scripts/public-site-smoke.py"
-      - ".github/workflows/public-site-monitor.yml"
   workflow_run:
     workflows: ["Pages Production Deploy"]
     types: [completed]
