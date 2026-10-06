@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Digital Insight AI — أخبار الذكاء الاصطناعي</title>
+    <link>https://digitalinsightai.com/news/</link>
+    <description>تحليلات عربية أصلية موثقة من المصادر الرسمية حول الذكاء الاصطناعي والتقنيات.</description>
+    <language>ar-SA</language>
+    <atom:link href="https://digitalinsightai.com/news/feed.xml" rel="self" type="application/rss+xml" />
+    <lastBuildDate>Tue, 06 Oct 2026 08:00:00 GMT</lastBuildDate>
+    <item>
+      <title>تحديثات Google للذكاء الاصطناعي: Gemini 4 Argon والربط بين التطبيقات في سبتمبر 2026</title>
+      <link>https://digitalinsightai.com/news/google-ai-september-2026/</link>
+      <guid isPermaLink="true">https://digitalinsightai.com/news/google-ai-september-2026/</guid>
+      <pubDate>Tue, 06 Oct 2026 08:00:00 GMT</pubDate>
+      <description>قراءة أصلية لملخص Google المنشور 2 أكتوبر 2026 عن Gemini 4 Argon والتطبيقات المتصلة والصوت والبحث، مع نصائح للتحقق قبل الاعتماد.</description>
+    </item>
+    <item>
+      <title>Claude Sonnet 5.5: السرعة والتكلفة المعلنة وما يجب اختباره قبل الانتقال</title>
+      <link>https://digitalinsightai.com/news/claude-sonnet-55/</link>
+      <guid isPermaLink="true">https://digitalinsightai.com/news/claude-sonnet-55/</guid>
+      <pubDate>Tue, 06 Oct 2026 08:00:00 GMT</pubDate>
+      <description>شرح عربي أصلي لإصدار Claude Sonnet 5.5 بتاريخ 28 سبتمبر 2026: مزاعم السرعة والتكلفة وحالات الاستخدام والحدود والاختبار العادل.</description>
+    </item>
+    <item>
+      <title>Anthropic تستثمر 100 مليون دولار لتدريب 10 آلاف مهندس: ماذا يعني ذلك للأعمال؟</title>
+      <link>https://digitalinsightai.com/news/claude-frontier-academy/</link>
+      <guid isPermaLink="true">https://digitalinsightai.com/news/claude-frontier-academy/</guid>
+      <pubDate>Tue, 06 Oct 2026 08:00:00 GMT</pubDate>
+      <description>تحليل عربي أصلي لإعلان Claude Frontier Academy في أكتوبر 2026: الفئات المستهدفة، التدريب العملي، والأثر المحتمل على الشركات في السعودية.</description>
+    </item>
+  </channel>
+</rss>
