@@ -52,7 +52,7 @@ def main():
             continue
         if '<html lang="ar" dir="rtl">' not in html:
             failures.append(f"{url}: Arabic RTL HTML missing")
-        if not re.search(r"<h1(?:\\s|>)", html):
+        if not re.search(r"<h1(?:\s|>)", html):
             failures.append(f"{url}: h1 missing")
         if f'rel="canonical" href="{url}"' not in html:
             failures.append(f"{url}: incorrect canonical")
