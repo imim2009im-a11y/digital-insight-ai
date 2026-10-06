@@ -5,6 +5,7 @@ on:
     paths:
       - "site/**"
       - "scripts/site-professional-check.py"
+      - "scripts/site-interactions.test.cjs"
       - ".github/workflows/professional-site-checks.yml"
   push:
     branches: [main]
@@ -28,3 +29,5 @@ jobs:
           node --check site/assets/app.js
           node --check site/assets/directory.js
           node --check site/assets/site.js
+      - name: Exercise search, calculator and share interactions
+        run: node --test scripts/site-interactions.test.cjs
