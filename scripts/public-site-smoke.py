@@ -59,6 +59,14 @@ def main():
         if not re.search(r'<meta name="description" content="[^"]+', html):
             failures.append(f"{url}: meta description missing")
         print(f"OK {url}", flush=True)
+    try:
+        feed = ElementTree.fromstring(fetch(ROOT + "/news/feed.xml"))
+        article_links = [n.text for n in feed.findall("channel/item/link")]
+        indexed_news = [u for u in urls if u.startswith(ROOT + "/news/") and u != ROOT + "/news/"]
+        if feed.tag != "rss" or set(article_links) != set(indexed_news):
+            failures.append("RSS articles do not match sitemap news URLs")
+    except (RuntimeError, ElementTree.ParseError) as exc:
+        failures.append(f"RSS failure: {exc}")
     if failures:
         for failure in failures:
             print(f"FAIL {failure}", file=sys.stderr)

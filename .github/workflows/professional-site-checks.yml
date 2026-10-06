@@ -24,6 +24,8 @@ jobs:
           persist-credentials: false
       - name: Check static content / metadata / links / sitemap
         run: python3 scripts/site-professional-check.py
+      - name: Keep public news RSS synchronized with articles
+        run: python3 scripts/build-news-feed.py
       - name: JavaScript syntax
         run: |
           node --check site/assets/app.js
