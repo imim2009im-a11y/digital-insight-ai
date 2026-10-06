@@ -40,7 +40,7 @@ for f in sorted(ROOT.rglob("*.html")):
     text = f.read_text(encoding="utf-8")
     parser = Tags()
     parser.feed(text)
-    if len(re.findall(r"<h1(?:\\s|>)", text)) != 1:
+    if len(re.findall(r"<h1(?:\s|>)", text)) != 1:
         fail(f, "expected one h1")
     if 'lang="ar"' not in text or 'dir="rtl"' not in text:
         fail(f, "expected Arabic RTL document")
@@ -68,7 +68,7 @@ for f in sorted(ROOT.rglob("*.html")):
         if dest.endswith("/") or target.is_dir():
             target = target / "index.html"
         if not target.is_file(): fail(f, f"broken local asset/link: {ref}")
-    for body in re.findall(r'<script type="application/ld\\+json">([\\s\\S]*?)</script>', text):
+    for body in re.findall(r'<script type="application/ld\+json">([\s\S]*?)</script>', text):
         try: json.loads(body)
         except json.JSONDecodeError as e: fail(f, f"invalid JSON-LD: {e}")
 
@@ -86,6 +86,6 @@ if "Sitemap: https://digitalinsightai.com/sitemap.xml" not in (ROOT / "robots.tx
 for required in ("site/contact/index.html","site/assets/site.js","site/assets/icon.svg"):
     if not Path(required).is_file(): errors.append(f"missing required {required}")
 if errors:
-    print("\\n".join(errors), file=sys.stderr)
+    print("\n".join(errors), file=sys.stderr)
     sys.exit(1)
 print(f"PASS: {len(urls)} canonical URLs, RTL pages, JSON-LD and local links.")
