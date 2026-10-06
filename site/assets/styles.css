@@ -32,3 +32,22 @@ button:disabled{cursor:not-allowed;opacity:.65}
 .comparison thead{background:#172b43}
 @media(max-width:760px){.finder-line,.compare-heading{flex-direction:column;align-items:stretch}.finder-controls{grid-template-columns:1fr}.quick-finder{padding:18px}.finder-line .btn{width:100%;text-align:center}}
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
+
+/* Editorial articles: scan-friendly Arabic typography and responsive cards. */
+.skip-link{position:absolute;z-index:50;top:-100px;right:15px;background:#fff;color:#07101f;padding:10px 16px;border-radius:8px}.skip-link:focus{top:15px}
+.editorial{font-size:1.07rem;max-width:860px}
+.editorial h1{font-size:clamp(1.9rem,4vw,2.85rem);line-height:1.4;margin:14px 0 22px}
+.editorial h2{font-size:clamp(1.3rem,3vw,1.7rem);margin:38px 0 12px}
+.editorial p,.editorial li{line-height:2.05}
+.editorial p{margin:14px 0 18px}
+.editorial ul,.editorial ol{padding-inline-start:1.5em}
+.editorial li{margin-bottom:12px}
+.editorial .lead,.lead{max-width:850px;color:#d0e0f3;font-size:1.13rem;line-height:1.9}
+.editorial-meta{font-size:.92rem;border-inline-start:3px solid var(--brand);padding-inline-start:12px;color:var(--muted)!important}
+.breadcrumbs{color:var(--muted);font-size:.87rem;margin-bottom:20px}
+.references{border-top:1px solid var(--line);padding-top:18px;margin-top:42px;overflow-wrap:anywhere}
+.news-grid article{display:flex;flex-direction:column}
+.news-grid article h2,.news-grid article h3{font-size:1.18rem;line-height:1.5}
+.news-grid article p{flex:1}
+.news-grid article a{text-underline-offset:3px}
+@media(max-width:760px){.editorial{font-size:1rem}.editorial h1{line-height:1.35}.news-grid article{padding:20px}}
