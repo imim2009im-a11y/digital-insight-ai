@@ -88,6 +88,12 @@ if "Sitemap: https://digitalinsightai.com/sitemap.xml" not in (ROOT / "robots.tx
     errors.append("robots.txt sitemap mismatch")
 for required in ("site/contact/index.html","site/assets/site.js","site/assets/icon.svg"):
     if not Path(required).is_file(): errors.append(f"missing required {required}")
+# Prevent hidden honeypot controls from creating huge horizontal RTL scrollbars.
+css = (ROOT / "assets/styles.css").read_text(encoding="utf-8")
+if "left:-99999" in css or "right:-99999" in css:
+    errors.append("off-canvas honeypot CSS expands viewport scroll width")
+if "clip-path:inset(50%)" not in css:
+    errors.append("visually-hidden honeypot clipping missing")
 if errors:
     print("\n".join(errors), file=sys.stderr)
     sys.exit(1)
