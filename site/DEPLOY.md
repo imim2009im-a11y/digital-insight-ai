@@ -31,3 +31,9 @@
 - Backend Formspree form remains labeled `Newsletter` internally, despite this being the contact/partnership form. Existing production endpoint is left unchanged to avoid losing submissions.
 - Public form now provides a `form_name` field to disambiguate future notifications. This **does not rename the backend form**; that requires authenticated Formspree account settings.
 - Do not change the form endpoint, notification recipients or billing without authorization and delivery verification.
+
+## Canonical-domain monitoring — 2026-10-07
+- `https://digitalinsightai.com/` is the only production origin that should be indexed.
+- The legacy GitHub Pages origin is expected to redirect to the custom domain; a Search Console “Page with redirect” status on the legacy property is therefore not treated as a production defect by itself.
+- `scripts/public-site-smoke.py` verifies the legacy-to-canonical redirect as well as production canonical pages, robots.txt and sitemap.xml.
+- The static quality gate rejects accidental reintroduction of the legacy GitHub Pages origin anywhere under the production `site/` artifact (except this deployment note).
