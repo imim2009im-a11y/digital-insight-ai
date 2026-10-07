@@ -108,6 +108,15 @@
     return JSON.parse(JSON.stringify(value));
   }
 
+  function escapeHtml(value) {
+    return String(value ?? '')
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   function mergeState(input) {
     const parsed = input && typeof input === 'object' ? input : {};
     const merged = {
@@ -558,22 +567,22 @@
         .map((product) => `
           <div class="product-card">
             <div>
-              <div class="product-title">${product.name}</div>
-              <div class="product-meta">${categoryLabel(product.category)} · ${product.prep} دقيقة</div>
+              <div class="product-title">${escapeHtml(product.name)}</div>
+              <div class="product-meta">${categoryLabel(product.category)} · ${escapeHtml(product.prep)} دقيقة</div>
             </div>
             <div>
               <div class="price">${formatMoney(product.price)}</div>
-              <button class="btn btn-soft" data-add-cart="${cook.id}|${product.id}" ${canOrder ? '' : 'disabled'} type="button">أضف</button>
+              <button class="btn btn-soft" data-add-cart="${escapeHtml(cook.id)}|${escapeHtml(product.id)}" ${canOrder ? '' : 'disabled'} type="button">أضف</button>
             </div>
           </div>`).join('');
       return `
         <article class="cook-card">
           <div class="cook-top">
             <div class="cook-id">
-              <div class="avatar">${cook.avatar}</div>
+              <div class="avatar">${escapeHtml(cook.avatar)}</div>
               <div>
-                <div class="cook-name">${cook.name}</div>
-                <div class="cook-meta">${cook.district} · ⭐ ${cook.rating}</div>
+                <div class="cook-name">${escapeHtml(cook.name)}</div>
+                <div class="cook-meta">${escapeHtml(cook.district)} · ⭐ ${escapeHtml(cook.rating)}</div>
               </div>
             </div>
             <div class="badges">
@@ -582,8 +591,8 @@
               ${isFull ? '<span class="badge full">ممتلئة</span>' : ''}
             </div>
           </div>
-          <p class="muted">${cook.specialty}</p>
-          <div class="status-row"><span>الطلبات النشطة</span><strong>${activeOrders} / ${cook.capacity}</strong></div>
+          <p class="muted">${escapeHtml(cook.specialty)}</p>
+          <div class="status-row"><span>الطلبات النشطة</span><strong>${activeOrders} / ${escapeHtml(cook.capacity)}</strong></div>
           <div class="product-list">${productCards}</div>
         </article>`;
     }).join('');
@@ -608,15 +617,15 @@
         <div class="cart-item">
           <div class="cart-line">
             <div>
-              <strong>${product.name}</strong>
-              <div class="muted">${cook.name} · ${categoryLabel(product.category)} · ${product.prep} دقيقة</div>
+              <strong>${escapeHtml(product.name)}</strong>
+              <div class="muted">${escapeHtml(cook.name)} · ${categoryLabel(product.category)} · ${escapeHtml(product.prep)} دقيقة</div>
             </div>
             <strong>${formatMoney(product.price * item.qty)}</strong>
           </div>
           <div class="cart-line">
             <div class="qty-controls">
               <button data-cart-delta="${index}|-1" type="button">−</button>
-              <strong>${item.qty}</strong>
+              <strong>${escapeHtml(item.qty)}</strong>
               <button data-cart-delta="${index}|1" type="button">+</button>
             </div>
             <button class="btn btn-soft" data-remove-cart="${index}" type="button">حذف</button>
@@ -644,7 +653,7 @@
   function renderCookSelector() {
     const selector = $('#cookSelector');
     if (!selector) return;
-    selector.innerHTML = state.cooks.map((cook) => `<option value="${cook.id}">${cook.name} — ${cook.district}</option>`).join('');
+    selector.innerHTML = state.cooks.map((cook) => `<option value="${escapeHtml(cook.id)}">${escapeHtml(cook.name)} — ${escapeHtml(cook.district)}</option>`).join('');
     selector.value = String(state.selectedCookId);
   }
 
@@ -657,14 +666,14 @@
     if (profile) {
       profile.innerHTML = `
         <div class="cook-id">
-          <div class="avatar">${cook.avatar}</div>
+          <div class="avatar">${escapeHtml(cook.avatar)}</div>
           <div>
-            <h3>${cook.name}</h3>
-            <p class="muted">${cook.specialty}</p>
-            <p class="muted">${cook.district} · ⭐ ${cook.rating}</p>
+            <h3>${escapeHtml(cook.name)}</h3>
+            <p class="muted">${escapeHtml(cook.specialty)}</p>
+            <p class="muted">${escapeHtml(cook.district)} · ⭐ ${escapeHtml(cook.rating)}</p>
           </div>
         </div>
-        <div class="status-row" style="margin-top:12px;"><span>الطلبات النشطة</span><strong>${activeOrders} / ${cook.capacity}</strong></div>`;
+        <div class="status-row" style="margin-top:12px;"><span>الطلبات النشطة</span><strong>${activeOrders} / ${escapeHtml(cook.capacity)}</strong></div>`;
     }
 
     const onlineToggle = $('#cookOnlineToggle');
@@ -674,7 +683,7 @@
     if (onlineToggle) onlineToggle.checked = cook.online;
     if (liveToggle) liveToggle.checked = cook.live;
     if (capacityRange) capacityRange.value = cook.capacity;
-    if (capacityLabel) capacityLabel.textContent = `${cook.capacity} طلبات كحد أقصى`;
+    if (capacityLabel) capacityLabel.textContent = `${escapeHtml(cook.capacity)} طلبات كحد أقصى`;
 
     const orders = state.orders.filter((order) => Number(order.cookId) === Number(cook.id));
     const badge = $('#cookOrdersBadge');
@@ -691,36 +700,36 @@
   function orderHtml(order, mode) {
     const step = statusStep(order.status);
     const steps = ['تسجيل', 'قبول', 'تحضير', 'جاهز', 'تسليم'];
-    const items = order.items.map((item) => `${item.qty}× ${item.name}`).join('، ');
+    const items = order.items.map((item) => `${escapeHtml(item.qty)}× ${escapeHtml(item.name)}`).join('، ');
     const actions = mode === 'cook' ? cookOrderActions(order) : customerOrderActions(order);
     return `
       <article class="order-card">
         <div class="cart-line">
           <div>
-            <strong>${order.id}</strong>
-            <div class="order-meta">${mode === 'cook' ? order.customer.name : order.cookName} · ${new Date(order.createdAt).toLocaleString('ar-SA')}</div>
+            <strong>${escapeHtml(order.id)}</strong>
+            <div class="order-meta">${escapeHtml(mode === 'cook' ? order.customer.name : order.cookName)} · ${new Date(order.createdAt).toLocaleString('ar-SA')}</div>
           </div>
-          <span class="badge status">${statusLabel(order.status)}</span>
+          <span class="badge status">${escapeHtml(statusLabel(order.status))}</span>
         </div>
         <div class="muted">${items}</div>
         <div class="status-row"><span>الإجمالي</span><strong>${formatMoney(order.total)}</strong></div>
-        ${mode === 'cook' ? `<div class="muted">📍 ${order.customer.address} · 📞 ${order.customer.phone}</div>` : ''}
-        ${order.customer.notes ? `<div class="muted">📝 ${order.customer.notes}</div>` : ''}
+        ${mode === 'cook' ? `<div class="muted">📍 ${escapeHtml(order.customer.address)} · 📞 ${escapeHtml(order.customer.phone)}</div>` : ''}
+        ${order.customer.notes ? `<div class="muted">📝 ${escapeHtml(order.customer.notes)}</div>` : ''}
         <div class="progress">${steps.map((label, index) => `<div class="progress-step ${index <= step && order.status !== 'cancelled' ? 'active' : ''}">${label}</div>`).join('')}</div>
         ${actions ? `<div class="order-actions">${actions}</div>` : ''}
       </article>`;
   }
 
   function cookOrderActions(order) {
-    if (order.status === 'pending') return `<button class="btn btn-primary" data-order-status="${order.id}|accepted" type="button">قبول</button><button class="btn btn-danger" data-order-status="${order.id}|cancelled" type="button">رفض</button>`;
-    if (order.status === 'accepted') return `<button class="btn btn-primary" data-order-status="${order.id}|preparing" type="button">بدء التحضير</button>`;
-    if (order.status === 'preparing') return `<button class="btn btn-primary" data-order-status="${order.id}|ready" type="button">جاهز</button>`;
-    if (order.status === 'ready') return `<button class="btn btn-primary" data-order-status="${order.id}|delivered" type="button">تم التسليم</button>`;
+    if (order.status === 'pending') return `<button class="btn btn-primary" data-order-status="${escapeHtml(order.id)}|accepted" type="button">قبول</button><button class="btn btn-danger" data-order-status="${escapeHtml(order.id)}|cancelled" type="button">رفض</button>`;
+    if (order.status === 'accepted') return `<button class="btn btn-primary" data-order-status="${escapeHtml(order.id)}|preparing" type="button">بدء التحضير</button>`;
+    if (order.status === 'preparing') return `<button class="btn btn-primary" data-order-status="${escapeHtml(order.id)}|ready" type="button">جاهز</button>`;
+    if (order.status === 'ready') return `<button class="btn btn-primary" data-order-status="${escapeHtml(order.id)}|delivered" type="button">تم التسليم</button>`;
     return '';
   }
 
   function customerOrderActions(order) {
-    if (['pending', 'accepted'].includes(order.status)) return `<button class="btn btn-soft" data-cancel-order="${order.id}" type="button">إلغاء الطلب</button>`;
+    if (['pending', 'accepted'].includes(order.status)) return `<button class="btn btn-soft" data-cancel-order="${escapeHtml(order.id)}" type="button">إلغاء الطلب</button>`;
     return '';
   }
 
@@ -738,18 +747,18 @@
         <article class="live-card">
           <div class="live-screen">
             <div>
-              <div style="font-size:2.3rem;">${cook.avatar}</div>
-              <strong>🔴 ${cook.name} تبث الآن</strong>
-              <p>${mainProduct.name} قيد التحضير</p>
+              <div style="font-size:2.3rem;">${escapeHtml(cook.avatar)}</div>
+              <strong>🔴 ${escapeHtml(cook.name)} تبث الآن</strong>
+              <p>${escapeHtml(mainProduct.name)} قيد التحضير</p>
             </div>
           </div>
           <div class="live-body">
-            <div class="status-row"><span>${cook.district}</span><strong>${formatMoney(mainProduct.price)}</strong></div>
+            <div class="status-row"><span>${escapeHtml(cook.district)}</span><strong>${formatMoney(mainProduct.price)}</strong></div>
             <div class="comment-box">
               <input type="text" placeholder="اكتب تعليقاً تجريبياً..." />
-              <button class="btn btn-soft" data-live-comment="${cook.id}" type="button">إرسال</button>
+              <button class="btn btn-soft" data-live-comment="${escapeHtml(cook.id)}" type="button">إرسال</button>
             </div>
-            <button class="btn btn-primary full" data-add-cart="${cook.id}|${mainProduct.id}" ${canCookAccept(cook) ? '' : 'disabled'} type="button">اطلب وجبة البث</button>
+            <button class="btn btn-primary full" data-add-cart="${escapeHtml(cook.id)}|${escapeHtml(mainProduct.id)}" ${canCookAccept(cook) ? '' : 'disabled'} type="button">اطلب وجبة البث</button>
           </div>
         </article>`;
     }).join('');
