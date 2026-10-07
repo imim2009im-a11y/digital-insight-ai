@@ -92,6 +92,24 @@ jobs:
             exit 1
           fi
 
+      - name: Guard canonical production origin
+        shell: bash
+        run: |
+          set -euo pipefail
+          legacy='imim2009im-a11y.github.io/digital-insight-ai'
+          if grep -RniF "$legacy" site --exclude=DEPLOY.md; then
+            echo 'Legacy GitHub Pages origin detected in the production artifact.' >&2
+            exit 1
+          fi
+          grep -qF 'Sitemap: https://digitalinsightai.com/sitemap.xml' site/robots.txt || {
+            echo 'robots.txt must announce the canonical production sitemap.' >&2
+            exit 1
+          }
+          if grep -F '<loc>' site/sitemap.xml | grep -vF '<loc>https://digitalinsightai.com/' ; then
+            echo 'Non-canonical URL found in the production sitemap.' >&2
+            exit 1
+          fi
+
       - name: Guard DNS cutover
         shell: bash
         run: |

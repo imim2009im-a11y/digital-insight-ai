@@ -8,6 +8,7 @@ from urllib.request import Request, urlopen
 from xml.etree import ElementTree
 
 ROOT = "https://digitalinsightai.com"
+LEGACY_ROOT = "https://imim2009im-a11y.github.io/digital-insight-ai"
 HEADERS = {"User-Agent": "DigitalInsightAI-SiteQA/1.0", "Cache-Control": "no-cache"}
 
 def fetch(url):
@@ -28,8 +29,24 @@ def fetch(url):
                 time.sleep(3)
     raise RuntimeError(f"{url}: {error}") from error
 
+def verify_legacy_redirect():
+    """Require the retired GitHub Pages origin to resolve to the canonical domain."""
+    request = Request(LEGACY_ROOT + "/", headers=HEADERS)
+    with urlopen(request, timeout=14) as response:
+        final = urlsplit(response.geturl())
+        if response.status != 200:
+            raise RuntimeError(f"legacy redirect ended with HTTP {response.status}")
+        if final.scheme != "https" or final.netloc != "digitalinsightai.com" or final.path not in ("", "/"):
+            raise RuntimeError(f"legacy origin resolved unexpectedly to {response.geturl()}")
+
+
 def main():
     failures = []
+    try:
+        verify_legacy_redirect()
+        print("OK legacy GitHub Pages origin redirects to canonical domain", flush=True)
+    except Exception as exc:
+        failures.append(f"legacy-domain redirect failure: {exc}")
     robots = fetch(ROOT + "/robots.txt")
     if "Sitemap: " + ROOT + "/sitemap.xml" not in robots:
         failures.append("robots.txt does not announce the canonical sitemap")
