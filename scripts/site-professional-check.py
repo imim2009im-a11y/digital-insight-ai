@@ -88,6 +88,11 @@ if "Sitemap: https://digitalinsightai.com/sitemap.xml" not in (ROOT / "robots.tx
     errors.append("robots.txt sitemap mismatch")
 for required in ("site/contact/index.html","site/assets/site.js","site/assets/icon.svg"):
     if not Path(required).is_file(): errors.append(f"missing required {required}")
+# Preserve clear submission metadata and user consent on the contact page.
+contact_html = (ROOT / "contact/index.html").read_text(encoding="utf-8")
+for marker in ('name="form_name"', 'name="privacy_consent"', 'action="https://formspree.io/f/xeewzvkr"'):
+    if marker not in contact_html:
+        errors.append(f"Contact form is missing {marker}")
 # Prevent hidden honeypot controls from creating huge horizontal RTL scrollbars.
 css = (ROOT / "assets/styles.css").read_text(encoding="utf-8")
 if "left:-99999" in css or "right:-99999" in css:
