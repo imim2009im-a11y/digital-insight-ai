@@ -683,7 +683,7 @@
     if (onlineToggle) onlineToggle.checked = cook.online;
     if (liveToggle) liveToggle.checked = cook.live;
     if (capacityRange) capacityRange.value = cook.capacity;
-    if (capacityLabel) capacityLabel.textContent = `${escapeHtml(cook.capacity)} طلبات كحد أقصى`;
+    if (capacityLabel) capacityLabel.textContent = `${cook.capacity} طلبات كحد أقصى`;
 
     const orders = state.orders.filter((order) => Number(order.cookId) === Number(cook.id));
     const badge = $('#cookOrdersBadge');
