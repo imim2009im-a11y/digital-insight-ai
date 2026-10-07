@@ -26,4 +26,26 @@ jobs:
         run: git diff --check "origin/${{ github.base_ref }}...HEAD"
 
       - name: Run consolidated agent verification
-        run: bash scripts/agent-verify.sh
+        run: python3 scripts/ia_preflight.py --timeout 120 --attempts 1
+
+      - name: Record bounded execution evidence
+        if: always()
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          import os
+          from pathlib import Path
+          import subprocess
+
+          git_dir = Path(subprocess.check_output(["git", "rev-parse", "--absolute-git-dir"], text=True).strip())
+          evidence = git_dir / "ia-preflight" / "evidence.json"
+          with open(os.environ["GITHUB_STEP_SUMMARY"], "a") as summary:
+              summary.write("## IA bounded source verification\n\n")
+              if not evidence.is_file():
+                  summary.write("Evidence unavailable; inspect the failed step.\n")
+              else:
+                  data = json.loads(evidence.read_text())
+                  allowed = {key: data[key] for key in ("schema_version", "status", "run_id", "fingerprint", "runtime_fingerprint", "exit_code", "duration_seconds") if key in data}
+                  summary.write("```json\n" + json.dumps(allowed, sort_keys=True) + "\n```\n")
+          PY

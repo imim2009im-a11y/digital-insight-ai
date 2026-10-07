@@ -4,8 +4,9 @@ import sqlite3
 import subprocess
 import tempfile
 import unittest
+from unittest.mock import patch
 
-from ia_preflight import bounded_check, verify
+from ia_preflight import bounded_check, verify, write_report
 
 
 class PreflightTests(unittest.TestCase):
@@ -60,6 +61,16 @@ class PreflightTests(unittest.TestCase):
             self.assertEqual(verify(self.root, self.state, check=self.passing)["reason"], "already_running")
         self.assertEqual(self.calls, 0)
 
+    def test_blocked_call_preserves_completed_evidence(self):
+        result = verify(self.root, self.state, check=self.passing)
+        evidence = self.state / "evidence.json"
+        original = evidence.read_bytes()
+        with (self.state / "lock").open("a") as lock:
+            fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            self.assertEqual(verify(self.root, self.state, check=self.passing)["status"], "blocked")
+        self.assertEqual(evidence.read_bytes(), original)
+        self.assertEqual(result["status"], "passed")
+
     def test_changed_source_not_cached(self):
         def mutate(root, timeout):
             (root / "source").write_text("changed")
@@ -84,6 +95,37 @@ class PreflightTests(unittest.TestCase):
         for kwargs in ({"timeout": 0}, {"timeout": 601}, {"attempts": 4}):
             with self.assertRaises(ValueError):
                 verify(self.root, self.state, **kwargs)
+
+    def test_runtime_change_invalidates_cached_pass(self):
+        with patch("ia_preflight.runtime_signature", return_value="runtime-one"):
+            verify(self.root, self.state, check=self.passing)
+            self.assertEqual(verify(self.root, self.state, resume=True, check=self.passing)["status"], "reused")
+        with patch("ia_preflight.runtime_signature", return_value="runtime-two"):
+            self.assertEqual(verify(self.root, self.state, resume=True, check=self.passing)["status"], "passed")
+        self.assertEqual(self.calls, 2)
+
+    def test_interrupted_run_recovered_without_reuse(self):
+        verify(self.root, self.state, check=self.passing)
+        with sqlite3.connect(self.state / "state.sqlite3") as db:
+            db.execute("UPDATE runs SET status='running'")
+        self.assertEqual(verify(self.root, self.state, resume=True, check=self.passing)["status"], "passed")
+        with sqlite3.connect(self.state / "state.sqlite3") as db:
+            self.assertEqual(db.execute("SELECT status FROM runs WHERE id=1").fetchone()[0], "interrupted")
+
+    def test_process_error_persisted_without_exception_text(self):
+        def error(root, timeout):
+            raise OSError("confidential-exception-value")
+        self.assertEqual(verify(self.root, self.state, check=error)["status"], "error")
+        self.assertNotIn(b"confidential-exception-value", (self.state / "state.sqlite3").read_bytes())
+
+    def test_evidence_atomic_allowlist(self):
+        import json
+        destination = self.state / "evidence.json"
+        write_report({"status": "failed", "run_id": 1, "secret": "confidential"}, destination)
+        self.assertEqual(json.loads(destination.read_text()), {"schema_version": 1, "status": "failed", "run_id": 1})
+        write_report({"status": "passed", "run_id": 2}, destination)
+        self.assertEqual(json.loads(destination.read_text())["run_id"], 2)
+        self.assertEqual(list(self.state.iterdir()), [destination])
 
 
 if __name__ == "__main__":

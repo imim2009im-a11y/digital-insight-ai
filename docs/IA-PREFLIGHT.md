@@ -25,15 +25,25 @@ calling user's rights. Run untrusted branches only in an isolated runner.
 - SQLite state lives in the Git metadata directory, outside tracked source.
 - An exclusive nonblocking POSIX lock prevents concurrent runs in that checkout.
 - Successful runs can be reused only for an identical fingerprint of Git-visible
-  source paths, file bytes, modes, Git index entries and symlink targets. Ignored build/cache files
-  do not participate. A check relying on ignored files or changed tool versions
+  source paths, file bytes, modes, Git index entries, symlink targets and runtime
+  identities (Git/Node/Bash/Python version outputs and resolved paths). Ignored build/cache files
+  do not participate. A check relying on ignored files or changed tool contents
+  that retain the same reported version/path
   must be run without `--resume`; cache reuse is an optimization, not new evidence.
 - Attempts are limited to 1–3, each to 1–600 seconds. A timeout kills the process
   group. External processes that detach from the group are outside this guarantee.
   Git inventory, streaming source hashing and SQLite operations are outside the
   subprocess timeout. The runner is intended for small trusted checkouts.
 - Interrupted records remain `running` and are never treated as success. A later
-  invocation reruns them after the OS releases the lock.
+  invocation marks them `interrupted` and reruns them after the OS releases the lock.
+  This marks an ended parent invocation; an externally killed parent may leave
+  orphan child processes. A hosted supervisor is required to bound that case.
+- Process-start failures are recorded as `error` without persisting exception text.
+- Verification atomically writes schema-versioned `evidence.json` beside the database
+  before releasing the lock; blocked calls never overwrite the last completed report.
+  It contains allowlisted status/ID/duration/fingerprint fields, not subprocess output.
+  The existing governance workflow publishes these fields in its run summary.
+  Evidence is not imported as trusted execution state.
 - Source changes during a check yield `source_changed`, not success.
 - Audit records contain status, timestamps, duration, exit code and fingerprint.
   Child stdout/stderr are discarded to prevent accidental secret persistence;
@@ -55,7 +65,7 @@ calling user's rights. Run untrusted branches only in an isolated runner.
 | Skills catalog | Available, partial compatibility | Relevant skills read; no claim all skills/plugins are installed or tested |
 | Agents SDK / API | Not integrated | Official documentation researched; no dependency installed or key used |
 | Knowledge base | Repository documentation available | Prior contract inspected at immutable PR-head SHA; official sources below |
-| Observability | Local increment tested | SQLite run IDs/status/duration; provider monitoring and alert delivery untested |
+| Observability | Local increment tested; CI summary integration under review | SQLite run IDs/status/duration and atomic JSON; provider monitoring and alert delivery untested |
 | Automation interface | Read-tested, execution unverified | Existing tasks inspected; no new schedule activated; relevant engineering task has no observed last run |
 | Production release / merge | Needs explicit approval | No main update, deployment or merge authorized |
 | Paid runtime and credentials | Needs explicit approval | Account quota, spend and billing limits unknown; no paid resources created |

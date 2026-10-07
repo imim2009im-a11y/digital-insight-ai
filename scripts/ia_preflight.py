@@ -7,8 +7,11 @@ import json
 import os
 from pathlib import Path
 import signal
+import shutil
 import sqlite3
 import subprocess
+import sys
+import tempfile
 import time
 
 
@@ -32,6 +35,47 @@ def fingerprint(root):
         else:
             digest.update(b"missing")
     return digest.hexdigest()
+
+
+def runtime_signature():
+    """Hash tool identity/version without persisting paths or environment values."""
+    digest = hashlib.sha256(sys.version.encode())
+    digest.update(os.fsencode(sys.executable))
+    digest.update(os.fsencode(os.environ.get("PATH", "")))
+    for command in ("git", "node", "bash", "python3"):
+        executable = shutil.which(command)
+        if executable is None:
+            raise ValueError("required runtime tool unavailable")
+        digest.update(os.fsencode(executable))
+        try:
+            result = subprocess.run(
+                [executable, "--version"], stdout=subprocess.PIPE,
+                stderr=subprocess.DEVNULL, timeout=5, check=True,
+            )
+        except (OSError, subprocess.SubprocessError):
+            raise ValueError("runtime identity probe failed") from None
+        digest.update(result.stdout)
+    return digest.hexdigest()
+
+
+def write_report(result, destination):
+    """Atomically publish only known non-sensitive execution fields."""
+    allowed = ("status", "reason", "run_id", "fingerprint", "runtime_fingerprint", "exit_code", "duration_seconds")
+    report = {key: result[key] for key in allowed if key in result}
+    report["schema_version"] = 1
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", dir=destination.parent, delete=False) as handle:
+            temporary = Path(handle.name)
+            json.dump(report, handle, sort_keys=True)
+            handle.write("\n")
+            handle.flush()
+            os.fsync(handle.fileno())
+        os.replace(temporary, destination)
+    finally:
+        if temporary and temporary.exists():
+            temporary.unlink()
 
 
 def bounded_check(root, timeout):
@@ -62,24 +106,35 @@ def verify(root, state_dir, timeout=120, attempts=1, resume=False, check=bounded
             fcntl.flock(lock, fcntl.LOCK_EX | fcntl.LOCK_NB)
         except BlockingIOError:
             return {"status": "blocked", "reason": "already_running"}
-        key = fingerprint(root)
+        runtime_key = runtime_signature()
+        source_key = fingerprint(root)
+        key = hashlib.sha256((source_key + runtime_key).encode()).hexdigest()
         with sqlite3.connect(state_dir / "state.sqlite3") as db:
             db.execute("CREATE TABLE IF NOT EXISTS runs (id INTEGER PRIMARY KEY, fingerprint TEXT, status TEXT, exit_code INTEGER, duration REAL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP)")
+            # Holding the checkout lock proves no prior invocation is still active.
+            db.execute("UPDATE runs SET status='interrupted' WHERE status='running'")
+            db.commit()
             prior = db.execute("SELECT id FROM runs WHERE fingerprint=? AND status='passed' ORDER BY id DESC LIMIT 1", (key,)).fetchone()
             if resume and prior:
-                return {"status": "reused", "run_id": prior[0], "fingerprint": key}
+                result = {"status": "reused", "run_id": prior[0], "fingerprint": key, "runtime_fingerprint": runtime_key}
+                write_report(result, state_dir / "evidence.json")
+                return result
             for _ in range(attempts):
                 cursor = db.execute("INSERT INTO runs(fingerprint,status) VALUES (?, 'running')", (key,))
                 run_id = cursor.lastrowid
                 db.commit()  # Interrupted runs are retained and never reused as successful.
-                status, code, duration = check(root, timeout)
-                if fingerprint(root) != key:
+                try:
+                    status, code, duration = check(root, timeout)
+                except (OSError, subprocess.SubprocessError):
+                    status, code, duration = "error", None, None
+                if fingerprint(root) != source_key:
                     status = "source_changed"
                 db.execute("UPDATE runs SET status=?, exit_code=?, duration=? WHERE id=?", (status, code, duration, run_id))
                 db.commit()
-                result = {"status": status, "run_id": run_id, "fingerprint": key, "exit_code": code, "duration_seconds": duration}
+                result = {"status": status, "run_id": run_id, "fingerprint": key, "runtime_fingerprint": runtime_key, "exit_code": code, "duration_seconds": duration}
                 if status in ("passed", "source_changed"):
                     break
+            write_report(result, state_dir / "evidence.json")
             return result
 
 
