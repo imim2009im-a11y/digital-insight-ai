@@ -1,0 +1,24 @@
+{
+  "channels": [
+    {
+      "handle": "dr_hebaahmed",
+      "focus": "Arabic AI tools"
+    },
+    {
+      "handle": "OpenAI",
+      "focus": "AI and Codex"
+    },
+    {
+      "handle": "HuggingFace",
+      "focus": "open models"
+    },
+    {
+      "handle": "n8n-io",
+      "focus": "automation"
+    },
+    {
+      "handle": "GitHub",
+      "focus": "DevOps"
+    }
+  ]
+}
