@@ -1,4 +1,5 @@
 import fcntl
+from contextlib import closing
 from pathlib import Path
 import sqlite3
 import subprocess
@@ -106,10 +107,10 @@ class PreflightTests(unittest.TestCase):
 
     def test_interrupted_run_recovered_without_reuse(self):
         verify(self.root, self.state, check=self.passing)
-        with sqlite3.connect(self.state / "state.sqlite3") as db:
+        with closing(sqlite3.connect(self.state / "state.sqlite3")) as db, db:
             db.execute("UPDATE runs SET status='running'")
         self.assertEqual(verify(self.root, self.state, resume=True, check=self.passing)["status"], "passed")
-        with sqlite3.connect(self.state / "state.sqlite3") as db:
+        with closing(sqlite3.connect(self.state / "state.sqlite3")) as db, db:
             self.assertEqual(db.execute("SELECT status FROM runs WHERE id=1").fetchone()[0], "interrupted")
 
     def test_process_error_persisted_without_exception_text(self):
@@ -117,6 +118,24 @@ class PreflightTests(unittest.TestCase):
             raise OSError("confidential-exception-value")
         self.assertEqual(verify(self.root, self.state, check=error)["status"], "error")
         self.assertNotIn(b"confidential-exception-value", (self.state / "state.sqlite3").read_bytes())
+
+    def test_database_connections_closed_after_pass_and_resume(self):
+        original_connect = sqlite3.connect
+        connections = []
+
+        def track_connection(*args, **kwargs):
+            db = original_connect(*args, **kwargs)
+            connections.append(db)
+            return db
+
+        with patch("ia_preflight.sqlite3.connect", side_effect=track_connection):
+            self.assertEqual(verify(self.root, self.state, check=self.passing)["status"], "passed")
+            self.assertEqual(verify(self.root, self.state, resume=True, check=self.passing)["status"], "reused")
+
+        self.assertEqual(len(connections), 2)
+        for db in connections:
+            with self.assertRaises(sqlite3.ProgrammingError):
+                db.execute("SELECT 1")
 
     def test_evidence_atomic_allowlist(self):
         import json
