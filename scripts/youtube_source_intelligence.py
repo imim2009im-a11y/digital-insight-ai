@@ -6,6 +6,7 @@ import json
 import os
 import pathlib
 import re
+import tempfile
 import urllib.parse
 import urllib.request
 
@@ -30,6 +31,24 @@ def api(endpoint, params, key):
 def classify(text):
     lowered = text.lower()
     return sorted(k for k, terms in TOPICS.items() if any(x in lowered for x in terms))
+
+def write_json_atomic(path, data):
+    """Replace one JSON file only after a complete, flushed temporary write."""
+    path = pathlib.Path(path)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    temporary = None
+    try:
+        with tempfile.NamedTemporaryFile(mode="w", encoding="utf-8",
+                                         dir=path.parent, delete=False) as stream:
+            temporary = pathlib.Path(stream.name)
+            json.dump(data, stream, ensure_ascii=False, indent=2)
+            stream.write("\n")
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary, path)
+    finally:
+        if temporary is not None:
+            temporary.unlink(missing_ok=True)
 
 def process(items, previous):
     known = {r["video_id"]: r for r in previous}
@@ -87,11 +106,23 @@ def main():
     parser.add_argument("--sources", default="docs/research-sources/youtube-channels.json")
     parser.add_argument("--state", default="data/research/youtube-videos.json")
     parser.add_argument("--output", default="youtube-intelligence-report.json")
+    parser.add_argument("--write-state", action="store_true",
+                        help="Persist merged records after successful live collection; never allowed with fixtures")
     parser.add_argument("--fixture", help="Offline JSON array of raw videos; does not access YouTube")
     parser.add_argument("--limit", type=int, default=20)
     args = parser.parse_args()
     if not 1 <= args.limit <= 50:
         parser.error("--limit must be between 1 and 50")
+    if args.fixture and args.write_state:
+        parser.error("--write-state cannot be used with --fixture")
+    protected = [pathlib.Path(args.sources).resolve(), pathlib.Path(args.state).resolve()]
+    if args.fixture:
+        protected.append(pathlib.Path(args.fixture).resolve())
+    output = pathlib.Path(args.output).resolve()
+    if output in protected:
+        parser.error("--output must differ from sources, state and fixture paths")
+    if args.write_state and protected[0] == protected[1]:
+        parser.error("--state must differ from --sources")
     channels = json.loads(pathlib.Path(args.sources).read_text(encoding="utf-8"))["channels"]
     existing_path = pathlib.Path(args.state)
     previous = json.loads(existing_path.read_text(encoding="utf-8")) if existing_path.exists() else []
@@ -111,8 +142,10 @@ def main():
         "new": new_count, "total_unique": len(records),
         "verified_video_content": False, "records": records
     }
-    # Output only: never overwrite the existing canonical registry during a trial.
-    pathlib.Path(args.output).write_text(json.dumps(summary, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    # Reports and state have separate atomic writes; fixture runs remain report-only.
+    write_json_atomic(args.output, summary)
+    if args.write_state:
+        write_json_atomic(args.state, records)
     print(json.dumps({k: v for k, v in summary.items() if k != "records"}, ensure_ascii=False))
 
 if __name__ == "__main__":
