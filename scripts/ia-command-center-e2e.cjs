@@ -6,6 +6,7 @@
 'use strict';
 const assert = require('node:assert/strict');
 const { spawn } = require('node:child_process');
+const { mkdirSync } = require('node:fs');
 const { chromium } = require('playwright');
 
 const BASE = 'http://127.0.0.1:18759';
@@ -23,6 +24,7 @@ async function waitForServer(){
 
 async function run(){
  await waitForServer();
+ mkdirSync('artifacts/ia-command-center',{recursive:true});
  let browser;
  try{browser=await chromium.launch({channel:'chrome',headless:true,args:['--no-sandbox']});}
  catch(e){console.log('Switching to bundled Chromium:',e.message.slice(0,150));browser=await chromium.launch({headless:true,args:['--no-sandbox']});}
@@ -47,6 +49,7 @@ async function run(){
         externalScripts:document.querySelectorAll('script[src]').length
       };
     });
+    await page.screenshot({path:`artifacts/ia-command-center/viewport-${width}.png`,fullPage:true,animations:'disabled'});
     assert.equal(actual.lang,'ar');
     assert.equal(actual.dir,'rtl');
     assert.equal(actual.h1,1);
@@ -58,6 +61,11 @@ async function run(){
     assert.equal(await page.locator('.task').count(),4,'four checklist items');
     assert.deepEqual(errors,[],'runtime errors at '+width);
     if(width===390){
+      await page.keyboard.press('Tab');
+      assert.equal(await page.evaluate(()=>document.activeElement?.classList.contains('skip')),
+        true,'skip link keyboard focus');
+      await page.keyboard.press('Enter');
+      assert(new URL(page.url()).hash==='#content','skip link keyboard activation');
       const design=page.locator('button[data-filter="design"]');
       await design.click();
       assert.equal(await page.locator('.project:visible').count(),1,'design filter');
@@ -85,7 +93,7 @@ async function run(){
       assert.equal(await page.locator('#task-review').isChecked(),false,'clear resets state');
       await page.reload();
       assert.equal(await page.locator('#task-review').isChecked(),false,'clear persists after reload');
-      console.log('PASS interactive project filtering, task persistence, JSON download, reset');
+      console.log('PASS keyboard skip link, project filtering, task persistence, JSON download, reset');
     }
     console.log('PASS Chromium prototype',width,'px');
     await context.close();
