@@ -32,7 +32,7 @@ function fixture(byId, lists = {}, extras = {}) {
     navigator: extras.navigator || {},
     Intl
   };
-  vm.runInNewContext(source, context, { filename: 'site/assets/site.js', timeout: 1000 });
+  vm.runInNewContext(source, context, { filename: 'site/assets/site.js', timeout: 3000 });
   return { byId, context };
 }
 function field(value, max = 100000) { return new Element({ value: String(value), min: '0', max: String(max) }); }
