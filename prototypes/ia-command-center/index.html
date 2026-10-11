@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#07101f">
+<title>IA Command Center — نموذج Digital Insight AI</title>
+<meta name="description" content="نموذج محلي تجريبي للوحة متابعة مشاريع IA، دون اتصال بخوادم أو حسابات.">
+<style>
+:root{color-scheme:dark;--bg:#07101f;--surface:#111f33;--surface2:#152842;--line:#29435d;--text:#eef4ff;--muted:#b9c9dc;--cyan:#6ee7ff;--gold:#d7b37a;--radius:20px}
+*{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;font-family:system-ui,Tahoma,Arial,sans-serif;color:var(--text);background:radial-gradient(circle at 100% -10%,#173b57 0,transparent 32%),linear-gradient(155deg,#07101f 20%,#0b1628 85%);line-height:1.7;min-height:100vh}
+a{color:var(--cyan);text-underline-offset:4px}a:hover{text-decoration:none}:focus-visible{outline:3px solid var(--cyan);outline-offset:4px}button{font:inherit;cursor:pointer}.skip{position:absolute;top:-80px;right:10px;padding:8px 14px;background:white;color:#07101f;z-index:5}.skip:focus{top:12px}
+.shell{max-width:1380px;margin:auto;display:grid;grid-template-columns:258px minmax(0,1fr);min-height:100vh}
+aside{background:#0a192c;border-left:1px solid var(--line);padding:30px 18px;position:sticky;top:0;height:100vh}
+.wordmark{font-size:1.03rem;font-weight:900;line-height:1.3;letter-spacing:.01em}.wordmark span{color:var(--cyan)}.brand-mark{display:inline-grid;place-items:center;width:42px;height:42px;margin-left:8px;background:linear-gradient(135deg,#1e6984,#15283e);border:1px solid #38637f;border-radius:14px;color:#e9fcff;font-weight:900}
+.nav-group{margin-top:35px}.nav-group>p{font-size:.77rem;font-weight:800;letter-spacing:.09em;color:var(--muted);margin:0 10px 12px}.nav-link{display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;text-decoration:none;color:var(--muted);font-weight:650}.nav-link.active,.nav-link:hover{color:#fff;background:#17334b}.nav-link.active{border:1px solid #315c71}.sidebar-note{padding:15px;margin-top:40px;border:1px solid #5c4b31;border-radius:14px;color:#e8d2a7;background:rgba(157,115,52,.08);font-size:.85rem}
+main{padding:34px min(4vw,52px) 64px;min-width:0}.topline{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px;padding-bottom:26px;border-bottom:1px solid var(--line)}.eyebrow{font-size:.79rem;letter-spacing:.08em;color:var(--cyan);font-weight:850}.topline p{margin:0;color:var(--muted)}.status{font-size:.78rem;background:#132b3d;border:1px solid #457189;color:#e3f8ff;padding:7px 13px;border-radius:100px}.hero{display:flex;align-items:end;justify-content:space-between;flex-wrap:wrap;gap:25px;padding:36px 0 28px}.hero h1{font-size:clamp(1.8rem,4vw,3rem);line-height:1.25;margin:.15em 0}.hero p{max-width:720px;color:var(--muted);margin:8px 0}.quick-link{background:var(--cyan);color:#07101f;font-weight:800;padding:12px 18px;border-radius:12px;text-decoration:none;white-space:nowrap}.quick-link:hover{background:#b7f5ff}
+.metrics{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}.metric,.panel,.project{border:1px solid var(--line);background:linear-gradient(145deg,rgba(23,43,67,.88),rgba(11,26,43,.98));border-radius:var(--radius)}.metric{padding:22px;min-width:0}.metric .label{display:block;color:var(--muted);font-size:.86rem}.metric strong{display:block;font-size:1.27rem;margin-top:10px;line-height:1.45}.metric small{display:block;color:var(--gold);margin-top:4px;font-size:.78rem}.section-head{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;margin:36px 0 18px}.section-head h2{font-size:1.35rem;margin:0}.section-head p{margin:0;color:var(--muted);font-size:.87rem}.projects{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}.project{padding:22px;min-width:0;display:flex;flex-direction:column}.project small{color:var(--gold);font-weight:750}.project h3{margin:5px 0;font-size:1.14rem}.project p{margin:6px 0 18px;color:var(--muted);flex:1}.project a{align-self:flex-start;font-weight:700}.project[hidden],.task[hidden]{display:none!important}
+.filters{display:flex;flex-wrap:wrap;gap:8px}.filter{border:1px solid var(--line);border-radius:100px;background:#10243a;color:var(--text);padding:7px 16px}.filter[aria-pressed=true]{background:var(--cyan);color:#07101f;border-color:var(--cyan);font-weight:800}
+.panel{padding:22px}.task-list{display:grid;gap:12px}.task{display:flex;align-items:flex-start;gap:13px;padding:15px;background:#0e2034;border:1px solid #2d4863;border-radius:13px}.task input{accent-color:var(--cyan);width:19px;height:19px;margin-top:5px;flex:none}.task label{cursor:pointer}.task label strong{display:block}.task label small{display:block;color:var(--muted);font-size:.83rem;margin-top:3px}.task:has(input:checked){border-color:#346957;background:#102b2c}.task input:checked+label strong{text-decoration:line-through;color:#b6d0c5}.task-tools{display:flex;gap:12px;flex-wrap:wrap;margin-top:17px;align-items:center}.button{background:#16324d;color:var(--text);border:1px solid #557793;border-radius:11px;padding:9px 14px}.button:hover{background:#245071}.notice{color:var(--muted);font-size:.84rem;margin:0}.footnote{margin-top:38px;border-top:1px solid var(--line);padding-top:22px;color:var(--muted);font-size:.83rem}
+@media(max-width:980px){.shell{grid-template-columns:1fr}aside{position:static;height:auto;padding:17px 20px;display:flex;align-items:center;justify-content:space-between;gap:12px}.nav-group{margin:0}.nav-group>p,.sidebar-note{display:none}.nav-group nav{display:flex;flex-wrap:wrap}.nav-link{padding:8px 10px}.brand-mark{width:35px;height:35px}main{padding:22px 20px 50px}}
+@media(max-width:650px){.metrics,.projects{grid-template-columns:1fr}.hero{padding:24px 0}.status{white-space:normal}aside{display:block}.nav-group{margin-top:10px}.nav-link{font-size:.82rem}main{padding-inline:14px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<a class="skip" href="#content">تجاوز القائمة إلى المحتوى</a>
+<div class="shell">
+<aside aria-label="التنقل">
+ <div class="wordmark"><span class="brand-mark">IA</span> DIGITAL<br><span>INSIGHT AI</span></div>
+ <div class="nav-group"><p>التشغيل</p><nav aria-label="أقسام اللوحة">
+  <a class="nav-link active" href="#overview">◈ نظرة عامة</a>
+  <a class="nav-link" href="#projects">▦ المشاريع</a>
+  <a class="nav-link" href="#tasks">✓ المهام</a>
+ </nav></div>
+ <p class="sidebar-note">نموذج خاص قيد المراجعة؛ لا يمثل جلسة تحكم أو اتصالًا حيًا بالأنظمة.</p>
+</aside>
+<main id="content">
+ <div class="topline"><div><span class="eyebrow">IA / VISUAL LAB · 11 OCT 2026</span><p>نسخة استكشافية منفصلة عن موقع الإنتاج</p></div><span class="status">● بيانات مرجعية ثابتة — ليست مراقبة مباشرة</span></div>
+ <section class="hero" id="overview"><div><span class="eyebrow">لوحة تشغيل مقترحة</span><h1>من الفكرة إلى التنفيذ الموثق.</h1><p>نقطة دخول واحدة لتطوير Digital Insight AI، متابعة مهمة واحدة واضحة، ومراجعة الأدلة قبل اعتماد أي تغيير في الموقع المنشور.</p></div><a class="quick-link" href="https://digitalinsightai.com/" target="_blank" rel="noopener noreferrer">فتح الموقع الحالي ↗</a></section>
+ <section class="metrics" aria-label="حالة الاتصالات عند الفحص">
+  <article class="metric"><span class="label">مصدر الموقع العام</span><strong>GitHub · site/</strong><small>تم التحقق من بنية المستودع</small></article>
+  <article class="metric"><span class="label">مساحة التصميم</span><strong>MagicPath · خاصة</strong><small>نموذج أولي وليس تطبيقًا منشورًا</small></article>
+  <article class="metric"><span class="label">تصاميم المحتوى</span><strong>Canva · موجودة</strong><small>قوالب سابقة يمكن إعادة استخدامها</small></article>
+ </section>
+ <section id="projects" aria-labelledby="projects-heading"><div class="section-head"><h2 id="projects-heading">مشاريع وتكاملات حقيقية</h2><p>روابط معروفة، لا إحصاءات زيارات أو عائد مختلقة</p></div>
+ <div class="filters" role="group" aria-label="تصفية المشاريع"><button type="button" class="filter" data-filter="all" aria-pressed="true">الكل</button><button type="button" class="filter" data-filter="development" aria-pressed="false">تطوير</button><button type="button" class="filter" data-filter="design" aria-pressed="false">تصميم</button><button type="button" class="filter" data-filter="content" aria-pressed="false">محتوى</button></div>
+ <div class="projects" style="margin-top:16px">
+  <article class="project" data-category="development"><small>الموقع العام · مصدر الحقيقة</small><h3>Digital Insight AI</h3><p>صفحات عامة ثابتة، SEO، دليل أدوات، مراجعات وخدمة أتمتة. التطوير عبر الفروع وطلبات السحب.</p><a href="https://github.com/imim2009im-a11y/digital-insight-ai" target="_blank" rel="noopener noreferrer">فتح المستودع ↗</a></article>
+  <article class="project" data-category="design"><small>تصميم · قيد التجربة</small><h3>IA Design Lab</h3><p>مخطط واجهة مقترحة. لم يتم بناء مكوّن إنتاجي أو دمج التصميم بالموقع.</p><a href="https://www.magicpath.ai/files/459955340012822528" target="_blank" rel="noopener noreferrer">فتح MagicPath ↗</a></article>
+  <article class="project" data-category="content"><small>محتوى · أصل موجود</small><h3>قالب شرح أدوات AI</h3><p>قالب بصري سابق متاح لإعداد منشورات توضيحية بعد مراجعة المعلومات والأصول.</p><a href="https://www.canva.com/d/8GzlcOpJ7kW6OUj" target="_blank" rel="noopener noreferrer">فتح Canva ↗</a></article>
+  <article class="project" data-category="development"><small>أدوات · مستودع مستقل</small><h3>AI Tools Directory</h3><p>المستودع المستقل هو مصدر تطوير تطبيق دليل الأدوات الحديث، وليس النسخة القديمة المضمنة في الموقع.</p><a href="https://github.com/imim2009im-a11y/ai-tools-directory" target="_blank" rel="noopener noreferrer">فتح الدليل البرمجي ↗</a></article>
+ </div></section>
+ <section id="tasks" aria-labelledby="tasks-heading"><div class="section-head"><h2 id="tasks-heading">قائمة تحقق التشغيل</h2><p>مربعات الحالة يحددها المستخدم يدويًا ولا تغيّر GitHub أو التطبيقات</p></div>
+  <div class="panel"><div class="task-list" id="task-list" aria-live="polite"></div><div class="task-tools"><button class="button" type="button" id="export">تصدير سجل المتابعة JSON</button><button class="button" type="button" id="clear">إلغاء العلامات المحلية</button><p class="notice" id="save-status" role="status">الحالة محفوظة على هذا المتصفح فقط عند توفر التخزين المحلي.</p></div></div>
+ </section>
+ <footer class="footnote"><strong>حوكمة:</strong> لا يتصل هذا النموذج بواجهات API، ولا يفتح جلسات دخول أو ينشر محتوى أو يعالج أموالًا. كل العناصر ثابتة ما عدا التصفية وقائمة المهام المحلية. التغييرات الإنتاجية تمر بالمراجعة والاختبارات. <a href="https://digitalinsightai.com/privacy/" target="_blank" rel="noopener noreferrer">سياسة خصوصية الموقع العام</a>.</footer>
+</main>
+</div>
+<script>
+"use strict";
+(function(){
+  const tasks=[
+    {id:"review",title:"مراجعة نموذج IA Design Lab",detail:"قارن التصميم بإمكانية القراءة على الهاتف واتجاه RTL قبل اعتماده."},
+    {id:"ui",title:"اختبار الواجهة التفاعلية",detail:"اختبر روابط المشاريع، التصفية، لوحة المفاتيح، وحفظ الحالة."},
+    {id:"canva",title:"مراجعة أصول Canva",detail:"التحقق من العربية والتراخيص والإفصاح ومصدر كل ادعاء."},
+    {id:"gate",title:"فحص بوابات GitHub",detail:"تحقق من CI والمراجعة المستقلة قبل دمج أي صفحة عامة."}
+  ];
+  const storageKey="dia-ia-command-lab-v1";
+  let checked={};
+  try{checked=JSON.parse(localStorage.getItem(storageKey)||"{}");if(!checked||typeof checked!=="object"||Array.isArray(checked))checked={};}catch(_){checked={};}
+  const list=document.getElementById("task-list");
+  const status=document.getElementById("save-status");
+  function save(){try{localStorage.setItem(storageKey,JSON.stringify(checked));status.textContent="حُفظت العلامات في هذا المتصفح فقط.";}catch(_){status.textContent="تعذر التخزين المحلي؛ العلامات مؤقتة في هذه الجلسة.";}}
+  function render(){list.replaceChildren();tasks.forEach(function(t){const wrap=document.createElement("div");wrap.className="task";const input=document.createElement("input");input.type="checkbox";input.id="task-"+t.id;input.checked=Boolean(checked[t.id]);const label=document.createElement("label");label.htmlFor=input.id;const strong=document.createElement("strong");strong.textContent=t.title;const small=document.createElement("small");small.textContent=t.detail;label.append(strong,small);input.addEventListener("change",function(){checked[t.id]=input.checked;save();render();});wrap.append(input,label);list.append(wrap);});}
+  document.querySelectorAll(".filter").forEach(function(btn){btn.addEventListener("click",function(){const selected=btn.dataset.filter;document.querySelectorAll(".filter").forEach(function(x){x.setAttribute("aria-pressed",String(x===btn));});document.querySelectorAll(".project").forEach(function(card){card.hidden=selected!=="all"&&card.dataset.category!==selected;});});});
+  document.getElementById("clear").addEventListener("click",function(){checked={};save();render();});
+  document.getElementById("export").addEventListener("click",function(){const snapshot={type:"IA Command Center manual checklist",snapshot:"2026-10-11",exportedAt:new Date().toISOString(),tasks:tasks.map(function(t){return{id:t.id,title:t.title,completed:Boolean(checked[t.id])};})};const url=URL.createObjectURL(new Blob([JSON.stringify(snapshot,null,2)],{type:"application/json"}));const a=document.createElement("a");a.href=url;a.download="ia-checklist.json";document.body.append(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(url);},500);});
+  render();
+})();
+</script>
+</body></html>
