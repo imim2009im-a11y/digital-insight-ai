@@ -1,0 +1,43 @@
+name: Free AI Lab checks
+
+on:
+  push:
+    branches:
+      - codex/free-ai-lab-v2
+    paths:
+      - 'free-ai-lab/**'
+      - '.github/workflows/free-ai-lab-check.yml'
+  pull_request:
+    paths:
+      - 'free-ai-lab/**'
+      - '.github/workflows/free-ai-lab-check.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify files
+        run: |
+          test -f free-ai-lab/index.html
+          test -f free-ai-lab/alt-generator.html
+          test -f free-ai-lab/background-remover.html
+          test -f free-ai-lab/audio-transcriber.html
+          grep -q 'noindex,nofollow' free-ai-lab/index.html
+          grep -q 'Xenova/vit-gpt2-image-captioning' free-ai-lab/alt-generator.html
+          grep -q 'Xenova/modnet' free-ai-lab/background-remover.html
+          grep -q 'Xenova/whisper-tiny' free-ai-lab/audio-transcriber.html
+      - name: Serve and smoke test
+        run: |
+          python3 -m http.server 4173 --directory free-ai-lab >/tmp/free-ai-lab.log 2>&1 &
+          server_pid=$!
+          trap 'kill $server_pid' EXIT
+          sleep 1
+          curl --fail --silent http://127.0.0.1:4173/ | grep -q 'Free AI Lab'
+          curl --fail --silent http://127.0.0.1:4173/alt-generator.html | grep -q 'ALT & Caption'
+          curl --fail --silent http://127.0.0.1:4173/background-remover.html | grep -q 'Xenova/modnet'
+          curl --fail --silent http://127.0.0.1:4173/audio-transcriber.html | grep -q 'Xenova/whisper-tiny'
