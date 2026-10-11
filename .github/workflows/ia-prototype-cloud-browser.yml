@@ -35,3 +35,12 @@ jobs:
       - name: Test IA prototype in Chromium (320, 390, 768, 1365)
         shell: bash
         run: NODE_PATH="$RUNNER_TEMP/ia-prototype-qa/node_modules" node scripts/ia-command-center-e2e.cjs
+
+      - name: Upload visual evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: ia-command-center-screenshots
+          path: artifacts/ia-command-center/*.png
+          if-no-files-found: warn
+          retention-days: 7
