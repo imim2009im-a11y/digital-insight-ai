@@ -1,0 +1,11 @@
+{
+  "id":"negative-001",
+  "objective":"Ensure false success claims are rejected",
+  "scope":"Validator negative test",
+  "success_criteria":["Validator rejects success without evidence"],
+  "risk":"low",
+  "capabilities_required":["engineering/test"],
+  "state":"SUCCEEDED",
+  "evidence":[],
+  "blockers":[]
+}
