@@ -1,7 +1,7 @@
 # ADR-2026-10-11 — Manjaro engineering workstation + GitHub-hosted verification
 
 **Decision:** Accepted by project owner on 2026-10-11.
-**Implementation state:** Operating-model documentation only; changes are proposed through a pull request.
+**Implementation:** Documentation-only adoption through PR #89; this record does not provision or reconfigure runtime services.
 **Production boundary:** No deployment, DNS, credentials, billing, or local system configuration changes in this ADR.
 
 ## 1. Scope and authority
