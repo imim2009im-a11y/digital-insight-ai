@@ -11,6 +11,56 @@ sys.path.insert(0, str(ROOT / "scripts"))
 import youtube_source_intelligence as y
 
 class IngestionTests(unittest.TestCase):
+    def test_live_state_survives_two_runs_without_duplicates(self):
+        incoming = json.loads((ROOT / "tests/fixtures/youtube-videos.json").read_text())
+        with tempfile.TemporaryDirectory() as d:
+            state = pathlib.Path(d) / "nested/state.json"
+            output = pathlib.Path(d) / "report.json"
+            argv = ["collector", "--sources", str(ROOT / "docs/research-sources/youtube-channels.json"),
+                    "--state", str(state), "--output", str(output), "--write-state"]
+            with patch.object(sys, "argv", argv), patch.dict(y.os.environ, {"YOUTUBE_API_KEY": "test-key"}), patch.object(y, "collect", return_value=incoming):
+                y.main()
+                y.main()
+            self.assertEqual(json.loads(output.read_text())["new"], 0)
+            self.assertEqual(len(json.loads(state.read_text())), 1)
+            self.assertFalse(json.loads(state.read_text())[0]["claims_tested"])
+
+    def test_failed_replacement_preserves_existing_state(self):
+        with tempfile.TemporaryDirectory() as d:
+            state = pathlib.Path(d) / "state.json"
+            state.write_text('[{"existing": true}]')
+            with patch.object(y.os, "replace", side_effect=OSError("disk failure")):
+                with self.assertRaises(OSError):
+                    y.write_json_atomic(state, [])
+            self.assertEqual(state.read_text(), '[{"existing": true}]')
+            self.assertEqual(list(pathlib.Path(d).iterdir()), [state])
+
+    def test_fixture_cannot_write_state(self):
+        with patch.object(sys, "argv", ["collector", "--fixture", "fixture.json", "--write-state"]):
+            with self.assertRaises(SystemExit) as error:
+                y.main()
+            self.assertEqual(error.exception.code, 2)
+
+    def test_output_cannot_overwrite_state(self):
+        with patch.object(sys, "argv", ["collector", "--state", "same.json", "--output", "same.json"]):
+            with self.assertRaises(SystemExit) as error:
+                y.main()
+            self.assertEqual(error.exception.code, 2)
+
+    def test_collection_failure_preserves_report_and_state(self):
+        with tempfile.TemporaryDirectory() as d:
+            state = pathlib.Path(d) / "state.json"
+            output = pathlib.Path(d) / "report.json"
+            state.write_text("[]")
+            output.write_text('{"previous": true}')
+            argv = ["collector", "--sources", str(ROOT / "docs/research-sources/youtube-channels.json"),
+                    "--state", str(state), "--output", str(output), "--write-state"]
+            with patch.object(sys, "argv", argv), patch.dict(y.os.environ, {"YOUTUBE_API_KEY": "test-key"}), patch.object(y, "collect", side_effect=RuntimeError("unresolved")):
+                with self.assertRaises(RuntimeError):
+                    y.main()
+            self.assertEqual(state.read_text(), "[]")
+            self.assertEqual(output.read_text(), '{"previous": true}')
+
     def test_collection_preserves_origin_and_video_publish_date(self):
         responses = [
             {"items": [{"id": "UCfixture", "contentDetails": {"relatedPlaylists": {"uploads": "UUfixture"}}}]},
