@@ -66,6 +66,7 @@ async function run(){
         true,'skip link keyboard focus');
       await page.keyboard.press('Enter');
       assert(new URL(page.url()).hash==='#content','skip link keyboard activation');
+      assert.equal(await page.evaluate(()=>document.activeElement?.id),'content','skip link moves focus to main content');
       const design=page.locator('button[data-filter="design"]');
       await design.click();
       assert.equal(await page.locator('.project:visible').count(),1,'design filter');
@@ -76,6 +77,7 @@ async function run(){
       assert.equal(await page.locator('.project:visible').count(),4,'all filter restores');
       await page.locator('#task-review').check();
       assert.equal(await page.locator('#task-review').isChecked(),true,'manual checked state');
+      assert.equal(await page.evaluate(()=>document.activeElement?.id),'task-review','checking a task preserves keyboard focus');
       await page.reload();
       assert.equal(await page.locator('#task-review').isChecked(),true,'localStorage persisted after reload');
       const downloadPromise=page.waitForEvent('download');
