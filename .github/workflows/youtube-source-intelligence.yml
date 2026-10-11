@@ -1,0 +1,45 @@
+name: YouTube source intelligence (manual / test)
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: "fixture or live; live requires configured YouTube API key"
+        required: true
+        default: fixture
+        type: choice
+        options:
+          - fixture
+          - live
+  pull_request:
+    paths:
+      - "scripts/youtube_source_intelligence.py"
+      - "tests/test_youtube_source_intelligence.py"
+      - "tests/fixtures/youtube-videos.json"
+      - "docs/research-sources/youtube-channels.json"
+      - ".github/workflows/youtube-source-intelligence.yml"
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: python -m unittest discover -s tests -p 'test_youtube_source_intelligence.py' -v
+      - name: Run read-only collection
+        env:
+          YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+          RUN_MODE: ${{ inputs.mode }}
+        run: |
+          if [ "$RUN_MODE" = "live" ]; then
+            python scripts/youtube_source_intelligence.py --output youtube-intelligence-report.json
+          else
+            python scripts/youtube_source_intelligence.py --fixture tests/fixtures/youtube-videos.json --output youtube-intelligence-report.json
+          fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: youtube-intelligence-report
+          path: youtube-intelligence-report.json
+          retention-days: 7
