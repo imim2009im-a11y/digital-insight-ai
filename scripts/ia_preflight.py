@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Bounded, resumable source verification. No provider writes or model calls."""
 import argparse
+from contextlib import closing
 import fcntl
 import hashlib
 import json
@@ -109,7 +110,7 @@ def verify(root, state_dir, timeout=120, attempts=1, resume=False, check=bounded
         runtime_key = runtime_signature()
         source_key = fingerprint(root)
         key = hashlib.sha256((source_key + runtime_key).encode()).hexdigest()
-        with sqlite3.connect(state_dir / "state.sqlite3") as db:
+        with closing(sqlite3.connect(state_dir / "state.sqlite3")) as db:
             db.execute("CREATE TABLE IF NOT EXISTS runs (id INTEGER PRIMARY KEY, fingerprint TEXT, status TEXT, exit_code INTEGER, duration REAL, timestamp TEXT DEFAULT CURRENT_TIMESTAMP)")
             # Holding the checkout lock proves no prior invocation is still active.
             db.execute("UPDATE runs SET status='interrupted' WHERE status='running'")
