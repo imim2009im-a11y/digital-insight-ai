@@ -46,6 +46,7 @@ def process(items, previous):
             "video_id": video_id,
             "url": "https://www.youtube.com/watch?v=" + video_id,
             "source": str(item.get("source", "")),
+            "channel_id": str(item.get("channel_id", "")),
             "published_at": str(item.get("published_at", "")),
             "title": title,
             "description": description,
@@ -57,6 +58,8 @@ def process(items, previous):
     return sorted(known.values(), key=lambda x: x["video_id"]), added
 
 def collect(channels, key, per_channel):
+    if not 1 <= per_channel <= 50:
+        raise ValueError("per_channel must be between 1 and 50")
     videos = []
     for source in channels:
         handle = source["handle"].lstrip("@")
@@ -65,16 +68,18 @@ def collect(channels, key, per_channel):
         if not found:
             raise RuntimeError("Channel not resolved: " + handle)
         uploads = found[0]["contentDetails"]["relatedPlaylists"]["uploads"]
-        data = api("playlistItems", {"part": "snippet", "playlistId": uploads,
-                                     "maxResults": min(per_channel, 50)}, key)
+        channel_id = found[0]["id"]
+        data = api("playlistItems", {"part": "snippet,contentDetails", "playlistId": uploads,
+                                     "maxResults": per_channel}, key)
         for entry in data.get("items", []):
             s = entry.get("snippet", {})
             v = s.get("resourceId", {}).get("videoId")
             if v:
                 videos.append({"video_id": v, "source": "@" + handle,
+                               "channel_id": channel_id,
                                "title": s.get("title", ""),
                                "description": s.get("description", ""),
-                               "published_at": s.get("publishedAt", "")})
+                               "published_at": entry.get("contentDetails", {}).get("videoPublishedAt", "")})
     return videos
 
 def main():
@@ -85,6 +90,8 @@ def main():
     parser.add_argument("--fixture", help="Offline JSON array of raw videos; does not access YouTube")
     parser.add_argument("--limit", type=int, default=20)
     args = parser.parse_args()
+    if not 1 <= args.limit <= 50:
+        parser.error("--limit must be between 1 and 50")
     channels = json.loads(pathlib.Path(args.sources).read_text(encoding="utf-8"))["channels"]
     existing_path = pathlib.Path(args.state)
     previous = json.loads(existing_path.read_text(encoding="utf-8")) if existing_path.exists() else []
@@ -99,6 +106,7 @@ def main():
         mode = "youtube_api_live"
     records, new_count = process(items, previous)
     summary = {
+        "collected_at": dt.datetime.now(dt.timezone.utc).isoformat(),
         "mode": mode, "source_count": len(channels), "fetched": len(items),
         "new": new_count, "total_unique": len(records),
         "verified_video_content": False, "records": records
