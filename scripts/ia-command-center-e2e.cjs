@@ -59,6 +59,14 @@ async function run(){
     assert(actual.bodyScrollWidth<=actual.viewport+2,'body overflow at '+width+': '+JSON.stringify(actual));
     assert.equal(await page.locator('.project:visible').count(),4,'all projects shown');
     assert.equal(await page.locator('.task').count(),4,'four checklist items');
+    const externalLinks=await page.locator('a[href^="http"]').evaluateAll(links=>links.map(link=>({
+      target:link.target,
+      rel:link.rel.split(/\s+/).filter(Boolean)
+    })));
+    assert(externalLinks.length>0,'external links present');
+    assert(externalLinks.every(link=>link.target==='_blank'),'external links open in a new tab');
+    assert(externalLinks.every(link=>link.rel.includes('noopener')&&link.rel.includes('noreferrer')),
+      'external links isolate the opener and referrer');
     assert.deepEqual(errors,[],'runtime errors at '+width);
     if(width===390){
       await page.keyboard.press('Tab');
@@ -95,7 +103,12 @@ async function run(){
       assert.equal(await page.locator('#task-review').isChecked(),false,'clear resets state');
       await page.reload();
       assert.equal(await page.locator('#task-review').isChecked(),false,'clear persists after reload');
-      console.log('PASS keyboard skip link, project filtering, task persistence, JSON download, reset');
+      await page.evaluate(()=>{Storage.prototype.setItem=function(){throw new DOMException('Storage disabled','QuotaExceededError');};});
+      await page.locator('#task-ui').check();
+      assert.match(await page.locator('#save-status').innerText(),/تعذر التخزين المحلي/,
+        'storage failure is reported without breaking the checklist');
+      assert.equal(await page.locator('#task-ui').isChecked(),true,'checklist remains usable without storage');
+      console.log('PASS keyboard skip link, project filtering, task persistence, JSON download, reset, storage fallback');
     }
     console.log('PASS Chromium prototype',width,'px');
     await context.close();
