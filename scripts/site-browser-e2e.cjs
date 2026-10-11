@@ -74,8 +74,11 @@ async function main() {
       if(width===390){
         await page.goto(BASE+'/news/',{waitUntil:'domcontentloaded'});
         await page.locator('#news-search').fill('Gemini');
-        assert.equal(await page.locator('#news-results article:visible').count(),1,
-          'News filters Gemini');
+        const visibleNews = page.locator('#news-results article:visible');
+        assert((await visibleNews.count()) >= 1,'News filters Gemini finds matches');
+        assert.equal(await visibleNews.evaluateAll(cards =>
+          cards.filter(card => !card.textContent.toLowerCase().includes('gemini')).length),0,
+          'News filters Gemini hides non-matches');
         await page.goto(BASE+'/tools/',{waitUntil:'domcontentloaded'});
         await page.locator('#tool-category').selectOption('apps');
         assert.equal(await page.locator('[data-tool-card]:visible').count(),1,
