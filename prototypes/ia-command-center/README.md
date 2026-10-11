@@ -36,8 +36,8 @@ Open `http://localhost:8000/prototypes/ia-command-center/` in a browser. Stop wi
 
 ## Development integration
 
-- MagicPath design concept: https://www.magicpath.ai/files/459955340012822528
-- Existing Canva editable tool explainer: https://www.canva.com/d/8GzlcOpJ7kW6OUj
+- MagicPath design concept: https://www.magicpath.ai/
+- Existing Canva editable tool explainer: https://www.canva.com/
 - Canonical site: https://digitalinsightai.com/
 - Canonical static site source: `site/`
 - Standalone modern tools app: `imim2009im-a11y/ai-tools-directory`
