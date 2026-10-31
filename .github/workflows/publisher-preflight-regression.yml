@@ -29,6 +29,8 @@ jobs:
           node --check publisher/test.mjs
           node --check publisher/public/app.js
           node --check publisher/test-races.mjs
+          node --check publisher/state-inventory.mjs
+          node --check publisher/test-inventory.mjs
       - name: Run isolated publisher authentication and preflight tests
         working-directory: publisher
         env:
@@ -38,3 +40,5 @@ jobs:
         run: npm test
       - name: Test blocked outbound traffic, parallel writes and crash recovery
         run: node publisher/test-races.mjs
+      - name: Test read-only snapshot inventory and redaction
+        run: node publisher/test-inventory.mjs
