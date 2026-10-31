@@ -37,7 +37,7 @@ jobs:
           required = [
               "index.html", "tools/index.html", "reviews/index.html",
               "guides/index.html", "about/index.html", "privacy/index.html",
-              "404.html", "robots.txt", "sitemap.xml", "_headers", "_redirects"
+              "404.html", "robots.txt", "sitemap.xml", "_headers", "_redirects", ".well-known/security.txt"
           ]
           missing = [p for p in required if not (root / p).is_file()]
           if missing:
@@ -109,6 +109,27 @@ jobs:
             echo 'Non-canonical URL found in the production sitemap.' >&2
             exit 1
           fi
+
+      - name: Validate published security disclosure file
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          from datetime import datetime, timezone
+          fields = {}
+          for line in Path("site/.well-known/security.txt").read_text(encoding="utf-8").splitlines():
+              if not line or line.startswith("#"):
+                  continue
+              key, sep, value = line.partition(":")
+              assert sep and value.strip(), "Invalid security.txt entry"
+              fields.setdefault(key.strip(), []).append(value.strip())
+          assert fields.get("Contact") == ["https://digitalinsightai.com/contact/"]
+          assert fields.get("Canonical") == ["https://digitalinsightai.com/.well-known/security.txt"]
+          assert len(fields.get("Expires", [])) == 1
+          expires = datetime.fromisoformat(fields["Expires"][0].replace("Z", "+00:00"))
+          assert expires > datetime.now(timezone.utc), "Security disclosure has expired"
+          print("security.txt basic RFC 9116 fields validated")
+          PY
 
       - name: Guard DNS cutover
         shell: bash
