@@ -14,6 +14,9 @@ These are project-specific custom Codex agents written for this repository. They
 8. Content / Editorial
 9. Growth / Conversion
 10. Independent Reviewer
+11. GitHub Engineering Controller — advisory coordination and bounded local metadata inventory
+
+The controller guide is [docs/GITHUB-ENGINEERING-CONTROLLER.md](../docs/GITHUB-ENGINEERING-CONTROLLER.md). It complements the existing verification runner and does not grant provider permissions or enable a hosted AI service. Tool evaluation decisions and spending boundaries are recorded in [the approval registry](../docs/engineering/TOOL-APPROVAL-REGISTRY.json) and [FinOps policy](../docs/engineering/FINOPS.md).
 
 ## Install locally
 
