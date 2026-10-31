@@ -101,6 +101,33 @@ jobs:
           grep -qi '^content-security-policy:' /tmp/headers
           grep -qi '^x-content-type-options: nosniff' /tmp/headers
 
+      - name: Summarize publisher check outcomes
+        if: always()
+        shell: bash
+        env:
+          RUN_DUE_OUTCOME: ${{ steps.run_due.outcome }}
+          HEALTH_OUTCOME: ${{ steps.health.outcome }}
+          AUTH_GUARD_OUTCOME: ${{ steps.auth_guard.outcome }}
+          FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
+        run: |
+          {
+            echo '## Publisher Ops checks (credential values never logged)'
+            echo ''
+            echo '| Control | Outcome |'
+            echo '| --- | --- |'
+            printf '| Scheduler POST | %s |\n' "$RUN_DUE_OUTCOME"
+            printf '| Public health | %s |\n' "$HEALTH_OUTCOME"
+            printf '| Anonymous API denial | %s |\n' "$AUTH_GUARD_OUTCOME"
+            printf '| Frontend and headers | %s |\n' "$FRONTEND_OUTCOME"
+            echo ''
+            if [[ "$RUN_DUE_OUTCOME" == 'failure' && "$HEALTH_OUTCOME" == 'success' ]]; then
+              echo 'A healthy public endpoint does not prove scheduler authentication works.'
+              echo 'Review the sanitized scheduler HTTP status and the private configuration names.'
+              echo 'Do not re-enable scheduler publishing until pending jobs and data recovery are reviewed.'
+              echo 'Recovery plan: docs/runbooks/publisher-scheduler-401-recovery.md'
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Open one incident issue on failure
         if: steps.run_due.outcome == 'failure' || steps.health.outcome == 'failure' || steps.auth_guard.outcome == 'failure' || steps.frontend.outcome == 'failure'
         env:
