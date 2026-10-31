@@ -30,6 +30,7 @@ async function exercise(configured) {
       ADMIN_PASSWORD: 'local-test-password',
       SESSION_SECRET: 'local-test-session-secret',
       DIA_SCHEDULER_TOKEN: configured ? token : '',
+      DIA_ALLOW_EMPTY_STATE_BOOTSTRAP: 'ISOLATED_TEST_ONLY',
       TELEGRAM_BOT_TOKEN: '',
       TELEGRAM_CHAT_ID: '',
       DISCORD_WEBHOOK_URL: '',
@@ -83,9 +84,10 @@ async function exercise(configured) {
     assert.equal(emptyProbe.body.credentialParity, 'UNVERIFIED');
     assert.equal(emptyProbe.body.scheduledJobs, 0);
     assert.equal(emptyProbe.body.dueJobs, 0);
+    assert.equal(emptyProbe.body.safeMode, true);
     assert.equal(emptyProbe.body.persistence, 'ephemeral-file');
     assert.equal(emptyProbe.body.publishingTriggered, false);
-    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'persistence', 'publishingTriggered'];
+    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'safeMode', 'persistence', 'publishingTriggered'];
     assert.deepEqual(Object.keys(emptyProbe.body).sort(), allowedKeys.sort(), 'no job content or secrets are exposed');
     const created = await request('/api/posts', {
       method: 'POST',
@@ -99,6 +101,15 @@ async function exercise(configured) {
       body: JSON.stringify({ postId: created.body.id, scheduledFor: new Date(Date.now() - 60000).toISOString() }),
     });
     assert.equal(scheduled.status, 201);
+    const duplicateSchedule = await request('/api/schedule', {method:'POST',headers:{...authHeaders,'content-type':'application/json'},body:JSON.stringify({postId:created.body.id,scheduledFor:new Date().toISOString()})});
+    assert.equal(duplicateSchedule.status,409,'cannot create a second job for the same post');
+    const duplicateManual = await request('/api/publish', {method:'POST',headers:{...authHeaders,'content-type':'application/json'},body:JSON.stringify({postId:created.body.id,confirm:true})});
+    assert.equal(duplicateManual.status,409,'manual publishing cannot duplicate an existing scheduled job');
+    if(configured){
+      const held=await request('/api/run-due',{method:'POST',headers:{Authorization:'Bearer '+token}});
+      assert.equal(held.status,423,'safe mode must block overdue automatic publishing');
+      assert.equal(held.body.processed,0);
+    }
     const beforeProbe = await request('/api/state', { headers: authHeaders });
     assert.equal(beforeProbe.body.jobs[0].status, 'SCHEDULED');
     const dueProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
@@ -122,6 +133,20 @@ async function exercise(configured) {
       const unmodified = await request('/api/state', { headers: authHeaders });
       assert.deepEqual(unmodified.body, beforeProbe.body, 'credential check must not execute due jobs');
     }
+    // Overlapping requests must not overwrite each other's jobs/posts.
+    const concurrent = await Promise.all(Array.from({length:16}, (_,i)=>request('/api/posts',{
+      method:'POST',headers:{...authHeaders,'content-type':'application/json'},
+      body:JSON.stringify({title:'Concurrent '+i,content:'Synthetic safe test',platforms:['telegram']}),
+    })));
+    assert.ok(concurrent.every(v=>v.status===201),'parallel creation must be serialized');
+    const allPosts=await request('/api/state',{headers:authHeaders});
+    assert.equal(allPosts.body.posts.length,17,'all concurrent writes must survive');
+    const samePost=concurrent[0].body.id;
+    const claims=await Promise.all([1,2].map(()=>request('/api/schedule',{
+      method:'POST',headers:{...authHeaders,'content-type':'application/json'},
+      body:JSON.stringify({postId:samePost,scheduledFor:new Date().toISOString()}),
+    })));
+    assert.deepEqual(claims.map(v=>v.status).sort(),[201,409],'exactly one concurrent scheduling request wins');
     const statePath = join(dir, 'data', 'store.json');
     const savedState = readFileSync(statePath, 'utf8');
     unlinkSync(statePath);
@@ -129,6 +154,7 @@ async function exercise(configured) {
     assert.equal(missingProbe.status, 503, 'preflight must refuse absent state');
     assert.equal(missingProbe.body.error, 'scheduler_state_unavailable');
     assert.equal(existsSync(statePath), false, 'preflight must never create a missing state file');
+    // Regular startup without the test-only bootstrap flag is covered by a separate fail-closed run.
     writeFileSync(statePath, '{invalid-json');
     const corruptProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(corruptProbe.status, 503, 'preflight must refuse corrupted state');
@@ -148,6 +174,8 @@ async function exercise(configured) {
     assert.equal(malformedPreflight.status, 503, 'preflight must reject incomplete persisted state, not just invalid jobs');
     assert.equal(readFileSync(statePath, 'utf8'), invalidPosts, 'incomplete state remains untouched');
     writeFileSync(statePath, savedState);
+    // The test bootstrap variable is intentionally limited to a synthetic process;
+    // restoration should leave old state intact rather than re-bootstrap it.
     const restoredProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(restoredProbe.status, 200);
     assert.equal(restoredProbe.body.dueJobs, 1, 'preflight must count restored pending jobs without publishing');
