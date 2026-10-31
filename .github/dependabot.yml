@@ -1,0 +1,13 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
+  # Live API only. ai-tools-directory/ is a frozen legacy snapshot.
+  - package-ecosystem: "npm"
+    directory: "/mongodb-api"
+    schedule:
+      interval: "monthly"
+    open-pull-requests-limit: 2
