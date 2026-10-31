@@ -7,7 +7,7 @@ Please do **not** disclose security vulnerabilities in public GitHub Issues.
 If you discover a potential vulnerability in Digital Insight AI:
 
 1. Do not include secrets, credentials, personal data, or exploit details in a public issue.
-2. Contact the repository owner privately through the contact methods listed on the GitHub profile.
+2. Submit an **initial, non-sensitive report** through https://digitalinsightai.com/contact/ (choose the security category). The public contact form is handled by Formspree; do not send private exploit details or credentials through it.
 3. Include a concise description, affected component, reproduction conditions, and potential impact.
 4. Allow reasonable time for validation and remediation before public disclosure.
 
