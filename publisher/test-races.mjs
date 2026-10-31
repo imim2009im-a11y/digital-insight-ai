@@ -214,6 +214,46 @@ try {
   const afterRestart = await request('/api/state', {headers});
   assert.equal(afterRestart.body.jobs[0].status, 'PUBLISHING');
   assert.equal(readFileSync(marker, 'utf8'), '1', 'restart must not replay ambiguous external send');
+  for(const mutation of ['content','title','platforms','scheduledFor','status']){
+    const post=await createPost(headers,'Fingerprint guard '+mutation);
+    const scheduled=await request('/api/schedule',{method:'POST',headers,body:JSON.stringify({postId:post.id,scheduledFor:new Date(Date.now()-60_000).toISOString()})});
+    const preview=await request('/api/scheduler/release-preview?jobId='+encodeURIComponent(scheduled.body.id),{headers});
+    const approved=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({jobId:scheduled.body.id,fingerprint:preview.body.fingerprint,confirm:true})});
+    assert.equal(approved.status,201);
+    const snapshot=JSON.parse(readFileSync(stateFile,'utf8'));
+    const job=snapshot.jobs.find(item=>item.id===scheduled.body.id);
+    const target=snapshot.posts.find(item=>item.id===post.id);
+    if(mutation==='content')target.content+=' modified';
+    if(mutation==='title')target.title+=' modified';
+    if(mutation==='platforms')job.platforms=['discord'];
+    if(mutation==='scheduledFor')job.scheduledFor=new Date(Date.now()+60_000).toISOString();
+    if(mutation==='status')job.status='FAILED';
+    writeFileSync(stateFile,JSON.stringify(snapshot,null,2));
+    const blocked=await request('/api/run-due',{method:'POST',headers:schedulerHeaders,body:JSON.stringify({releaseIds:[approved.body.releaseId]})});
+    assert.equal(blocked.status,409,mutation+' mutation after approval must invalidate release');
+    assert.equal(readFileSync(marker,'utf8'),'1',mutation+' mutation must not call provider');
+    const cleanup=JSON.parse(readFileSync(stateFile,'utf8'));
+    const current=cleanup.jobs.find(item=>item.id===scheduled.body.id);
+    if(current.releaseApproval){current.releaseApproval.state='EXPIRED';writeFileSync(stateFile,JSON.stringify(cleanup,null,2));}
+  }
+  const expiredPost=await createPost(headers,'Expired release ticket');
+  const expiredSchedule=await request('/api/schedule',{method:'POST',headers,body:JSON.stringify({postId:expiredPost.id,scheduledFor:new Date(Date.now()-60_000).toISOString()})});
+  const expiredPreview=await request('/api/scheduler/release-preview?jobId='+encodeURIComponent(expiredSchedule.body.id),{headers});
+  const expiredApproval=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({jobId:expiredSchedule.body.id,fingerprint:expiredPreview.body.fingerprint,confirm:true})});
+  assert.equal(expiredApproval.status,201);
+  const expireDisk=JSON.parse(readFileSync(stateFile,'utf8'));
+  expireDisk.jobs.find(item=>item.id===expiredSchedule.body.id).releaseApproval.expiresAt=new Date(Date.now()-1000).toISOString();
+  writeFileSync(stateFile,JSON.stringify(expireDisk,null,2));
+  const expiredAttempt=await request('/api/run-due',{method:'POST',headers:schedulerHeaders,body:JSON.stringify({releaseIds:[expiredApproval.body.releaseId]})});
+  assert.equal(expiredAttempt.status,409,'expired release ticket must be rejected');
+  assert.equal(readFileSync(marker,'utf8'),'1','expired ticket must not call provider');
+  for(const csrfHeaders of [
+    {...headers,Origin:'https://attacker.invalid'},
+    Object.fromEntries(Object.entries(headers).filter(([key])=>key.toLowerCase()!=='x-requested-with')),
+  ]){
+    const denied=await request('/api/scheduler/approve-job',{method:'POST',headers:csrfHeaders,body:JSON.stringify({jobId:expiredSchedule.body.id,fingerprint:expiredPreview.body.fingerprint,confirm:true})});
+    assert.equal(denied.status,403,'approval must reject wrong Origin and missing custom request marker');
+  }
   const capacityCandidates=[];
   for(let i=0;i<4;i++){
     const post=await createPost(headers,'Approval capacity '+i);
@@ -231,7 +271,14 @@ try {
   assert.equal(overCapacity.status,429,'a fourth outstanding approval must be rejected');
   assert.equal(overCapacity.body.error,'release_approval_capacity_reached');
   assert.equal(readFileSync(marker,'utf8'),'1','approval capacity checks must never publish');
-  console.log('PASS: bounded release approvals, fingerprint checks, concurrent approval, crash visibility and no automatic replay');
+  const expireCapacity=JSON.parse(readFileSync(stateFile,'utf8'));
+  const firstCapacityJob=expireCapacity.jobs.find(item=>item.id===capacityCandidates[0].jobId);
+  firstCapacityJob.releaseApproval.expiresAt=new Date(Date.now()-1000).toISOString();
+  writeFileSync(stateFile,JSON.stringify(expireCapacity,null,2));
+  const freedSlot=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({...capacityCandidates[3],confirm:true})});
+  assert.equal(freedSlot.status,201,'expired approval cleanup must release the global capacity slot');
+  assert.equal(readFileSync(marker,'utf8'),'1','expiry cleanup must not publish');
+  console.log('PASS: bounded approvals, expiry and cleanup, fingerprint mutation, CSRF, concurrent approval, crash visibility and no automatic replay');
 } finally {
   await stopServer();
   rmSync(temp, {recursive: true, force: true});
