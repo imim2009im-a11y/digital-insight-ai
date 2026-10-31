@@ -220,6 +220,34 @@ async function exercise(configured) {
   }
 }
 
+async function exerciseFailClosedColdStart(){
+  const dir=mkdtempSync(join(tmpdir(),'dip-coldstart-test-'));
+  copyFileSync(original,join(dir,'server.mjs'));
+  const port=await freePort();
+  const child=spawn(process.execPath,[join(dir,'server.mjs')],{
+    env:{PATH:process.env.PATH||'',PORT:String(port),NODE_ENV:'production',
+      DIA_ALLOW_EMPTY_STATE_BOOTSTRAP:'',ADMIN_PASSWORD:'synthetic-admin',
+      SESSION_SECRET:'synthetic-session',DIA_SCHEDULER_TOKEN:''},
+    stdio:'ignore',
+  });
+  try{
+    let status=0;
+    for(let i=0;i<50;i++){
+      if(child.exitCode!==null)throw new Error('cold-start process exited');
+      try{const response=await fetch('http://127.0.0.1:'+port+'/api/health');status=response.status;if(status===503)break}
+      catch{/* startup */ }
+      await new Promise(resolve=>setTimeout(resolve,100));
+    }
+    assert.equal(status,503,'production must refuse an absent backing state');
+    assert.equal(existsSync(join(dir,'data','store.json')),false,'production must not generate a replacement empty queue');
+  }finally{
+    child.kill('SIGTERM');
+    await new Promise(resolve=>child.exitCode!==null||child.signalCode!==null?resolve():child.once('exit',resolve));
+    rmSync(dir,{recursive:true,force:true});
+  }
+}
+
+await exerciseFailClosedColdStart();
 await exercise(false);
 await exercise(true);
 console.log('PASS: scheduler authentication, fail-closed behavior, isolated test data');
