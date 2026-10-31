@@ -27,6 +27,7 @@ jobs:
         run: |
           node --check publisher/server.mjs
           node --check publisher/test.mjs
+          node --check publisher/public/app.js
       - name: Run isolated publisher authentication and preflight tests
         working-directory: publisher
         env:
