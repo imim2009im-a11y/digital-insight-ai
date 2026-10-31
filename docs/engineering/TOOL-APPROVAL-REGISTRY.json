@@ -1,0 +1,572 @@
+{
+  "schema_version": 1,
+  "observed_at": "2026-10-31",
+  "maximum_unapproved_spending_usd": 0,
+  "scope": "Research and approval recommendations only; APPROVED permits scoped local evaluation, not GitHub App/account changes or paid hosted operation",
+  "tools": [
+    {
+      "name": "actions",
+      "official_source": "https://github.com/github/actions",
+      "purpose": "Requested repository identifier is invalid/unavailable (404), not a tool to install",
+      "maintenance_evidence": {
+        "status": "NOT ACCESSIBLE",
+        "http_status": 404,
+        "summary": "Requested github/actions repository returned Not Found."
+      },
+      "latest_release": {
+        "status": "NOT ACCESSIBLE",
+        "http_status": 404
+      },
+      "license": "NOT VERIFIED (repository 404)",
+      "license_file_evidence": [],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "None",
+      "repositories_in_scope": [],
+      "risks": [
+        "Installing a similarly named unofficial repository would be unsafe"
+      ],
+      "expected_result": "No installation: invalid repository identifier; review official actions/<name> instead.",
+      "alternatives": [
+        "Official actions/<specific-action> repositories, each reviewed and pinned to a verified commit"
+      ],
+      "rollback": "No installation to remove",
+      "decision": "REJECTED",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "scorecard",
+      "official_source": "https://github.com/ossf/scorecard",
+      "purpose": "Periodic supply-chain posture assessment of the public main repository",
+      "maintenance_evidence": {
+        "full_name": "ossf/scorecard",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0",
+          "url": "https://api.github.com/licenses/apache-2.0",
+          "node_id": "MDc6TGljZW5zZTI="
+        },
+        "pushed_at": "2026-10-30T08:29:25Z",
+        "updated_at": "2026-10-31T18:50:08Z"
+      },
+      "latest_release": {
+        "tag": "v5.6.0",
+        "published_at": "2026-10-12T00:21:01Z",
+        "html_url": "https://github.com/ossf/scorecard/releases/tag/v5.6.0"
+      },
+      "license": "Apache-2.0",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE",
+          "sha": "18f7f43fde86f7ef648559da1e3b2ba46c167f90",
+          "url": "https://github.com/ossf/scorecard/blob/main/LICENSE",
+          "opening": "                                 Apache License                            Version 2.0, January 2004                         http://www.apache.org/licenses/    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Repository read; no write token/SARIF upload initially",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Scores indicate heuristics, not absence of vulnerabilities",
+        "Token or SARIF publishing broadens scope; not authorized here"
+      ],
+      "expected_result": "A read-only posture report with evidence; no security certification or automatic changes.",
+      "alternatives": [
+        "Manual Actions/dependency review",
+        "GitHub native security"
+      ],
+      "rollback": "Remove local binary and any explicitly approved job/config; revoke dedicated token only with owner authorization",
+      "decision": "CONDITIONAL",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "zizmor",
+      "official_source": "https://github.com/zizmorcore/zizmor",
+      "purpose": "Local static security audit of GitHub Actions",
+      "maintenance_evidence": {
+        "full_name": "zizmorcore/zizmor",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "pushed_at": "2026-10-31T04:38:10Z",
+        "updated_at": "2026-10-31T20:38:20Z"
+      },
+      "latest_release": {
+        "tag": "v1.31.1",
+        "published_at": "2026-10-15T23:16:39Z",
+        "html_url": "https://github.com/zizmorcore/zizmor/releases/tag/v1.31.1"
+      },
+      "license": "MIT",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE",
+          "sha": "491f2b2c09f25968b9554948aa7f9b33708aa23a",
+          "url": "https://github.com/zizmorcore/zizmor/blob/main/LICENSE",
+          "opening": "The MIT License (MIT) Copyright (c) 2024 William Woodruff <william @ yossarian.net> Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"S",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Read workflow files locally; offline mode without token initially",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Results need human validation",
+        "Online audit modes can contact GitHub; keep offline until scoped"
+      ],
+      "expected_result": "Actionable workflow-security findings validated by a reviewer.",
+      "alternatives": [
+        "Manual workflow threat review"
+      ],
+      "rollback": "Remove local binary/virtualenv and CI invocation",
+      "decision": "APPROVED",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "actionlint",
+      "official_source": "https://github.com/rhysd/actionlint",
+      "purpose": "Local GitHub Actions syntax/expression validation",
+      "maintenance_evidence": {
+        "full_name": "rhysd/actionlint",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "pushed_at": "2026-07-16T06:05:57Z",
+        "updated_at": "2026-10-31T18:05:32Z"
+      },
+      "latest_release": {
+        "tag": "v1.7.12",
+        "published_at": "2026-03-30T17:49:21Z",
+        "html_url": "https://github.com/rhysd/actionlint/releases/tag/v1.7.12"
+      },
+      "license": "MIT",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE.txt",
+          "sha": "69292aedc9113498e83d72e48d38894f9a2a2eb6",
+          "url": "https://github.com/rhysd/actionlint/blob/main/LICENSE.txt",
+          "opening": "the MIT License Copyright (c) 2021 rhysd Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Read workflows; run on isolated snapshot, no GitHub token",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Does not prove runtime behavior",
+        "Optional ShellCheck integration requires separate verification"
+      ],
+      "expected_result": "Workflow syntax, expression and action-input diagnostics.",
+      "alternatives": [
+        "GitHub parser plus manual review"
+      ],
+      "rollback": "Remove binary and CI invocation",
+      "decision": "APPROVED",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "osv-scanner",
+      "official_source": "https://github.com/google/osv-scanner",
+      "purpose": "Scan actual lockfiles for known vulnerable dependencies",
+      "maintenance_evidence": {
+        "full_name": "google/osv-scanner",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0",
+          "url": "https://api.github.com/licenses/apache-2.0",
+          "node_id": "MDc6TGljZW5zZTI="
+        },
+        "pushed_at": "2026-10-31T20:56:42Z",
+        "updated_at": "2026-10-31T19:03:42Z"
+      },
+      "latest_release": {
+        "tag": "v2.7.0",
+        "published_at": "2026-10-12T01:32:07Z",
+        "html_url": "https://github.com/google/osv-scanner/releases/tag/v2.7.0"
+      },
+      "license": "Apache-2.0",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE",
+          "sha": "d645695673349e3947e8e5ae42332d0ac3164cd7",
+          "url": "https://github.com/google/osv-scanner/blob/main/LICENSE",
+          "opening": "                                 Apache License                            Version 2.0, January 2004                         http://www.apache.org/licenses/    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Read selected manifests; public database network access or preloaded offline DB; no repository write",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Online scanning may disclose dependency identifiers",
+        "Offline database freshness must be established",
+        "Not a source-code vulnerability scanner"
+      ],
+      "expected_result": "Known-vulnerability findings for selected actual lockfiles with database freshness recorded.",
+      "alternatives": [
+        "Dependabot alerts",
+        "npm audit with privacy and network review"
+      ],
+      "rollback": "Remove binary/cache and CI invocation",
+      "decision": "CONDITIONAL",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "renovate",
+      "official_source": "https://github.com/renovatebot/renovate",
+      "purpose": "Dependency update PR automation; currently duplicates selected Dependabot approach",
+      "maintenance_evidence": {
+        "full_name": "renovatebot/renovate",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "agpl-3.0",
+          "name": "GNU Affero General Public License v3.0",
+          "spdx_id": "AGPL-3.0",
+          "url": "https://api.github.com/licenses/agpl-3.0",
+          "node_id": "MDc6TGljZW5zZTE="
+        },
+        "pushed_at": "2026-10-31T16:26:50Z",
+        "updated_at": "2026-10-31T18:44:30Z"
+      },
+      "latest_release": {
+        "tag": "44.198.3",
+        "published_at": "2026-10-30T22:26:11Z",
+        "html_url": "https://github.com/renovatebot/renovate/releases/tag/44.198.3"
+      },
+      "license": "AGPL-3.0",
+      "license_file_evidence": [
+        {
+          "path": "license",
+          "sha": "0ad25db4bd1d86c452db3f9602ccdbe172438f52",
+          "url": "https://github.com/renovatebot/renovate/blob/main/license",
+          "opening": "                    GNU AFFERO GENERAL PUBLIC LICENSE                        Version 3, 19 November 2007  Copyright (C) 2007 Free Software Foundation, Inc. <https://fsf.org/>  Everyone is permitted to copy and distribute",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "GitHub App repository read/write and pull-request creation if used later",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Duplicate update PRs with Dependabot",
+        "AGPL-3.0 conditions for modified network-service distribution/use",
+        "Hosted or self-hosted compute is separate from source license"
+      ],
+      "expected_result": "No installation in this baseline; avoid duplicate dependency update automation.",
+      "alternatives": [
+        "Dependabot"
+      ],
+      "rollback": "If later approved: uninstall repository-scoped app, remove renovate config, close only its unwanted PRs with review",
+      "decision": "REJECTED",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "ruff",
+      "official_source": "https://github.com/astral-sh/ruff",
+      "purpose": "Lint Python scripts only where Python is actively maintained",
+      "maintenance_evidence": {
+        "full_name": "astral-sh/ruff",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "pushed_at": "2026-10-31T21:40:15Z",
+        "updated_at": "2026-10-31T21:40:18Z"
+      },
+      "latest_release": {
+        "tag": "0.17.3",
+        "published_at": "2026-10-27T00:35:07Z",
+        "html_url": "https://github.com/astral-sh/ruff/releases/tag/0.17.3"
+      },
+      "license": "MIT",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE",
+          "sha": "655a0c76fc5539b2f8e63b673741a5fd0e0c5799",
+          "url": "https://github.com/astral-sh/ruff/blob/main/LICENSE",
+          "opening": "MIT License Copyright (c) 2022 Charles Marsh Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Read local Python source; no GitHub token",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Bulk auto-fix may alter behavior; review diffs",
+        "No reason to lint frozen/vendor code"
+      ],
+      "expected_result": "Lint findings over maintained Python code without automatic broad rewrites.",
+      "alternatives": [
+        "Python compile/unittest baseline"
+      ],
+      "rollback": "Remove binary/config/CI invocation; revert format changes via reviewed commit",
+      "decision": "CONDITIONAL",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "trivy",
+      "official_source": "https://github.com/aquasecurity/trivy",
+      "purpose": "Targeted image/container/dependency scan when active container surface warrants it",
+      "maintenance_evidence": {
+        "full_name": "aquasecurity/trivy",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "main",
+        "license": {
+          "key": "apache-2.0",
+          "name": "Apache License 2.0",
+          "spdx_id": "Apache-2.0",
+          "url": "https://api.github.com/licenses/apache-2.0",
+          "node_id": "MDc6TGljZW5zZTI="
+        },
+        "pushed_at": "2026-10-30T13:51:36Z",
+        "updated_at": "2026-10-31T21:06:55Z"
+      },
+      "latest_release": {
+        "tag": "v0.76.1",
+        "published_at": "2026-10-21T11:18:34Z",
+        "html_url": "https://github.com/aquasecurity/trivy/releases/tag/v0.76.1"
+      },
+      "license": "Apache-2.0",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE",
+          "sha": "261eeb9e9f8b2b4b0d119366dda99c6fd7d35c64",
+          "url": "https://github.com/aquasecurity/trivy/blob/main/LICENSE",
+          "opening": "                                 Apache License                            Version 2.0, January 2004                         http://www.apache.org/licenses/    TERMS AND CONDITIONS FOR USE, REPRODUCTION, AND DISTRIBUTION",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Read selected image/files; database downloads; no default privileged Docker access",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Duplicate OSV findings if used over same dependencies",
+        "Large DB/cache and runtime cost",
+        "Image inspection must not expose secrets"
+      ],
+      "expected_result": "A targeted container/dependency report only if active container scope justifies it.",
+      "alternatives": [
+        "OSV for selected dependency lockfiles",
+        "Focused Dockerfile review"
+      ],
+      "rollback": "Remove binary/cache and targeted job",
+      "decision": "CONDITIONAL",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "gitleaks",
+      "official_source": "https://github.com/gitleaks/gitleaks",
+      "purpose": "Redacted local secret scan if native coverage is unavailable or history review is necessary",
+      "maintenance_evidence": {
+        "full_name": "gitleaks/gitleaks",
+        "archived": false,
+        "disabled": false,
+        "default_branch": "master",
+        "license": {
+          "key": "mit",
+          "name": "MIT License",
+          "spdx_id": "MIT",
+          "url": "https://api.github.com/licenses/mit",
+          "node_id": "MDc6TGljZW5zZTEz"
+        },
+        "pushed_at": "2026-10-28T04:14:29Z",
+        "updated_at": "2026-10-31T21:42:02Z"
+      },
+      "latest_release": {
+        "tag": "v8.30.1",
+        "published_at": "2026-03-21T02:17:58Z",
+        "html_url": "https://github.com/gitleaks/gitleaks/releases/tag/v8.30.1"
+      },
+      "license": "MIT",
+      "license_file_evidence": [
+        {
+          "path": "LICENSE",
+          "sha": "3c270b36c539ca8fbc4cc1017d3cbb7be1e44bbc",
+          "url": "https://github.com/gitleaks/gitleaks/blob/master/LICENSE",
+          "opening": "MIT License Copyright (c) 2019 Zachary Rice Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the \"Software\"), to deal",
+          "accessible": true
+        }
+      ],
+      "cost": {
+        "source_license": "No software purchase required for listed open-source CLIs; hosting/compute/storage/API costs are separate",
+        "hosted_execution": "NOT AUTHORIZED until quotas, runner type and billing hard stop verified",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Read selected local repository/history; no token required for CLI",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai (public, selected snapshot only)"
+      ],
+      "risks": [
+        "Reports can contain secrets; redact and retain locally",
+        "CLI MIT licensing is separate from any hosted GitHub Action licensing"
+      ],
+      "expected_result": "A redacted local secret-detection report with no credential disclosure.",
+      "alternatives": [
+        "GitHub secret scanning and push protection when available"
+      ],
+      "rollback": "Remove CLI and scanner job; delete sensitive local reports securely under approved retention policy",
+      "decision": "CONDITIONAL",
+      "installation_status": "NOT INSTALLED BY THIS SESSION; pre-existing local installation not checked in this research"
+    },
+    {
+      "name": "Dependabot",
+      "official_source": "https://docs.github.com/code-security/dependabot",
+      "purpose": "First-choice version/security dependency update mechanism; github-actions and active package ecosystems only",
+      "maintenance_evidence": {
+        "summary": "GitHub native service; no CLI release applies"
+      },
+      "latest_release": {},
+      "license": "GitHub service terms",
+      "license_file_evidence": [],
+      "cost": {
+        "summary": "No subscription enabled; current billing/feature eligibility not accessible",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Repository-scoped managed GitHub service; update PRs, no app installation assumed",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai"
+      ],
+      "risks": [
+        "PR workflows consume Actions resources; configuration does not prove alerts/security updates enabled"
+      ],
+      "expected_result": "Reviewed update PRs for active ecosystems after configuration is approved.",
+      "alternatives": [
+        "Manual dependency update PRs; no second automatic manager by default"
+      ],
+      "rollback": "Revert dependabot.yml through PR; owner can adjust feature settings",
+      "decision": "CONDITIONAL",
+      "installation_status": "Feature state must be checked separately"
+    },
+    {
+      "name": "GitHub native Code Scanning / Secret Scanning / Push Protection / Dependency Graph / Security Advisories",
+      "official_source": "https://docs.github.com/code-security",
+      "purpose": "Evaluate native security first, enabling only free/included eligible features",
+      "maintenance_evidence": {
+        "summary": "GitHub native service; no single release applies"
+      },
+      "latest_release": {},
+      "license": "GitHub service terms",
+      "license_file_evidence": [],
+      "cost": {
+        "summary": "Plan/usage NOT ACCESSIBLE here; no paid security SKU authorized",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "Feature-specific repository settings; some require administration",
+      "repositories_in_scope": [
+        "imim2009im-a11y/digital-insight-ai"
+      ],
+      "risks": [
+        "Feature availability varies by visibility/plan; CodeQL may consume Actions compute"
+      ],
+      "expected_result": "Verified feature availability and scoped coverage, with actual enablement reported separately.",
+      "alternatives": [
+        "Scoped local scanners after source and cost review"
+      ],
+      "rollback": "Owner-approved settings change and/or workflow revert",
+      "decision": "CONDITIONAL",
+      "installation_status": "Not enabled by this research"
+    },
+    {
+      "name": "GitHub Copilot / GitHub Models / external AI reviewer",
+      "official_source": "https://docs.github.com",
+      "purpose": "Evaluate only after verified included entitlement/quota, code privacy and restricted access",
+      "maintenance_evidence": {
+        "summary": "No model/provider/version selected"
+      },
+      "latest_release": {},
+      "license": "Service/provider terms; model terms must be evaluated individually",
+      "license_file_evidence": [],
+      "cost": {
+        "summary": "No paid plan, API call, subscription or generation initiated",
+        "maximum_unapproved_spend_usd": 0
+      },
+      "permissions": "No access granted; never secret/admin/branch-bypass access",
+      "repositories_in_scope": [],
+      "risks": [
+        "Unknown entitlement/quota; metered API spending or private code transfer possible"
+      ],
+      "expected_result": "No activation until entitlement, privacy scope and zero-spend controls are verified.",
+      "alternatives": [
+        "Deterministic local checks and human review without paid inference"
+      ],
+      "rollback": "Disable approved integration, revoke scoped grant with owner review, revert invocation",
+      "decision": "NEEDS AUTHORIZATION",
+      "installation_status": "Not activated"
+    }
+  ]
+}
