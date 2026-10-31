@@ -35,5 +35,5 @@ jobs:
         run: |
           set -euo pipefail
           echo "## Public response headers (observation, not enforcement)" >> "$GITHUB_STEP_SUMMARY"
-          python3 scripts/edge_headers_audit.py --live | tee edge-header-observation.json
+          python3 scripts/edge_headers_audit.py --live --strict | tee edge-header-observation.json
           cat edge-header-observation.json >> "$GITHUB_STEP_SUMMARY"
