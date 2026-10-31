@@ -78,6 +78,17 @@ async function exercise(configured) {
     const cookie = loginResponse.headers.get('set-cookie')?.split(';')[0];
     assert.ok(cookie?.startsWith('dip_session='), 'login must supply an HttpOnly session cookie');
     const authHeaders = { Cookie: cookie };
+    const loginAgain=await fetch('http://127.0.0.1:' + listenPort + '/api/login',{
+      method:'POST',headers:{'content-type':'application/json'},
+      body:JSON.stringify({password:'local-test-password'}),
+    });
+    assert.equal(loginAgain.status,200);
+    const secondCookie=loginAgain.headers.get('set-cookie')?.split(';')[0];
+    assert.ok(secondCookie&&secondCookie!==cookie,'every login must create a distinct session');
+    const loggedOut=await request('/api/logout',{method:'POST',headers:{Cookie:secondCookie}});
+    assert.equal(loggedOut.status,200);
+    assert.equal((await request('/api/state',{headers:{Cookie:secondCookie}})).status,401,'logout must invalidate the session server-side');
+    assert.equal((await request('/api/state',{headers:authHeaders})).status,200,'logging out one session must not revoke another');
     const emptyProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(emptyProbe.status, 200);
     assert.equal(emptyProbe.body.schedulerCredentialConfigured, configured);
@@ -178,7 +189,7 @@ async function exercise(configured) {
     // restoration should leave old state intact rather than re-bootstrap it.
     const restoredProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(restoredProbe.status, 200);
-    assert.equal(restoredProbe.body.dueJobs, 1, 'preflight must count restored pending jobs without publishing');
+    assert.equal(restoredProbe.body.dueJobs, 2, 'both distinct pending jobs must survive failed-state recovery without publication');
   } finally {
     child.kill('SIGTERM');
     await new Promise((resolve) => {
