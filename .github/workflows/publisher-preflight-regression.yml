@@ -28,6 +28,7 @@ jobs:
           node --check publisher/server.mjs
           node --check publisher/test.mjs
           node --check publisher/public/app.js
+          node --check publisher/test-races.mjs
       - name: Run isolated publisher authentication and preflight tests
         working-directory: publisher
         env:
@@ -35,3 +36,5 @@ jobs:
           TELEGRAM_CHAT_ID: ""
           DISCORD_WEBHOOK_URL: ""
         run: npm test
+      - name: Test blocked outbound traffic, parallel writes and crash recovery
+        run: node publisher/test-races.mjs
