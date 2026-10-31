@@ -10,6 +10,8 @@ const dataFile = path.join(__dirname, 'data', 'store.json');
 const PORT = Number(process.env.PORT || 8787);
 const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || '';
 const SESSION_SECRET = process.env.SESSION_SECRET || '';
+// Dedicated scheduler credential; never execute jobs on unauthenticated requests.
+const DIA_SCHEDULER_TOKEN = process.env.DIA_SCHEDULER_TOKEN || '';
 const SESSION_COOKIE = 'dip_session';
 const MAX_BODY_BYTES = 1024 * 1024;
 const loginAttempts = new Map();
@@ -61,6 +63,9 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
   }
   if(req.method==='POST'&&u.pathname==='/api/logout')return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});
   if(req.method==='POST'&&u.pathname==='/api/run-due'){
+    // Fail closed until the same strong secret is configured in Render and GitHub Actions.
+    if(DIA_SCHEDULER_TOKEN.length < 32)return json(res,503,{error:'scheduler_auth_not_configured'});
+    if(!timingSafeEqual(req.headers.authorization || '', 'Bearer ' + DIA_SCHEDULER_TOKEN))return json(res,401,{error:'authentication_required'});
     const due=state.jobs.filter(j=>j.status==='SCHEDULED'&&new Date(j.scheduledFor)<=new Date());for(const job of due)await executeJob(state,job);return json(res,200,{processed:due.length});
   }
   if(u.pathname.startsWith('/api/')&&!requireAuth(req,res))return;
