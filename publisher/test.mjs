@@ -133,6 +133,15 @@ async function exercise(configured) {
     const corruptProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(corruptProbe.status, 503, 'preflight must refuse corrupted state');
     assert.equal(readFileSync(statePath, 'utf8'), '{invalid-json', 'preflight must not repair or overwrite corrupted state');
+    const healthOnCorrupt = await request('/api/health');
+    assert.equal(healthOnCorrupt.status, 503, 'regular API must fail closed on corrupted state');
+    assert.equal(healthOnCorrupt.body.error, 'publisher_state_unavailable');
+    assert.equal(readFileSync(statePath, 'utf8'), '{invalid-json', 'regular API must preserve corrupted data for recovery');
+    const invalidStructure = JSON.stringify({ posts: [], jobs: null, audit: [] });
+    writeFileSync(statePath, invalidStructure);
+    const malformedStateHealth = await request('/api/health');
+    assert.equal(malformedStateHealth.status, 503, 'regular API must reject malformed persisted state');
+    assert.equal(readFileSync(statePath, 'utf8'), invalidStructure, 'malformed state must not be overwritten');
     writeFileSync(statePath, savedState);
     const restoredProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(restoredProbe.status, 200);
