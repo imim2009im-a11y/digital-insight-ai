@@ -68,7 +68,7 @@ function staticFile(res,pathname){const rel=pathname==='/'?'index.html':pathname
 function readStateForPreflight(){
   try {
     const snapshot=JSON.parse(fs.readFileSync(dataFile,'utf8'));
-    return snapshot&&typeof snapshot==='object'&&Array.isArray(snapshot.jobs)?snapshot:null;
+    return snapshot&&typeof snapshot==='object'&&Array.isArray(snapshot.posts)&&Array.isArray(snapshot.jobs)&&Array.isArray(snapshot.audit)?snapshot:null;
   } catch {
     return null;
   }
