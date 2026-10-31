@@ -195,6 +195,11 @@ async function exercise(configured) {
     const malformedPreflight = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(malformedPreflight.status, 503, 'preflight must reject incomplete persisted state, not just invalid jobs');
     assert.equal(readFileSync(statePath, 'utf8'), invalidPosts, 'incomplete state remains untouched');
+    const invalidProviders=JSON.stringify({posts:[],jobs:[],audit:[],settings:{safeMode:true,timezone:'Asia/Riyadh'},providers:{}});
+    writeFileSync(statePath,invalidProviders);
+    const missingNested=await request('/api/health');
+    assert.equal(missingNested.status,503,'missing provider objects must fail closed, not crash');
+    assert.equal(readFileSync(statePath,'utf8'),invalidProviders);
     writeFileSync(statePath, savedState);
     // The test bootstrap variable is intentionally limited to a synthetic process;
     // restoration should leave old state intact rather than re-bootstrap it.
