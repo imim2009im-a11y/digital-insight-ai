@@ -16,8 +16,10 @@ const stateFile = join(temp, 'data', 'store.json');
 copyFileSync(original, source);
 writeFileSync(preload, [
   "import { writeFileSync } from 'node:fs';",
-  "globalThis.fetch = async (url) => {",
+  "globalThis.fetch = async (url, options = {}) => {",
   "  if (String(url) !== 'https://api.telegram.org/botTEST-NO-REAL-SEND/sendMessage') throw new Error('unexpected_outbound_network_call');",
+  "  const sentText = JSON.parse(options.body || '{}').text;",
+  "  if (sentText === 'Synthetic error path') throw new Error('upstream URL contained SYNTHETIC-PROVIDER-SECRET');",
   "  writeFileSync(process.env.DIA_TEST_MARKER, 'external-call-started');",
   "  await new Promise(resolve => setTimeout(resolve, 950));",
   "  return {ok:true,status:200,json:async()=>({ok:true,result:{message_id:123456}})};",
@@ -86,10 +88,10 @@ async function login() {
   assert.ok(session?.startsWith('dip_session='));
   return {'Cookie': session, 'content-type': 'application/json', 'Origin': base, 'X-Requested-With': 'DigitalInsightPublisher'};
 }
-async function createPost(headers, title) {
+async function createPost(headers, title, content = 'Synthetic content - never send to real provider') {
   const result = await request('/api/posts', {
     method: 'POST', headers,
-    body: JSON.stringify({title, content: 'Synthetic content - never send to real provider', platforms: ['telegram']}),
+    body: JSON.stringify({title, content, platforms: ['telegram']}),
   });
   assert.equal(result.status, 201);
   return result.body;
@@ -137,6 +139,14 @@ try {
   assert.equal(blockedDuplicate.status,'FAILED');
   assert.equal(blockedDuplicate.error,'POST_ALREADY_ATTEMPTED_REQUIRES_REVIEW');
 
+  const providerFailureDraft = await createPost(headers, 'Provider error disclosure', 'Synthetic error path');
+  const providerFailure = await publish(headers, providerFailureDraft.id);
+  assert.equal(providerFailure.status,200);
+  assert.equal(providerFailure.body.status,'FAILED');
+  assert.ok(!JSON.stringify(providerFailure.body).includes('SYNTHETIC-PROVIDER-SECRET'),'provider exception text must not be returned to clients');
+  const failureState = await request('/api/state',{headers});
+  assert.ok(!JSON.stringify(failureState.body).includes('SYNTHETIC-PROVIDER-SECRET'),'provider exception text must not be persisted');
+
   if (existsSync(marker)) unlinkSync(marker);
   const interrupted = await createPost(headers, 'Interrupted outbound');
   const toInterrupt = publish(headers, interrupted.id).catch(() => null);
@@ -146,7 +156,7 @@ try {
   await toInterrupt;
   const afterCrash = JSON.parse(readFileSync(stateFile, 'utf8'));
   assert.equal(afterCrash.jobs[0].status, 'PUBLISHING', 'ambiguous publish must not reset');
-  assert.equal(afterCrash.jobs[1].status, 'PUBLISHED');
+  assert.equal(afterCrash.jobs.find(job => job.id === saved.body.jobs[0].id)?.status, 'PUBLISHED');
   unlinkSync(marker);
 
   startServer(false);
