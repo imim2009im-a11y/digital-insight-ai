@@ -14,6 +14,21 @@
 8. **Scheduler credential probe:** `/api/scheduler/check` verifies the bearer token without executing jobs; private values aren't returned. This probe does not prove future job delivery or durable storage.
 9. **Log/health semantics:** `/api/health` is a process/data-read check, not proof of scheduling readiness, provider delivery or successful restoration.
 
+## Offline authorized snapshot inventory tool
+
+After an authorized operator has exported and protected a local copy of the **real** publisher state, use the new local-only inventory tool on that **copy**, not on the production service:
+
+```bash
+node publisher/state-inventory.mjs --input /path/to/protected/offline-copy/store.json
+```
+
+- This script performs no network requests and no file modifications. Output contains **counts, categorical findings, a SHA-256 of the exact file bytes, and readiness caveats**. It never prints post text, titles, identifiers, provider credentials or raw exceptions.
+- It checks duplicate post/job identifiers, multiple jobs linked to a post, missing referenced posts, invalid scheduled dates and ambiguous `PUBLISHING` jobs.
+- `INVENTORY_ONLY` is **not** an approval to publish. `REVIEW_REQUIRED` means inspect the restricted original data with an authorized operator before taking action. `NOT_VERIFIED` means the file cannot be used as evidence.
+- The tool deliberately does not query Render or Atlas, authenticate to admin APIs, retrieve a backup or prove a restore. Both `restorationVerified` and `productionReleaseApproved` are always `false`.
+- **Never upload** the original private snapshot or the output checksum to public GitHub Actions, issues or PR descriptions. Keep the source export and findings in an approved, access-controlled location and perform an independent restore rehearsal.
+- Regression test: `node publisher/test-inventory.mjs`, using disposable synthetic files with a deliberate private marker that must not appear in output.
+
 ## Required staging acceptance
 
 - Restore a **real authorized snapshot** into an isolated environment; verify expected post/job counts, a checksum and recoverable provider acknowledgment history.
