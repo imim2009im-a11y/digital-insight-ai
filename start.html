@@ -165,22 +165,56 @@
     ];
     const addCampaignParams = (url, tool) => {
       try {
-        const next = new URL(url);
+        const next = new URL(String(url || ''));
+        // Untrusted catalog data must not become a javascript:/data: or HTTP link.
+        if (next.protocol !== 'https:') return null;
         next.searchParams.set('utm_source', 'digital_insight_ai');
         next.searchParams.set('utm_medium', 'affiliate');
         next.searchParams.set('utm_campaign', 'start_tool_finder');
-        next.searchParams.set('utm_content', tool.toLowerCase().replace(/\s+/g, '-'));
+        next.searchParams.set('utm_content', String(tool || '').toLowerCase().replace(/\s+/g, '-'));
         return next.toString();
-      } catch { return url; }
+      } catch { return null; }
     };
     const renderTools = (tools, category='video') => {
       const box = document.getElementById('recommendations');
-      const selected = tools.filter(t => t.category === category).slice(0, 3);
-      const list = selected.length ? selected : tools.slice(0, 3);
-      box.innerHTML = list.map((tool, index) => {
-        const link = addCampaignParams(tool.url, tool.name);
-        return `<article class="recommendation"><span>${index === 0 ? 'الاختيار الأول' : tool.label}</span><h3>${tool.name}</h3><p>${tool.bestFor}</p><p><strong>نقطة القوة:</strong> ${tool.strength}</p><p class="warning"><strong>تنبيه:</strong> ${tool.caution}</p><a class="js-affiliate-link" data-tool="${tool.name}" href="${link}" target="_blank" rel="sponsored nofollow noopener noreferrer">جرّب بحذر</a></article>`;
-      }).join('');
+      if (!box) return;
+      const catalog = Array.isArray(tools) ? tools.filter(tool => tool && typeof tool === 'object') : fallbackTools;
+      const selected = catalog.filter(tool => tool.category === category).slice(0, 3);
+      const list = selected.length ? selected : catalog.slice(0, 3);
+      const fragment = document.createDocumentFragment();
+      list.forEach((tool, index) => {
+        const article = document.createElement('article');
+        article.className = 'recommendation';
+        const label = document.createElement('span');
+        label.textContent = index === 0 ? 'الاختيار الأول' : String(tool.label || '');
+        const title = document.createElement('h3');
+        title.textContent = String(tool.name || '');
+        const bestFor = document.createElement('p');
+        bestFor.textContent = String(tool.bestFor || '');
+        const strength = document.createElement('p');
+        const strengthLabel = document.createElement('strong');
+        strengthLabel.textContent = 'نقطة القوة:';
+        strength.append(strengthLabel, document.createTextNode(' ' + String(tool.strength || '')));
+        const caution = document.createElement('p');
+        caution.className = 'warning';
+        const cautionLabel = document.createElement('strong');
+        cautionLabel.textContent = 'تنبيه:';
+        caution.append(cautionLabel, document.createTextNode(' ' + String(tool.caution || '')));
+        article.append(label, title, bestFor, strength, caution);
+        const href = addCampaignParams(tool.url, tool.name);
+        if (href) {
+          const link = document.createElement('a');
+          link.className = 'js-affiliate-link';
+          link.dataset.tool = String(tool.name || '');
+          link.href = href;
+          link.target = '_blank';
+          link.rel = 'sponsored nofollow noopener noreferrer';
+          link.textContent = 'جرّب بحذر';
+          article.append(link);
+        }
+        fragment.append(article);
+      });
+      box.replaceChildren(fragment);
     };
     const boot = async () => {
       let tools = fallbackTools;

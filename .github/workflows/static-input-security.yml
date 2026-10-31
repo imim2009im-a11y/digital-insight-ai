@@ -1,0 +1,37 @@
+name: Static Input Security Regression
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "start.html"
+      - "saferelay-ai/script.js"
+      - "scripts/test-static-input-security.mjs"
+      - ".github/workflows/static-input-security.yml"
+  push:
+    branches: [main]
+    paths:
+      - "start.html"
+      - "saferelay-ai/script.js"
+      - "scripts/test-static-input-security.mjs"
+      - ".github/workflows/static-input-security.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  input-security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout pinned revision
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Verify syntax
+        run: |
+          node --check saferelay-ai/script.js
+          node --check scripts/test-static-input-security.mjs
+      - name: Verify untrusted DOM and repeatable PII checks
+        run: node --test scripts/test-static-input-security.mjs
