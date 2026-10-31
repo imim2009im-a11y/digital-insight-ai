@@ -31,6 +31,7 @@ async function exercise(configured) {
       ADMIN_PASSWORD: 'local-test-password',
       SESSION_SECRET: 'local-test-session-secret',
       DIA_SCHEDULER_TOKEN: configured ? token : '',
+      DIA_RELEASE_APPROVALS_ENABLED: configured ? 'true' : '',
       DIA_ADMIN_ORIGIN: 'http://127.0.0.1:' + listenPort,
       DIA_ALLOW_EMPTY_STATE_BOOTSTRAP: 'ISOLATED_TEST_ONLY',
       NODE_ENV: 'test',
@@ -65,8 +66,8 @@ async function exercise(configured) {
       const valid = await request('/api/run-due', {
         method: 'POST', headers: { Authorization: 'Bearer ' + token },
       });
-      assert.equal(valid.status, 200, 'authorized scheduler request must succeed');
-      assert.equal(valid.body.processed, 0, 'isolated test must not publish any jobs');
+      assert.equal(valid.status, 409, 'scheduler must never run the backlog without explicit per-job release IDs');
+      assert.equal(valid.body.error, 'release_manifest_required');
     } else {
       assert.equal(anonymous.status, 503, 'missing secret must fail closed');
     }
