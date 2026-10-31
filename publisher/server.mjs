@@ -35,7 +35,7 @@ function loadState(){
   if(!fs.existsSync(dataFile)){if((process.env.NODE_ENV!=='test'||process.env.DIA_ALLOW_EMPTY_STATE_BOOTSTRAP!=='ISOLATED_TEST_ONLY'))throw new Error('publisher_state_unavailable');fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
   try {
     const value=JSON.parse(fs.readFileSync(dataFile,'utf8'));
-    if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit)||!value.settings||typeof value.settings.safeMode!=='boolean'||!value.providers||typeof value.providers!=='object')throw new Error('invalid_state_shape');
+    if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit)||!value.settings||typeof value.settings.safeMode!=='boolean'||!value.providers||typeof value.providers!=='object'||!value.providers.telegram||typeof value.providers.telegram!=='object'||!value.providers.discord||typeof value.providers.discord!=='object')throw new Error('invalid_state_shape');
     return value;
   } catch {
     // Never silently replace a damaged or unreadable existing datastore with empty jobs.
@@ -110,7 +110,7 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
   let state;
   try {state=schedulerCheck?null:probeRequest?readStateForPreflight():loadState();}
   catch {return json(res,503,{error:'publisher_state_unavailable'});}
-  if(state)refreshProviderState(state);
+  if(state&&!probeRequest)refreshProviderState(state);
   try{
   if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,service:'Digital Insight Publisher',timezone:state.settings.timezone,authConfigured:Boolean(ADMIN_PASSWORD&&SESSION_SECRET),persistence:'ephemeral-file'});
   if(req.method==='POST'&&u.pathname==='/api/login'){
