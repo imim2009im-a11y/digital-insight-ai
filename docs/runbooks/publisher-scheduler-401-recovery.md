@@ -1,7 +1,7 @@
 # Publisher scheduler HTTP 401 — controlled recovery
 
-**Prepared:** 2026-10-31 (Asia/Riyadh). **Status:** investigation complete; production recovery **NOT EXECUTED**.  
-**Owner roles:** Backend/SRE (diagnosis), Security (credential handling), Data/QA (state preservation and verification).  
+**Prepared:** 2026-10-31 (Asia/Riyadh). **Status:** investigation complete; production recovery **NOT EXECUTED**.
+**Owner roles:** Backend/SRE (diagnosis), Security (credential handling), Data/QA (state preservation and verification).
 **Change classification:** high-risk authentication + automated external publishing + ephemeral storage.
 
 ## Confirmed evidence and scope
