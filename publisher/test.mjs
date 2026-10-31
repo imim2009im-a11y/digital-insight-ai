@@ -21,6 +21,7 @@ async function freePort() {
 async function exercise(configured) {
   const dir = mkdtempSync(join(tmpdir(), 'dip-security-test-'));
   const source = join(dir, 'server.mjs');
+  const stateFile = join(dir, 'data', 'store.json');
   copyFileSync(original, source);
   const listenPort = await freePort();
   const child = spawn(process.execPath, [source], {
@@ -30,6 +31,7 @@ async function exercise(configured) {
       ADMIN_PASSWORD: 'local-test-password',
       SESSION_SECRET: 'local-test-session-secret',
       DIA_SCHEDULER_TOKEN: configured ? token : '',
+      DIA_ADMIN_ORIGIN: 'http://127.0.0.1:' + listenPort,
       DIA_ALLOW_EMPTY_STATE_BOOTSTRAP: 'ISOLATED_TEST_ONLY',
       NODE_ENV: 'test',
       TELEGRAM_BOT_TOKEN: '',
@@ -78,7 +80,7 @@ async function exercise(configured) {
     assert.equal(loginResponse.status, 200);
     const cookie = loginResponse.headers.get('set-cookie')?.split(';')[0];
     assert.ok(cookie?.startsWith('dip_session='), 'login must supply an HttpOnly session cookie');
-    const authHeaders = { Cookie: cookie };
+    const authHeaders = { Cookie: cookie, Origin: 'http://127.0.0.1:' + listenPort, 'X-Requested-With': 'DigitalInsightPublisher', 'content-type': 'application/json' };
     const loginAgain=await fetch('http://127.0.0.1:' + listenPort + '/api/login',{
       method:'POST',headers:{'content-type':'application/json'},
       body:JSON.stringify({password:'local-test-password'}),
@@ -86,11 +88,22 @@ async function exercise(configured) {
     assert.equal(loginAgain.status,200);
     const secondCookie=loginAgain.headers.get('set-cookie')?.split(';')[0];
     assert.ok(secondCookie&&secondCookie!==cookie,'every login must create a distinct session');
-    const loggedOut=await request('/api/logout',{method:'POST',headers:{Cookie:secondCookie}});
+    const loggedOut=await request('/api/logout',{method:'POST',headers:{...authHeaders,Cookie:secondCookie}});
     assert.equal(loggedOut.status,200);
     assert.equal((await request('/api/state',{headers:{Cookie:secondCookie}})).status,401,'logout must invalidate the session server-side');
     assert.equal((await request('/api/state',{headers:authHeaders})).status,200,'logging out one session must not revoke another');
     const emptyProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    const validSnapshot = readFileSync(stateFile, 'utf8');
+    writeFileSync(stateFile, JSON.stringify({posts:[],jobs:[],audit:[],settings:{},providers:{telegram:{},discord:{}}}));
+    const malformedShapeProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(malformedShapeProbe.status, 503, 'preflight must reject a syntactically valid but incomplete state snapshot');
+    writeFileSync(stateFile, validSnapshot);
+    const csrfAttempt = await request('/api/settings', {method:'POST',headers:{Cookie:cookie,Origin:'https://attacker.onrender.com','content-type':'text/plain'},body:'{"safeMode":false}'});
+    assert.equal(csrfAttempt.status,403,'same-site sibling origins and simple text/plain posts must fail CSRF validation');
+    const sameOriginBadType = await request('/api/settings', {method:'POST',headers:{Cookie:cookie,Origin:'http://127.0.0.1:'+listenPort,'X-Requested-With':'DigitalInsightPublisher','content-type':'text/plain'},body:'{"safeMode":false}'});
+    assert.equal(sameOriginBadType.status,403,'non-JSON admin mutations must be rejected');
+    const missingOrigin = await request('/api/settings', {method:'POST',headers:{Cookie:cookie,'X-Requested-With':'DigitalInsightPublisher','content-type':'application/json'},body:JSON.stringify({safeMode:false})});
+    assert.equal(missingOrigin.status,403,'admin mutation without Origin must be rejected');
     assert.equal(emptyProbe.status, 200);
     assert.equal(emptyProbe.body.schedulerCredentialConfigured, configured);
     assert.equal(emptyProbe.body.credentialParity, 'UNVERIFIED');
@@ -104,6 +117,12 @@ async function exercise(configured) {
     assert.equal(emptyProbe.body.publishingTriggered, false);
     const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'safeMode', 'unverifiedJobs', 'manualReviewRequired', 'autoPublishEnabled', 'persistence', 'publishingTriggered'];
     assert.deepEqual(Object.keys(emptyProbe.body).sort(), allowedKeys.sort(), 'no job content or secrets are exposed');
+    const manualDraft = await request('/api/posts', {method:'POST',headers:authHeaders,body:JSON.stringify({title:'Safe Mode manual test',content:'Synthetic only',platforms:['telegram']})});
+    assert.equal(manualDraft.status,201);
+    const blockedManual = await request('/api/publish', {method:'POST',headers:authHeaders,body:JSON.stringify({postId:manualDraft.body.id,confirm:true})});
+    assert.equal(blockedManual.status,423,'Safe Mode must block manual publishing before a job is recorded');
+    const noManualJob = await request('/api/state', {headers:authHeaders});
+    assert.equal(noManualJob.body.jobs.length,0,'blocked manual publish must not create a queue entry');
     const created = await request('/api/posts', {
       method: 'POST',
       headers: { ...authHeaders, 'content-type': 'application/json' },
@@ -162,7 +181,7 @@ async function exercise(configured) {
     })));
     assert.ok(concurrent.every(v=>v.status===201),'parallel creation must be serialized');
     const allPosts=await request('/api/state',{headers:authHeaders});
-    assert.equal(allPosts.body.posts.length,17,'all concurrent writes must survive');
+    assert.equal(allPosts.body.posts.length,18,'all concurrent writes and the blocked manual draft must survive');
     const samePost=concurrent[0].body.id;
     const claims=await Promise.all([1,2].map(()=>request('/api/schedule',{
       method:'POST',headers:{...authHeaders,'content-type':'application/json'},

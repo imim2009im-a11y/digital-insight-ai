@@ -45,7 +45,8 @@ function startServer(testBootstrap) {
       ADMIN_PASSWORD: 'SYNTHETIC-ADMIN-NOT-A-SECRET',
       SESSION_SECRET: 'SYNTHETIC-SESSION-NOT-A-SECRET',
       DIA_SCHEDULER_TOKEN: 'SYNTHETIC-SCHEDULER-NOT-A-SECRET-123456',
-      DIA_AUTO_PUBLISH_ENABLED: '',
+      DIA_AUTO_PUBLISH_ENABLED: 'true',
+      DIA_ADMIN_ORIGIN: base,
       TELEGRAM_BOT_TOKEN: 'TEST-NO-REAL-SEND',
       TELEGRAM_CHAT_ID: 'TEST-NO-REAL-SEND',
       DISCORD_WEBHOOK_URL: '',
@@ -83,7 +84,7 @@ async function login() {
   assert.equal(response.status, 200);
   const session = response.headers.get('set-cookie')?.split(';')[0];
   assert.ok(session?.startsWith('dip_session='));
-  return {'Cookie': session, 'content-type': 'application/json'};
+  return {'Cookie': session, 'content-type': 'application/json', 'Origin': base, 'X-Requested-With': 'DigitalInsightPublisher'};
 }
 async function createPost(headers, title) {
   const result = await request('/api/posts', {
@@ -105,6 +106,8 @@ try {
     try {return (await request('/api/health')).status === 200} catch {return false}
   }, 'synthetic server ready');
   let headers = await login();
+  const safeModeOff = await request('/api/settings', {method:'POST',headers,body:JSON.stringify({safeMode:false})});
+  assert.equal(safeModeOff.status,200,'synthetic manual publish requires explicit Safe Mode disablement');
 
   const first = await createPost(headers, 'Slow outbound');
   const pendingPublish = publish(headers, first.id);
@@ -121,7 +124,20 @@ try {
   assert.equal(saved.body.jobs[0].status, 'PUBLISHED');
   assert.equal(new Set(saved.body.posts.map(p => p.id)).size, 13);
 
+  // Simulate a legacy duplicate job already present in a recovered offline snapshot.
+  const legacyDuplicate = {...saved.body.jobs[0], id:'legacy-duplicate-job', status:'SCHEDULED', scheduledFor:new Date(Date.now()-60_000).toISOString(), error:null, results:[]};
+  writeFileSync(stateFile, JSON.stringify({...saved.body, jobs:[...saved.body.jobs, legacyDuplicate]}, null, 2));
   unlinkSync(marker);
+  const dueResult = await request('/api/run-due', {method:'POST',headers:{Authorization:'Bearer SYNTHETIC-SCHEDULER-NOT-A-SECRET-123456'}});
+  assert.equal(dueResult.status,200);
+  assert.equal(dueResult.body.processed,1);
+  assert.equal(existsSync(marker),false,'legacy duplicate for a successfully published post must not call the provider again');
+  const duplicateState = await request('/api/state',{headers});
+  const blockedDuplicate = duplicateState.body.jobs.find(job=>job.id==='legacy-duplicate-job');
+  assert.equal(blockedDuplicate.status,'FAILED');
+  assert.equal(blockedDuplicate.error,'POST_ALREADY_ATTEMPTED_REQUIRES_REVIEW');
+
+  if (existsSync(marker)) unlinkSync(marker);
   const interrupted = await createPost(headers, 'Interrupted outbound');
   const toInterrupt = publish(headers, interrupted.id).catch(() => null);
   await waitFor(() => existsSync(marker), 'second fake provider request reached');
