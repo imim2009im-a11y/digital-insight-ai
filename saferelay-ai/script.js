@@ -86,4 +86,3 @@ if (form) {
     resultBox.replaceChildren(...nodes);
   });
 }
-
