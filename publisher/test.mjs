@@ -66,6 +66,48 @@ async function exercise(configured) {
     } else {
       assert.equal(anonymous.status, 503, 'missing secret must fail closed');
     }
+    // A scheduler preflight must be private, bounded, nonpublishing and free of secrets.
+    assert.equal((await request('/api/scheduler/preflight')).status, 401, 'preflight requires an admin session');
+    const loginResponse = await fetch('http://127.0.0.1:' + listenPort + '/api/login', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ password: 'local-test-password' }),
+    });
+    assert.equal(loginResponse.status, 200);
+    const cookie = loginResponse.headers.get('set-cookie')?.split(';')[0];
+    assert.ok(cookie?.startsWith('dip_session='), 'login must supply an HttpOnly session cookie');
+    const authHeaders = { Cookie: cookie };
+    const emptyProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(emptyProbe.status, 200);
+    assert.equal(emptyProbe.body.schedulerCredentialConfigured, configured);
+    assert.equal(emptyProbe.body.credentialParity, 'UNVERIFIED');
+    assert.equal(emptyProbe.body.scheduledJobs, 0);
+    assert.equal(emptyProbe.body.dueJobs, 0);
+    assert.equal(emptyProbe.body.persistence, 'ephemeral-file');
+    assert.equal(emptyProbe.body.publishingTriggered, false);
+    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'persistence', 'publishingTriggered'];
+    assert.deepEqual(Object.keys(emptyProbe.body).sort(), allowedKeys.sort(), 'no job content or secrets are exposed');
+    const created = await request('/api/posts', {
+      method: 'POST',
+      headers: { ...authHeaders, 'content-type': 'application/json' },
+      body: JSON.stringify({ title: 'Synthetic', content: 'Local regression test only', platforms: ['telegram'] }),
+    });
+    assert.equal(created.status, 201);
+    const scheduled = await request('/api/schedule', {
+      method: 'POST',
+      headers: { ...authHeaders, 'content-type': 'application/json' },
+      body: JSON.stringify({ postId: created.body.id, scheduledFor: new Date(Date.now() - 60000).toISOString() }),
+    });
+    assert.equal(scheduled.status, 201);
+    const beforeProbe = await request('/api/state', { headers: authHeaders });
+    assert.equal(beforeProbe.body.jobs[0].status, 'SCHEDULED');
+    const dueProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(dueProbe.status, 200);
+    assert.equal(dueProbe.body.scheduledJobs, 1);
+    assert.equal(dueProbe.body.dueJobs, 1);
+    assert.equal(dueProbe.body.publishingTriggered, false);
+    const afterProbe = await request('/api/state', { headers: authHeaders });
+    assert.deepEqual(afterProbe.body, beforeProbe.body, 'preflight must not mutate pending jobs');
   } finally {
     child.kill('SIGTERM');
     await new Promise((resolve) => {
