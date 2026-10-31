@@ -158,7 +158,12 @@ try {
   assert.equal(scheduledRelease.status,201);
   const releasePreview=await request('/api/scheduler/release-preview?jobId='+encodeURIComponent(scheduledRelease.body.id),{headers});
   assert.equal(releasePreview.status,200);
-  const approval=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({jobId:scheduledRelease.body.id,fingerprint:releasePreview.body.fingerprint,confirm:true})});
+  const wrongFingerprint=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({jobId:scheduledRelease.body.id,fingerprint:'0'.repeat(64),confirm:true})});
+  assert.equal(wrongFingerprint.status,409,'approval must match the current task fingerprint');
+  const concurrentApprovals=await Promise.all(Array.from({length:2},()=>request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({jobId:scheduledRelease.body.id,fingerprint:releasePreview.body.fingerprint,confirm:true})})));
+  assert.equal(concurrentApprovals.filter(x=>x.status===201).length,1,'only one concurrent approval for a job may win');
+  assert.equal(concurrentApprovals.filter(x=>x.status===409).length,1);
+  const approval=concurrentApprovals.find(x=>x.status===201);
   assert.equal(approval.status,201);
   assert.match(approval.body.releaseId,/^[0-9a-f-]{36}$/);
   const missingManifest=await request('/api/run-due',{method:'POST',headers:schedulerHeaders,body:'{}'});
@@ -209,7 +214,24 @@ try {
   const afterRestart = await request('/api/state', {headers});
   assert.equal(afterRestart.body.jobs[0].status, 'PUBLISHING');
   assert.equal(readFileSync(marker, 'utf8'), '1', 'restart must not replay ambiguous external send');
-  console.log('PASS: outbound wait serialization, interrupted send visibility and no automatic replay');
+  const capacityCandidates=[];
+  for(let i=0;i<4;i++){
+    const post=await createPost(headers,'Approval capacity '+i);
+    const schedule=await request('/api/schedule',{method:'POST',headers,body:JSON.stringify({postId:post.id,scheduledFor:new Date(Date.now()-60_000).toISOString()})});
+    assert.equal(schedule.status,201);
+    const preview=await request('/api/scheduler/release-preview?jobId='+encodeURIComponent(schedule.body.id),{headers});
+    assert.equal(preview.status,200);
+    capacityCandidates.push({jobId:schedule.body.id,fingerprint:preview.body.fingerprint});
+  }
+  for(let i=0;i<3;i++){
+    const result=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({...capacityCandidates[i],confirm:true})});
+    assert.equal(result.status,201,'three live approvals fit the global cap');
+  }
+  const overCapacity=await request('/api/scheduler/approve-job',{method:'POST',headers,body:JSON.stringify({...capacityCandidates[3],confirm:true})});
+  assert.equal(overCapacity.status,429,'a fourth outstanding approval must be rejected');
+  assert.equal(overCapacity.body.error,'release_approval_capacity_reached');
+  assert.equal(readFileSync(marker,'utf8'),'1','approval capacity checks must never publish');
+  console.log('PASS: bounded release approvals, fingerprint checks, concurrent approval, crash visibility and no automatic replay');
 } finally {
   await stopServer();
   rmSync(temp, {recursive: true, force: true});

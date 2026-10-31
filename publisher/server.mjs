@@ -15,6 +15,7 @@ const DIA_SCHEDULER_TOKEN = process.env.DIA_SCHEDULER_TOKEN || '';
 const DIA_ADMIN_ORIGIN = process.env.DIA_ADMIN_ORIGIN || 'https://digital-insight-publisher.onrender.com';
 const DIA_RELEASE_APPROVALS_ENABLED = process.env.DIA_RELEASE_APPROVALS_ENABLED === 'true';
 const RELEASE_APPROVAL_TTL_MS = 10 * 60 * 1000;
+const MAX_OUTSTANDING_RELEASE_APPROVALS = 3;
 const MAX_RELEASE_BATCH = 3;
 // In-memory epoch intentionally invalidates stored approvals after process restart/restore.
 const RELEASE_EPOCH = crypto.randomUUID();
@@ -191,6 +192,9 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     const job=state.jobs.find(item=>item?.id===b.jobId);const now=Date.now();
     if(!releaseEligible(state,job,now)||b.fingerprint!==releaseFingerprint(state,job))return json(res,409,{error:'job_not_release_eligible'});
     if(job.releaseApproval?.state==='APPROVED'&&job.releaseApproval.epoch===RELEASE_EPOCH&&Date.parse(job.releaseApproval.expiresAt)>now)return json(res,409,{error:'job_already_approved'});
+    let outstanding=0;let cleanedApprovals=false;
+    for(const candidate of state.jobs){const a=candidate?.releaseApproval;if(a?.state!=='APPROVED')continue;if(a.epoch!==RELEASE_EPOCH||!Number.isFinite(Date.parse(a.expiresAt))||Date.parse(a.expiresAt)<=now){a.state='EXPIRED';cleanedApprovals=true;}else outstanding++;}
+    if(outstanding>=MAX_OUTSTANDING_RELEASE_APPROVALS){if(cleanedApprovals)saveState(state);return json(res,429,{error:'release_approval_capacity_reached'});}
     const releaseId=crypto.randomUUID();const expiresAt=new Date(now+RELEASE_APPROVAL_TTL_MS).toISOString();
     job.releaseApproval={id:releaseId,fingerprint:b.fingerprint,expiresAt,epoch:RELEASE_EPOCH,state:'APPROVED',approvedAt:new Date(now).toISOString()};
     audit(state,'JOB_RELEASE_APPROVED',{jobId:job.id});
