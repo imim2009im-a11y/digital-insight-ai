@@ -27,6 +27,34 @@ EXPECTED = (
 )
 
 
+def csp_meets_static_baseline(value: str) -> bool:
+    """Conservative static-site baseline, not a full browser CSP security review."""
+    directives: dict[str, list[str]] = {}
+    for part in value.lower().split(";"):
+        tokens = part.split()
+        if not tokens:
+            continue
+        if tokens[0] in directives:
+            return False  # Duplicate directives are ambiguous to simple scanners.
+        directives[tokens[0]] = tokens[1:]
+    defaults = directives.get("default-src", [])
+    frames = directives.get("frame-ancestors", [])
+    objects = directives.get("object-src", [])
+    bases = directives.get("base-uri", [])
+    if not defaults or not set(defaults).issubset({"'self'", "'none'"}):
+        return False
+    if not frames or not set(frames).issubset({"'none'", "'self'"}):
+        return False
+    if objects != ["'none'"]:
+        return False
+    if not bases or not set(bases).issubset({"'none'", "'self'"}):
+        return False
+    scripts = directives.get("script-src", defaults)
+    if any(v in scripts for v in ("*", "'unsafe-inline'", "'unsafe-eval'", "http:", "https:", "data:")):
+        return False
+    return True
+
+
 def evaluate(headers: dict[str, str], final_url: str) -> dict[str, str]:
     """Return categorical evidence, never any raw response-header values."""
     h = {str(key).lower(): str(value).strip() for key, value in headers.items()}
@@ -36,12 +64,12 @@ def evaluate(headers: dict[str, str], final_url: str) -> dict[str, str]:
     match = re.search(r"(?:^|;)\s*max-age\s*=\s*(\d+)\s*(?:;|$)", hsts, re.I)
     result["Strict-Transport-Security"] = (
         "NOT_PRESENT" if not hsts else
-        "WEAK" if scheme != "https" or not match or int(match.group(1)) < 300 else "PRESENT"
+        "WEAK" if scheme != "https" or not match or int(match.group(1)) < 31536000 else "PRESENT"
     )
     csp = h.get("content-security-policy", "").lower()
     result["Content-Security-Policy"] = (
         "NOT_PRESENT" if not csp else
-        "WEAK" if "default-src" not in csp or "frame-ancestors" not in csp else "PRESENT"
+        "PRESENT" if csp_meets_static_baseline(csp) else "WEAK"
     )
     xcto = h.get("x-content-type-options", "").lower()
     result["X-Content-Type-Options"] = "PRESENT" if xcto == "nosniff" else ("WEAK" if xcto else "NOT_PRESENT")
@@ -101,10 +129,10 @@ def main() -> int:
         print(json.dumps({"status": "NOT_VERIFIED", "reason": type(exc).__name__}, sort_keys=True))
         return 2
 
-    status = "VERIFIED_PRESENT" if all(v == "PRESENT" for v in checks.values()) else "GAPS_IDENTIFIED"
+    status = "BASELINE_PRESENT" if all(v == "PRESENT" for v in checks.values()) else "GAPS_IDENTIFIED"
     print(json.dumps({"evidence": evidence, "status": status, "checks": checks},
                      ensure_ascii=False, sort_keys=True))
-    return int(bool(args.strict and status != "VERIFIED_PRESENT"))
+    return int(bool(args.strict and status != "BASELINE_PRESENT"))
 
 
 if __name__ == "__main__":
