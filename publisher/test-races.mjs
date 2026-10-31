@@ -15,12 +15,12 @@ const marker = join(temp, 'mock-send-entered');
 const stateFile = join(temp, 'data', 'store.json');
 copyFileSync(original, source);
 writeFileSync(preload, [
-  "import { readFileSync, writeFileSync } from 'node:fs';",
+  "import { existsSync, readFileSync, writeFileSync } from 'node:fs';",
   "globalThis.fetch = async (url, options = {}) => {",
   "  if (String(url) !== 'https://api.telegram.org/botTEST-NO-REAL-SEND/sendMessage') throw new Error('unexpected_outbound_network_call');",
   "  const sentText = JSON.parse(options.body || '{}').text;",
   "  if (sentText === 'Synthetic error path') throw new Error('upstream URL contained SYNTHETIC-PROVIDER-SECRET');",
-  "  const count = Number(readFileSync(process.env.DIA_TEST_MARKER, 'utf8') || 0);",
+  "  const count = (existsSync(process.env.DIA_TEST_MARKER) ? Number(readFileSync(process.env.DIA_TEST_MARKER, 'utf8') || 0) : 0);",
   "  writeFileSync(process.env.DIA_TEST_MARKER, String(count + 1));",
   "  await new Promise(resolve => setTimeout(resolve, 950));",
   "  return {ok:true,status:200,json:async()=>({ok:true,result:{message_id:123456}})};",
@@ -130,13 +130,19 @@ try {
 
   // Simulate a legacy duplicate job already present in a recovered offline snapshot.
   const legacyDuplicate = {...saved.body.jobs[0], id:'legacy-duplicate-job', status:'SCHEDULED', scheduledFor:new Date(Date.now()-60_000).toISOString(), error:null, results:[]};
-  writeFileSync(stateFile, JSON.stringify({...saved.body, jobs:[...saved.body.jobs, legacyDuplicate]}, null, 2));
+  const legacyFailed = {...legacyDuplicate,id:'legacy-failed-job',status:'FAILED'};
+  const legacyPartial = {...legacyDuplicate,id:'legacy-partial-job',status:'PARTIAL_SUCCESS'};
+  writeFileSync(stateFile, JSON.stringify({...saved.body, jobs:[...saved.body.jobs, legacyDuplicate, legacyFailed, legacyPartial]}, null, 2));
   if (existsSync(marker)) unlinkSync(marker);
   const schedulerHeaders={Authorization:'Bearer SYNTHETIC-SCHEDULER-NOT-A-SECRET-123456','content-type':'application/json'};
   const broadRun = await request('/api/run-due', {method:'POST',headers:schedulerHeaders,body:'{}'});
   assert.equal(broadRun.status,409,'scheduler must reject broad backlog execution without release IDs');
   const duplicatePreview=await request('/api/scheduler/release-preview?jobId=legacy-duplicate-job',{headers});
   assert.equal(duplicatePreview.status,409,'a legacy duplicate of a published post cannot receive approval');
+  for (const jobId of ['legacy-failed-job','legacy-partial-job']) {
+    const unsafeLegacyPreview=await request('/api/scheduler/release-preview?jobId='+jobId,{headers});
+    assert.equal(unsafeLegacyPreview.status,409,`${jobId} is ambiguous and cannot receive approval`);
+  }
   assert.equal(existsSync(marker),false,'legacy duplicate must not call the provider');
 
   const providerFailureDraft = await createPost(headers, 'Provider error disclosure', 'Synthetic error path');

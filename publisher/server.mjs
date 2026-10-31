@@ -65,7 +65,7 @@ function releaseEligible(state,job,now=Date.now()){
   if(!job||job.status!=='SCHEDULED'||!Number.isFinite(Date.parse(job.scheduledFor))||Date.parse(job.scheduledFor)>now)return false;
   if(state.settings.safeMode!==false||!Array.isArray(job.platforms)||job.platforms.length<1)return false;
   if(!state.posts.some(post=>post.id===job.postId))return false;
-  return !state.jobs.some(other=>other.id!==job.id&&other.postId===job.postId&&['SCHEDULED','PUBLISHING','PUBLISHED'].includes(other.status));
+  return !state.jobs.some(other=>other.id!==job.id&&other.postId===job.postId&&true);
 }
 function cookieMap(req){return Object.fromEntries(String(req.headers.cookie||'').split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),decodeURIComponent(v.slice(i+1))]}))}
 const sessions=new Map();
