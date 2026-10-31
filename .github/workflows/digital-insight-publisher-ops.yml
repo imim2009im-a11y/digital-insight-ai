@@ -142,13 +142,14 @@ jobs:
           fi
           exit 1
 
-      - name: Close incident after recovery
+      # Do not auto-close incidents based on transient HTTP 2xx signals:
+      # health does not establish queue safety, durable state, or external delivery.
+      # A human reviewer must verify recovery evidence and close the issue manually.
+      - name: Report healthy probes without closing an incident
         if: steps.run_due.outcome == 'success' && steps.health.outcome == 'success' && steps.auth_guard.outcome == 'success' && steps.frontend.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
+        shell: bash
         run: |
-          title='Digital Insight Publisher production health failure'
-          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
-          if [ -n "$existing" ]; then
-            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment 'Production, frontend, and security checks recovered automatically.'
-          fi
+          {
+            echo 'Probes recovered, but production incidents are NOT auto-closed.'
+            echo 'Queue inventory, storage recovery, and actual provider delivery still require independent verification.'
+          } >> "$GITHUB_STEP_SUMMARY"
