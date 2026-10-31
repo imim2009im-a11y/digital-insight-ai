@@ -108,6 +108,20 @@ async function exercise(configured) {
     assert.equal(dueProbe.body.publishingTriggered, false);
     const afterProbe = await request('/api/state', { headers: authHeaders });
     assert.deepEqual(afterProbe.body, beforeProbe.body, 'preflight must not mutate pending jobs');
+    // Token parity probe is deliberately distinct from the publishing endpoint.
+    const invalidCredentialCheck = await request('/api/scheduler/check', {
+      method: 'POST', headers: { Authorization: 'Bearer incorrect-token' },
+    });
+    assert.equal(invalidCredentialCheck.status, configured ? 401 : 503);
+    if (configured) {
+      const matchingCheck = await fetch('http://127.0.0.1:' + listenPort + '/api/scheduler/check', {
+        method: 'POST', headers: { Authorization: 'Bearer ' + token },
+      });
+      assert.equal(matchingCheck.status, 204, 'matching scheduler token must be verifiable without publishing');
+      assert.equal(await matchingCheck.text(), '', 'credential check must not return secrets or job data');
+      const unmodified = await request('/api/state', { headers: authHeaders });
+      assert.deepEqual(unmodified.body, beforeProbe.body, 'credential check must not execute due jobs');
+    }
     const statePath = join(dir, 'data', 'store.json');
     const savedState = readFileSync(statePath, 'utf8');
     unlinkSync(statePath);
