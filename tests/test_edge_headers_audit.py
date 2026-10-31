@@ -11,8 +11,8 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from edge_headers_audit import evaluate, EXPECTED  # noqa: E402
 
 GOOD = {
-    "Strict-Transport-Security": "max-age=300",
-    "Content-Security-Policy": "default-src 'self'; frame-ancestors 'none'; object-src 'none'",
+    "Strict-Transport-Security": "max-age=31536000",
+    "Content-Security-Policy": "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; script-src 'self'",
     "X-Content-Type-Options": "nosniff",
     "X-Frame-Options": "DENY",
     "Referrer-Policy": "strict-origin-when-cross-origin",
@@ -44,6 +44,23 @@ class HeaderAuditTests(unittest.TestCase):
         self.assertEqual(result["Strict-Transport-Security"], "WEAK")
         self.assertEqual(result["Content-Security-Policy"], "WEAK")
 
+    def test_permissive_csp_cannot_pass_by_directive_names(self):
+        weak = dict(GOOD)
+        weak["Content-Security-Policy"] = "default-src *; frame-ancestors *; object-src 'none'; base-uri 'self'"
+        self.assertEqual(evaluate(weak, "https://digitalinsightai.com/")["Content-Security-Policy"], "WEAK")
+        weak["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'none'; script-src 'unsafe-inline'"
+        self.assertEqual(evaluate(weak, "https://digitalinsightai.com/")["Content-Security-Policy"], "WEAK")
+
+    def test_short_hsts_does_not_satisfy_production_baseline(self):
+        weak = dict(GOOD)
+        weak["Strict-Transport-Security"] = "max-age=300"
+        self.assertEqual(evaluate(weak, "https://digitalinsightai.com/")["Strict-Transport-Security"], "WEAK")
+
+    def test_no_object_src_or_base_uri_is_weak(self):
+        weak = dict(GOOD)
+        weak["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+        self.assertEqual(evaluate(weak, "https://digitalinsightai.com/")["Content-Security-Policy"], "WEAK")
+
     def test_header_keys_case_insensitive(self):
         self.assertEqual(set(evaluate({k.lower(): v for k, v in GOOD.items()},
                                       "https://digitalinsightai.com/").values()), {"PRESENT"})
@@ -58,7 +75,7 @@ class HeaderAuditTests(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             report = json.loads(result.stdout)
             self.assertEqual(report["evidence"], "LOCAL_FIXTURE_NOT_LIVE")
-            self.assertEqual(report["status"], "VERIFIED_PRESENT")
+            self.assertEqual(report["status"], "BASELINE_PRESENT")
 
     def test_missing_headers_fail_strict(self):
         with tempfile.TemporaryDirectory() as tmp:
