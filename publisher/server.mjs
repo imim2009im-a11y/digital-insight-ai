@@ -32,7 +32,7 @@ const defaultState = {
 function ensureDataDir(){fs.mkdirSync(path.dirname(dataFile),{recursive:true})}
 function loadState(){
   ensureDataDir();
-  if(!fs.existsSync(dataFile)){if(process.env.DIA_ALLOW_EMPTY_STATE_BOOTSTRAP!=='ISOLATED_TEST_ONLY')throw new Error('publisher_state_unavailable');fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
+  if(!fs.existsSync(dataFile)){if((process.env.NODE_ENV!=='test'||process.env.DIA_ALLOW_EMPTY_STATE_BOOTSTRAP!=='ISOLATED_TEST_ONLY'))throw new Error('publisher_state_unavailable');fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
   try {
     const value=JSON.parse(fs.readFileSync(dataFile,'utf8'));
     if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit)||!value.settings||typeof value.settings.safeMode!=='boolean'||!value.providers||typeof value.providers!=='object')throw new Error('invalid_state_shape');
@@ -140,7 +140,8 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     const now=Date.now();
     const scheduled=state.jobs.filter(job=>job?.status==='SCHEDULED');
     const dueJobs=scheduled.filter(job=>Number.isFinite(Date.parse(job.scheduledFor))&&Date.parse(job.scheduledFor)<=now).length;
-    return json(res,200,{schedulerCredentialConfigured:DIA_SCHEDULER_TOKEN.length>=32,credentialParity:'UNVERIFIED',scheduledJobs:scheduled.length,dueJobs,safeMode:state.settings.safeMode,persistence:'ephemeral-file',publishingTriggered:false});
+    const unverifiedJobs=state.jobs.filter(job=>job?.status==='PUBLISHING').length;
+    return json(res,200,{unverifiedJobs,manualReviewRequired:unverifiedJobs>0,schedulerCredentialConfigured:DIA_SCHEDULER_TOKEN.length>=32,credentialParity:'UNVERIFIED',scheduledJobs:scheduled.length,dueJobs,safeMode:state.settings.safeMode,persistence:'ephemeral-file',publishingTriggered:false});
   }
   if(u.pathname.startsWith('/api/')&&!requireAuth(req,res))return;
   if(req.method==='GET'&&u.pathname==='/api/state')return json(res,200,state);
