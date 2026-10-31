@@ -99,9 +99,10 @@ async function exercise(configured) {
     assert.equal(emptyProbe.body.safeMode, true);
     assert.equal(emptyProbe.body.unverifiedJobs, 0);
     assert.equal(emptyProbe.body.manualReviewRequired, false);
+    assert.equal(emptyProbe.body.autoPublishEnabled, false,'automatic publication requires explicit environment authorization');
     assert.equal(emptyProbe.body.persistence, 'ephemeral-file');
     assert.equal(emptyProbe.body.publishingTriggered, false);
-    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'safeMode', 'unverifiedJobs', 'manualReviewRequired', 'persistence', 'publishingTriggered'];
+    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'safeMode', 'unverifiedJobs', 'manualReviewRequired', 'autoPublishEnabled', 'persistence', 'publishingTriggered'];
     assert.deepEqual(Object.keys(emptyProbe.body).sort(), allowedKeys.sort(), 'no job content or secrets are exposed');
     const created = await request('/api/posts', {
       method: 'POST',
@@ -123,6 +124,13 @@ async function exercise(configured) {
       const held=await request('/api/run-due',{method:'POST',headers:{Authorization:'Bearer '+token}});
       assert.equal(held.status,423,'safe mode must block overdue automatic publishing');
       assert.equal(held.body.processed,0);
+      const disabled=await request('/api/settings',{method:'POST',headers:{...authHeaders,'content-type':'application/json'},body:JSON.stringify({safeMode:false})});
+      assert.equal(disabled.status,200);
+      const stillHeld=await request('/api/run-due',{method:'POST',headers:{Authorization:'Bearer '+token}});
+      assert.equal(stillHeld.status,423,'disabling safe mode must not enable scheduling without the separate release gate');
+      assert.equal(stillHeld.body.error,'auto_publishing_disabled');
+      const reenabled=await request('/api/settings',{method:'POST',headers:{...authHeaders,'content-type':'application/json'},body:JSON.stringify({safeMode:true})});
+      assert.equal(reenabled.status,200);
     }
     const beforeProbe = await request('/api/state', { headers: authHeaders });
     assert.equal(beforeProbe.body.jobs[0].status, 'SCHEDULED');
