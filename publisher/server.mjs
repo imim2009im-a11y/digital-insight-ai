@@ -53,7 +53,17 @@ async function publishDiscord(content){if(!process.env.DISCORD_WEBHOOK_URL)retur
 async function executeJob(state,job){if(!['QUEUED','SCHEDULED'].includes(job.status))return;const post=state.posts.find(p=>p.id===job.postId);if(!post){job.status='FAILED';job.error='POST_NOT_FOUND';job.updatedAt=new Date().toISOString();saveState(state);return}job.status='PUBLISHING';job.updatedAt=new Date().toISOString();saveState(state);const results=[];for(const platform of job.platforms){let result;try{if(platform==='telegram')result=await publishTelegram(post.content);else if(platform==='discord')result=await publishDiscord(post.content);else result={ok:false,code:'NOT_IMPLEMENTED'}}catch(e){result={ok:false,code:'EXCEPTION',message:cleanText(e?.message||e,200)}}results.push({platform,...result})}job.results=results;const okCount=results.filter(r=>r.ok).length;job.status=okCount===results.length&&okCount>0?'PUBLISHED':okCount>0?'PARTIAL_SUCCESS':'FAILED';job.updatedAt=new Date().toISOString();audit(state,'PUBLISH_ATTEMPT',{jobId:job.id,status:job.status,results:results.map(r=>({platform:r.platform,ok:r.ok,code:r.code||null,providerId:r.providerId||null}))});saveState(state)}
 function staticFile(res,pathname){const rel=pathname==='/'?'index.html':pathname.replace(/^\//,'');const target=path.resolve(publicDir,rel);if(!target.startsWith(`${path.resolve(publicDir)}${path.sep}`)&&target!==path.join(path.resolve(publicDir),'index.html'))return false;if(!fs.existsSync(target)||fs.statSync(target).isDirectory())return false;const ext=path.extname(target);const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'};res.writeHead(200,{'content-type':types[ext]||'application/octet-stream','x-content-type-options':'nosniff','referrer-policy':'no-referrer','content-security-policy':"default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'self'"});fs.createReadStream(target).pipe(res);return true}
 
-const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const state=loadState();refreshProviderState(state);try{
+// Preflight has a separate fail-closed read path: never initialize or repair local state.
+function readStateForPreflight(){
+  try {
+    const snapshot=JSON.parse(fs.readFileSync(dataFile,'utf8'));
+    return snapshot&&typeof snapshot==='object'&&Array.isArray(snapshot.jobs)?snapshot:null;
+  } catch {
+    return null;
+  }
+}
+
+const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const state=probeRequest?readStateForPreflight():loadState();if(state)refreshProviderState(state);try{
   if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,service:'Digital Insight Publisher',timezone:state.settings.timezone,authConfigured:Boolean(ADMIN_PASSWORD&&SESSION_SECRET),persistence:'ephemeral-file'});
   if(req.method==='POST'&&u.pathname==='/api/login'){
     if(!ADMIN_PASSWORD||!SESSION_SECRET)return json(res,503,{error:'admin_auth_not_configured'});
@@ -71,6 +81,7 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
   if(req.method==='GET'&&u.pathname==='/api/scheduler/preflight'){
     // Admin-only operational snapshot. Never invoke publishers or return credentials/job content.
     if(!requireAuth(req,res))return;
+    if(!state)return json(res,503,{error:'scheduler_state_unavailable'});
     const now=Date.now();
     const scheduled=state.jobs.filter(job=>job?.status==='SCHEDULED');
     const dueJobs=scheduled.filter(job=>Number.isFinite(Date.parse(job.scheduledFor))&&Date.parse(job.scheduledFor)<=now).length;
