@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { copyFileSync, mkdtempSync, rmSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
 import { createServer } from 'node:net';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -108,6 +108,21 @@ async function exercise(configured) {
     assert.equal(dueProbe.body.publishingTriggered, false);
     const afterProbe = await request('/api/state', { headers: authHeaders });
     assert.deepEqual(afterProbe.body, beforeProbe.body, 'preflight must not mutate pending jobs');
+    const statePath = join(dir, 'data', 'store.json');
+    const savedState = readFileSync(statePath, 'utf8');
+    unlinkSync(statePath);
+    const missingProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(missingProbe.status, 503, 'preflight must refuse absent state');
+    assert.equal(missingProbe.body.error, 'scheduler_state_unavailable');
+    assert.equal(existsSync(statePath), false, 'preflight must never create a missing state file');
+    writeFileSync(statePath, '{invalid-json');
+    const corruptProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(corruptProbe.status, 503, 'preflight must refuse corrupted state');
+    assert.equal(readFileSync(statePath, 'utf8'), '{invalid-json', 'preflight must not repair or overwrite corrupted state');
+    writeFileSync(statePath, savedState);
+    const restoredProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(restoredProbe.status, 200);
+    assert.equal(restoredProbe.body.dueJobs, 1, 'preflight must count restored pending jobs without publishing');
   } finally {
     child.kill('SIGTERM');
     await new Promise((resolve) => {
