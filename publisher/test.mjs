@@ -142,6 +142,11 @@ async function exercise(configured) {
     const malformedStateHealth = await request('/api/health');
     assert.equal(malformedStateHealth.status, 503, 'regular API must reject malformed persisted state');
     assert.equal(readFileSync(statePath, 'utf8'), invalidStructure, 'malformed state must not be overwritten');
+    const invalidPosts = JSON.stringify({ posts: null, jobs: [], audit: [] });
+    writeFileSync(statePath, invalidPosts);
+    const malformedPreflight = await request('/api/scheduler/preflight', { headers: authHeaders });
+    assert.equal(malformedPreflight.status, 503, 'preflight must reject incomplete persisted state, not just invalid jobs');
+    assert.equal(readFileSync(statePath, 'utf8'), invalidPosts, 'incomplete state remains untouched');
     writeFileSync(statePath, savedState);
     const restoredProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(restoredProbe.status, 200);
