@@ -32,10 +32,10 @@ const defaultState = {
 function ensureDataDir(){fs.mkdirSync(path.dirname(dataFile),{recursive:true})}
 function loadState(){
   ensureDataDir();
-  if(!fs.existsSync(dataFile)){fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
+  if(!fs.existsSync(dataFile)){if(process.env.DIA_ALLOW_EMPTY_STATE_BOOTSTRAP!=='ISOLATED_TEST_ONLY')throw new Error('publisher_state_unavailable');fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
   try {
     const value=JSON.parse(fs.readFileSync(dataFile,'utf8'));
-    if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit))throw new Error('invalid_state_shape');
+    if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit)||!value.settings||typeof value.settings.safeMode!=='boolean'||!value.providers||typeof value.providers!=='object')throw new Error('invalid_state_shape');
     return value;
   } catch {
     // Never silently replace a damaged or unreadable existing datastore with empty jobs.
@@ -49,8 +49,27 @@ async function readBody(req){let bytes=0;const chunks=[];for await(const c of re
 function refreshProviderState(state){state.providers.telegram.connected=Boolean(process.env.TELEGRAM_BOT_TOKEN&&process.env.TELEGRAM_CHAT_ID);state.providers.telegram.mode=state.providers.telegram.connected?'ENV_READY':'ENV_REQUIRED';state.providers.discord.connected=Boolean(process.env.DISCORD_WEBHOOK_URL);state.providers.discord.mode=state.providers.discord.connected?'ENV_READY':'ENV_REQUIRED'}
 function timingSafeEqual(a,b){const aa=Buffer.from(String(a));const bb=Buffer.from(String(b));return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb)}
 function cookieMap(req){return Object.fromEntries(String(req.headers.cookie||'').split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),decodeURIComponent(v.slice(i+1))]}))}
-function expectedSession(){if(!ADMIN_PASSWORD||!SESSION_SECRET)return'';return crypto.createHmac('sha256',SESSION_SECRET).update(`digital-insight-publisher:${ADMIN_PASSWORD}`).digest('hex')}
-function isAuthenticated(req){const token=cookieMap(req)[SESSION_COOKIE]||'';const expected=expectedSession();return Boolean(expected)&&timingSafeEqual(token,expected)}
+const sessions=new Map();
+const SESSION_TTL_MS=12*60*60*1000;
+function digestSession(token){return crypto.createHmac('sha256',SESSION_SECRET).update(token).digest('hex')}
+function purgeSessions(){const now=Date.now();for(const [key,expiry] of sessions)if(expiry<=now)sessions.delete(key)}
+function issueSession(){
+  purgeSessions();
+  if(sessions.size>=512)throw Object.assign(new Error('session_capacity_reached'),{status:503});
+  const token=crypto.randomBytes(32).toString('hex');
+  sessions.set(digestSession(token),Date.now()+SESSION_TTL_MS);
+  return token;
+}
+function revokeSession(req){const token=cookieMap(req)[SESSION_COOKIE]||'';if(token)sessions.delete(digestSession(token))}
+function isAuthenticated(req){
+  if(!SESSION_SECRET||!ADMIN_PASSWORD)return false;
+  const token=cookieMap(req)[SESSION_COOKIE]||'';
+  if(!/^[0-9a-f]{64}$/.test(token))return false;
+  const key=digestSession(token),expiry=sessions.get(key);
+  if(!expiry)return false;
+  if(expiry<=Date.now()){sessions.delete(key);return false}
+  return true;
+}
 function clientKey(req){return String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim()}
 function loginAllowed(req){const key=clientKey(req);const now=Date.now();const row=loginAttempts.get(key);if(!row||now-row.windowStart>15*60_000){loginAttempts.set(key,{count:0,windowStart:now});return true}return row.count<8}
 function recordLoginFailure(req){const key=clientKey(req);const now=Date.now();const row=loginAttempts.get(key)||{count:0,windowStart:now};if(now-row.windowStart>15*60_000){row.count=0;row.windowStart=now}row.count++;loginAttempts.set(key,row)}
@@ -74,7 +93,21 @@ function readStateForPreflight(){
   }
 }
 
-const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';let state;
+let stateQueue=Promise.resolve();
+async function acquireStateLock(){
+  let release;
+  const held=new Promise(resolve=>{release=resolve});
+  const previous=stateQueue;
+  stateQueue=previous.then(()=>held);
+  await previous;
+  return release;
+}
+const MUTATING_API_ROUTES=new Set(['/api/run-due','/api/posts','/api/schedule','/api/publish','/api/settings']);
+const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';
+  const lockRequired=(req.method==='POST'&&MUTATING_API_ROUTES.has(u.pathname))||(req.method==='GET'&&u.pathname==='/api/state');
+  const unlock=lockRequired?await acquireStateLock():()=>{};
+  try {
+  let state;
   try {state=schedulerCheck?null:probeRequest?readStateForPreflight():loadState();}
   catch {return json(res,503,{error:'publisher_state_unavailable'});}
   if(state)refreshProviderState(state);
@@ -84,9 +117,9 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     if(!ADMIN_PASSWORD||!SESSION_SECRET)return json(res,503,{error:'admin_auth_not_configured'});
     if(!loginAllowed(req))return json(res,429,{error:'too_many_login_attempts'});
     const b=await readBody(req);if(!timingSafeEqual(cleanText(b.password,256),ADMIN_PASSWORD)){recordLoginFailure(req);return json(res,401,{error:'invalid_credentials'})}
-    clearLoginFailures(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=${expectedSession()}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`});
+    clearLoginFailures(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=${issueSession()}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`});
   }
-  if(req.method==='POST'&&u.pathname==='/api/logout')return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});
+  if(req.method==='POST'&&u.pathname==='/api/logout'){revokeSession(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});}
   if(req.method==='POST'&&u.pathname==='/api/scheduler/check'){
     // Check scheduler credential parity without running jobs or touching the datastore.
     if(DIA_SCHEDULER_TOKEN.length<32)return json(res,503,{error:'scheduler_auth_not_configured'});
@@ -98,7 +131,7 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     // Fail closed until the same strong secret is configured in Render and GitHub Actions.
     if(DIA_SCHEDULER_TOKEN.length < 32)return json(res,503,{error:'scheduler_auth_not_configured'});
     if(!timingSafeEqual(req.headers.authorization || '', 'Bearer ' + DIA_SCHEDULER_TOKEN))return json(res,401,{error:'authentication_required'});
-    const due=state.jobs.filter(j=>j.status==='SCHEDULED'&&new Date(j.scheduledFor)<=new Date());for(const job of due)await executeJob(state,job);return json(res,200,{processed:due.length});
+    const due=state.jobs.filter(j=>j.status==='SCHEDULED'&&Number.isFinite(Date.parse(j.scheduledFor))&&Date.parse(j.scheduledFor)<=Date.now());if(due.length&&state.settings.safeMode!==false)return json(res,423,{error:'safe_mode_enabled',processed:0});for(const job of due)await executeJob(state,job);return json(res,200,{processed:due.length});
   }
   if(req.method==='GET'&&u.pathname==='/api/scheduler/preflight'){
     // Admin-only operational snapshot. Never invoke publishers or return credentials/job content.
@@ -107,7 +140,7 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     const now=Date.now();
     const scheduled=state.jobs.filter(job=>job?.status==='SCHEDULED');
     const dueJobs=scheduled.filter(job=>Number.isFinite(Date.parse(job.scheduledFor))&&Date.parse(job.scheduledFor)<=now).length;
-    return json(res,200,{schedulerCredentialConfigured:DIA_SCHEDULER_TOKEN.length>=32,credentialParity:'UNVERIFIED',scheduledJobs:scheduled.length,dueJobs,persistence:'ephemeral-file',publishingTriggered:false});
+    return json(res,200,{schedulerCredentialConfigured:DIA_SCHEDULER_TOKEN.length>=32,credentialParity:'UNVERIFIED',scheduledJobs:scheduled.length,dueJobs,safeMode:state.settings.safeMode,persistence:'ephemeral-file',publishingTriggered:false});
   }
   if(u.pathname.startsWith('/api/')&&!requireAuth(req,res))return;
   if(req.method==='GET'&&u.pathname==='/api/state')return json(res,200,state);
@@ -115,14 +148,16 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     const b=await readBody(req);const content=cleanText(b.content,10000);const title=cleanText(b.title,300);const platforms=validPlatforms(b.platforms);if(!content||platforms.length===0)return json(res,400,{error:'content_and_platforms_required'});const post={id:crypto.randomUUID(),title,content,platforms,status:'DRAFT',createdAt:new Date().toISOString(),scheduledFor:null,demo:false};state.posts.unshift(post);audit(state,'POST_CREATED',{postId:post.id,platforms});saveState(state);return json(res,201,post);
   }
   if(req.method==='POST'&&u.pathname==='/api/schedule'){
-    const b=await readBody(req);const post=state.posts.find(p=>p.id===b.postId);if(!post)return json(res,404,{error:'post_not_found'});const when=new Date(b.scheduledFor||Date.now());if(Number.isNaN(when.getTime()))return json(res,400,{error:'invalid_schedule_time'});const job={id:crypto.randomUUID(),postId:post.id,platforms:post.platforms,status:'SCHEDULED',scheduledFor:when.toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),results:[]};state.jobs.unshift(job);post.status='SCHEDULED';post.scheduledFor=job.scheduledFor;audit(state,'JOB_SCHEDULED',{jobId:job.id,postId:post.id});saveState(state);return json(res,201,job);
+    const b=await readBody(req);const post=state.posts.find(p=>p.id===b.postId);if(!post)return json(res,404,{error:'post_not_found'});if(state.jobs.some(job=>job.postId===post.id))return json(res,409,{error:'post_already_has_job'});const when=new Date(b.scheduledFor||Date.now());if(Number.isNaN(when.getTime()))return json(res,400,{error:'invalid_schedule_time'});const job={id:crypto.randomUUID(),postId:post.id,platforms:post.platforms,status:'SCHEDULED',scheduledFor:when.toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),results:[]};state.jobs.unshift(job);post.status='SCHEDULED';post.scheduledFor=job.scheduledFor;audit(state,'JOB_SCHEDULED',{jobId:job.id,postId:post.id});saveState(state);return json(res,201,job);
   }
   if(req.method==='POST'&&u.pathname==='/api/publish'){
-    const b=await readBody(req);const post=state.posts.find(p=>p.id===b.postId);if(!post)return json(res,404,{error:'post_not_found'});if(state.settings.safeMode&&b.confirm!==true)return json(res,409,{error:'safe_mode_confirmation_required'});const job={id:crypto.randomUUID(),postId:post.id,platforms:post.platforms,status:'QUEUED',scheduledFor:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),results:[]};state.jobs.unshift(job);audit(state,'JOB_QUEUED',{jobId:job.id});saveState(state);await executeJob(state,job);return json(res,200,job);
+    const b=await readBody(req);const post=state.posts.find(p=>p.id===b.postId);if(!post)return json(res,404,{error:'post_not_found'});if(state.jobs.some(job=>job.postId===post.id))return json(res,409,{error:'post_already_has_job'});if(b.confirm!==true)return json(res,409,{error:'explicit_confirmation_required'});const job={id:crypto.randomUUID(),postId:post.id,platforms:post.platforms,status:'QUEUED',scheduledFor:new Date().toISOString(),createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),results:[]};state.jobs.unshift(job);audit(state,'JOB_QUEUED',{jobId:job.id});saveState(state);await executeJob(state,job);return json(res,200,job);
   }
   if(req.method==='POST'&&u.pathname==='/api/settings'){
     const b=await readBody(req);state.settings={...state.settings,brandName:cleanText(b.brandName||state.settings.brandName,100),safeMode:b.safeMode!==false};audit(state,'SETTINGS_UPDATED',{safeMode:state.settings.safeMode});saveState(state);return json(res,200,state.settings);
   }
   if(req.method==='GET'&&staticFile(res,u.pathname))return;json(res,404,{error:'not_found'});
-}catch(e){console.error(e);json(res,e.status||500,{error:e.message==='payload_too_large'?'payload_too_large':e.message==='invalid_json'?'invalid_json':'internal_error'})}});
+ }catch(e){console.error(e);json(res,e.status||500,{error:e.message==='payload_too_large'?'payload_too_large':e.message==='invalid_json'?'invalid_json':'internal_error'})}
+  } finally {unlock()}
+});
 server.listen(PORT,()=>console.log(`Digital Insight Publisher listening on ${PORT}`));
