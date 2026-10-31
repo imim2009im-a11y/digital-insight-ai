@@ -1,6 +1,6 @@
 # Digital Insight AI — Website Health Audit | Pilot Offer
 
-Status: **Draft / not published / not yet validated on live production**  
+Status: **Draft / not published / not yet validated on live production**
 Prepared: 2026-10-31
 
 ## Who this is for
