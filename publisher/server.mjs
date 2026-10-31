@@ -30,7 +30,18 @@ const defaultState = {
 };
 
 function ensureDataDir(){fs.mkdirSync(path.dirname(dataFile),{recursive:true})}
-function loadState(){ensureDataDir();if(!fs.existsSync(dataFile)){fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}try{return JSON.parse(fs.readFileSync(dataFile,'utf8'))}catch{return structuredClone(defaultState)}}
+function loadState(){
+  ensureDataDir();
+  if(!fs.existsSync(dataFile)){fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
+  try {
+    const value=JSON.parse(fs.readFileSync(dataFile,'utf8'));
+    if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit))throw new Error('invalid_state_shape');
+    return value;
+  } catch {
+    // Never silently replace a damaged or unreadable existing datastore with empty jobs.
+    throw new Error('publisher_state_unavailable');
+  }
+}
 function saveState(state){ensureDataDir();const tmp=`${dataFile}.tmp`;fs.writeFileSync(tmp,JSON.stringify(state,null,2));fs.renameSync(tmp,dataFile)}
 function json(res,status,body,headers={}){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer',...headers});res.end(JSON.stringify(body))}
 function audit(state,action,detail={}){const row={id:crypto.randomUUID(),ts:new Date().toISOString(),action,detail};state.audit.unshift(row);state.audit=state.audit.slice(0,500);return row}
@@ -63,7 +74,11 @@ function readStateForPreflight(){
   }
 }
 
-const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';const state=schedulerCheck?null:probeRequest?readStateForPreflight():loadState();if(state)refreshProviderState(state);try{
+const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';let state;
+  try {state=schedulerCheck?null:probeRequest?readStateForPreflight():loadState();}
+  catch {return json(res,503,{error:'publisher_state_unavailable'});}
+  if(state)refreshProviderState(state);
+  try{
   if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,service:'Digital Insight Publisher',timezone:state.settings.timezone,authConfigured:Boolean(ADMIN_PASSWORD&&SESSION_SECRET),persistence:'ephemeral-file'});
   if(req.method==='POST'&&u.pathname==='/api/login'){
     if(!ADMIN_PASSWORD||!SESSION_SECRET)return json(res,503,{error:'admin_auth_not_configured'});
