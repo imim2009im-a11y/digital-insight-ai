@@ -68,6 +68,14 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     if(!timingSafeEqual(req.headers.authorization || '', 'Bearer ' + DIA_SCHEDULER_TOKEN))return json(res,401,{error:'authentication_required'});
     const due=state.jobs.filter(j=>j.status==='SCHEDULED'&&new Date(j.scheduledFor)<=new Date());for(const job of due)await executeJob(state,job);return json(res,200,{processed:due.length});
   }
+  if(req.method==='GET'&&u.pathname==='/api/scheduler/preflight'){
+    // Admin-only operational snapshot. Never invoke publishers or return credentials/job content.
+    if(!requireAuth(req,res))return;
+    const now=Date.now();
+    const scheduled=state.jobs.filter(job=>job?.status==='SCHEDULED');
+    const dueJobs=scheduled.filter(job=>Number.isFinite(Date.parse(job.scheduledFor))&&Date.parse(job.scheduledFor)<=now).length;
+    return json(res,200,{schedulerCredentialConfigured:DIA_SCHEDULER_TOKEN.length>=32,credentialParity:'UNVERIFIED',scheduledJobs:scheduled.length,dueJobs,persistence:'ephemeral-file',publishingTriggered:false});
+  }
   if(u.pathname.startsWith('/api/')&&!requireAuth(req,res))return;
   if(req.method==='GET'&&u.pathname==='/api/state')return json(res,200,state);
   if(req.method==='POST'&&u.pathname==='/api/posts'){
