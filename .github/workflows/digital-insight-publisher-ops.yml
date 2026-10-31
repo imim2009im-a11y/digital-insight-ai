@@ -23,7 +23,16 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
+      # Scheduled runs are read-only until an independent data recovery/replay approval.
+      # Even a matching token must not trigger old queued publications automatically.
+      - name: Explain scheduler publication hold
+        if: github.event_name != 'workflow_dispatch' || vars.DIA_SCHEDULER_RELEASE_APPROVED != 'true'
+        run: |
+          echo 'Publisher scheduler execution is HELD. Scheduled runs perform health observations only.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Manual workflow_dispatch plus separately approved DIA_SCHEDULER_RELEASE_APPROVED=true is required for controlled execution.' >> "$GITHUB_STEP_SUMMARY"
+
       - name: Run due publishing jobs
+        if: github.event_name == 'workflow_dispatch' && vars.DIA_SCHEDULER_RELEASE_APPROVED == 'true'
         id: run_due
         continue-on-error: true
         env:
@@ -81,7 +90,7 @@ jobs:
             --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
             -o /tmp/state-body -w '%{http_code}' \
             https://digital-insight-publisher.onrender.com/api/state)"
-          cat /tmp/state-body
+          # Never echo unexpected API response bodies into public CI logs.
           test "$code" = "401"
           grep -q 'authentication_required' /tmp/state-body
 
