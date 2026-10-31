@@ -63,7 +63,7 @@ function readStateForPreflight(){
   }
 }
 
-const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const state=probeRequest?readStateForPreflight():loadState();if(state)refreshProviderState(state);try{
+const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';const state=schedulerCheck?null:probeRequest?readStateForPreflight():loadState();if(state)refreshProviderState(state);try{
   if(req.method==='GET'&&u.pathname==='/api/health')return json(res,200,{ok:true,service:'Digital Insight Publisher',timezone:state.settings.timezone,authConfigured:Boolean(ADMIN_PASSWORD&&SESSION_SECRET),persistence:'ephemeral-file'});
   if(req.method==='POST'&&u.pathname==='/api/login'){
     if(!ADMIN_PASSWORD||!SESSION_SECRET)return json(res,503,{error:'admin_auth_not_configured'});
@@ -72,6 +72,13 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     clearLoginFailures(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=${expectedSession()}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`});
   }
   if(req.method==='POST'&&u.pathname==='/api/logout')return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});
+  if(req.method==='POST'&&u.pathname==='/api/scheduler/check'){
+    // Check scheduler credential parity without running jobs or touching the datastore.
+    if(DIA_SCHEDULER_TOKEN.length<32)return json(res,503,{error:'scheduler_auth_not_configured'});
+    if(!timingSafeEqual(req.headers.authorization||'', 'Bearer '+DIA_SCHEDULER_TOKEN))return json(res,401,{error:'authentication_required'});
+    res.writeHead(204,{'cache-control':'no-store'});
+    return res.end();
+  }
   if(req.method==='POST'&&u.pathname==='/api/run-due'){
     // Fail closed until the same strong secret is configured in Render and GitHub Actions.
     if(DIA_SCHEDULER_TOKEN.length < 32)return json(res,503,{error:'scheduler_auth_not_configured'});
