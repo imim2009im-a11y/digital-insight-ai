@@ -1,0 +1,7 @@
+# Security vulnerability reporting for Digital Insight AI
+# Only send an initial non-sensitive report using the contact form.
+# Do not include passwords, tokens, personal data, or exploit artifacts.
+Contact: https://digitalinsightai.com/contact/
+Expires: 2027-04-30T00:00:00Z
+Preferred-Languages: ar, en
+Canonical: https://digitalinsightai.com/.well-known/security.txt
