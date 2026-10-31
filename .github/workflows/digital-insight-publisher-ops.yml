@@ -2,6 +2,7 @@ name: Digital Insight Publisher Ops
 
 on:
   push:
+    branches: [main]
     paths:
       - '.github/workflows/digital-insight-publisher-ops.yml'
   schedule:
@@ -18,16 +19,26 @@ concurrency:
 
 jobs:
   scheduler-health:
+    if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
       - name: Run due publishing jobs
         id: run_due
         continue-on-error: true
+        env:
+          DIA_SCHEDULER_TOKEN: ${{ secrets.DIA_SCHEDULER_TOKEN }}
         run: |
-          curl --fail-with-body --silent --show-error \
-            --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
-            -X POST https://digital-insight-publisher.onrender.com/api/run-due
+          set -euo pipefail
+          if [[ ${#DIA_SCHEDULER_TOKEN} -lt 32 ]]; then
+            echo '::error::DIA_SCHEDULER_TOKEN must be configured with 32+ characters in both Render and GitHub Actions.'
+            exit 1
+          fi
+          # Pass the secret through stdin, not curl command-line arguments.
+          printf 'header = "Authorization: Bearer %s"\n' "${DIA_SCHEDULER_TOKEN}" | \
+            curl --config - --fail-with-body --silent --show-error \
+              --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
+              -X POST https://digital-insight-publisher.onrender.com/api/run-due
 
       - name: Verify production health and auth configuration
         id: health
