@@ -10,6 +10,13 @@ This document is deliberately generic: do not publish internal allowlists, datab
 - Atlas Free has constrained storage, throughput and network limits ([Atlas Free limits](https://www.mongodb.com/docs/atlas/reference/free-shared-limitations/)).
 - Atlas Free backups are **not assumed included**: the documented optional snapshot feature has a charge ([Free Cluster Backups](https://www.mongodb.com/docs/atlas/backup/cloud-backup/free-cluster-backup/)). Under this project's no-new-cost policy, do not activate that feature without a separate cost decision.
 
+## Metadata-only check of candidate existing storage
+
+- A connected Free-tier Atlas cluster in the EU was reachable during a **read-only** inventory on 2026-10-31.
+- Its existing application database already contains several collections and records; it is **not an empty, dedicated Publisher database**. No collection contents, credentials or user rows were retrieved.
+- **Decision:** do not reuse the existing application's database, collections, identities or backups for Publisher. A distinct database within an existing Free cluster is only a **candidate**, conditional on isolated least-privilege credentials, adequate remaining capacity, restricted access, an export/restore plan and owner approval. Shared cluster capacity still creates contention and recovery risk.
+- No DB writes, collection creation, membership/network changes or chargeable backup features were executed.
+
 ## Preferred no-new-service design (conditional)
 
 1. **Inventory and recover first.** Through an already authorized admin session, determine whether the Render instance currently has posts, pending/overdue jobs and publish attempts. Create a protected export with a verified SHA-256 and restore test. If state has already been lost, explicitly record the loss; an empty new database is not a backup.
