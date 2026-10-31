@@ -31,6 +31,7 @@ async function exercise(configured) {
       SESSION_SECRET: 'local-test-session-secret',
       DIA_SCHEDULER_TOKEN: configured ? token : '',
       DIA_ALLOW_EMPTY_STATE_BOOTSTRAP: 'ISOLATED_TEST_ONLY',
+      NODE_ENV: 'test',
       TELEGRAM_BOT_TOKEN: '',
       TELEGRAM_CHAT_ID: '',
       DISCORD_WEBHOOK_URL: '',
@@ -96,9 +97,11 @@ async function exercise(configured) {
     assert.equal(emptyProbe.body.scheduledJobs, 0);
     assert.equal(emptyProbe.body.dueJobs, 0);
     assert.equal(emptyProbe.body.safeMode, true);
+    assert.equal(emptyProbe.body.unverifiedJobs, 0);
+    assert.equal(emptyProbe.body.manualReviewRequired, false);
     assert.equal(emptyProbe.body.persistence, 'ephemeral-file');
     assert.equal(emptyProbe.body.publishingTriggered, false);
-    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'safeMode', 'persistence', 'publishingTriggered'];
+    const allowedKeys = ['schedulerCredentialConfigured', 'credentialParity', 'scheduledJobs', 'dueJobs', 'safeMode', 'unverifiedJobs', 'manualReviewRequired', 'persistence', 'publishingTriggered'];
     assert.deepEqual(Object.keys(emptyProbe.body).sort(), allowedKeys.sort(), 'no job content or secrets are exposed');
     const created = await request('/api/posts', {
       method: 'POST',
@@ -190,6 +193,15 @@ async function exercise(configured) {
     const restoredProbe = await request('/api/scheduler/preflight', { headers: authHeaders });
     assert.equal(restoredProbe.status, 200);
     assert.equal(restoredProbe.body.dueJobs, 2, 'both distinct pending jobs must survive failed-state recovery without publication');
+    const sourceState = JSON.parse(savedState);
+    sourceState.jobs.push({id:'synthetic-unverified',postId:'missing',status:'PUBLISHING',platforms:[],updatedAt:new Date().toISOString()});
+    writeFileSync(statePath, JSON.stringify(sourceState));
+    const crashed=await request('/api/scheduler/preflight',{headers:authHeaders});
+    assert.equal(crashed.status,200);
+    assert.equal(crashed.body.unverifiedJobs,1,'incomplete outbound publications require operator review');
+    assert.equal(crashed.body.manualReviewRequired,true);
+    const unchanged=await request('/api/state',{headers:authHeaders});
+    assert.equal(unchanged.body.jobs.find(j=>j.id==='synthetic-unverified').status,'PUBLISHING','preflight must never retry an ambiguous publication');
   } finally {
     child.kill('SIGTERM');
     await new Promise((resolve) => {
