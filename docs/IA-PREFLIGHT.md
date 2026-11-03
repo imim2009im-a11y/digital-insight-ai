@@ -1,9 +1,9 @@
-# IA cloud source preflight — first executable increment
+# IA cloud source preflight — merged executable increment
 
 This is a POSIX source-verification utility, not an autonomous model agent or
-hosted scheduler. It extends the design in draft PR #82 without copying that
-unmerged document or changing production. Start from `main` commit
-`817a19b962279440d8bbb906f30eb76c4f278e9f`.
+hosted scheduler. The implementation from PR #83 was merged into `main` on
+2026-10-11. It extends the design explored in draft PR #82 without making that
+unmerged contract a runtime dependency.
 
 ## Acceptance and operation
 
@@ -51,44 +51,47 @@ calling user's rights. Run untrusted branches only in an isolated runner.
 - SQLite persistence across cloud-session destruction requires a separately
   approved durable runtime/state adapter. This checkout is not a 24/7 service.
 
-## Capability matrix observed 2026-10-07 UTC / 2026-10-08 Riyadh
+## Verified integration record
+
+PR #83 was merged by merge commit
+`08d5b50ba9a3cb87d29dead59be814a4f360e612`. Its final branch head was
+`f444a287b4d0589bad20999fa4a549b94c23b344`.
+
+On that head, GitHub Actions completed successfully:
+
+- Agent Governance Verification: run `38110950513`.
+- Static Site Quality Gate: run `38110950520`.
+
+The PR also records an independent Linux verification of 14/14 preflight unit
+tests and an isolated integration rehearsal against the then-current `main`.
+Those results are historical evidence for the merged change, not a guarantee
+that a later checkout, runtime or production endpoint remains healthy.
+
+## Capability matrix observed 2026-10-11
 
 | Component | Status | Evidence / limitation |
 |---|---|---|
-| Work cloud filesystem and terminal | Connected and tested | Cloud checkout, Git/Python/Node execution and source checks |
-| Cloud Chrome | Available, not interaction-tested | Browser inventory: Chrome CDP, one about:blank tab; native apps absent |
-| Network | Partially tested | HTTPS Git clone/fetch succeeds; web GitHub open returned DisabledError; official documentation search succeeds |
-| GitHub | Connected and read-tested | Authenticated imim2009im-a11y; repo metadata reports pull/push/admin; PR #82 inspected |
-| Codex Cloud separate runtime | Not connected in this mission | No exposed task/environment interface discovered; shell availability is not proof |
-| MCP Gateway | Not connected | HTTPS endpoint returned 401; scoped MCP authentication/protocol not tested; no secrets used |
-| IA engineering skill | Read and applied | Package 0.4.0; instructions do not prove a running MCP server |
-| Skills catalog | Available, partial compatibility | Relevant skills read; no claim all skills/plugins are installed or tested |
-| Agents SDK / API | Not integrated | Official documentation researched; no dependency installed or key used |
-| Knowledge base | Repository documentation available | Prior contract inspected at immutable PR-head SHA; official sources below |
-| Observability | Local increment tested; CI summary integration under review | SQLite run IDs/status/duration and atomic JSON; provider monitoring and alert delivery untested |
-| Automation interface | Read-tested, execution unverified | Existing tasks inspected; no new schedule activated; relevant engineering task has no observed last run |
-| Production release / merge | Needs explicit approval | No main update, deployment or merge authorized |
-| Paid runtime and credentials | Needs explicit approval | Account quota, spend and billing limits unknown; no paid resources created |
-| Local device administration | Out of scope | Native apps absent; no device access expanded |
-
-Observed memory: approximately 9.7 GiB total; scratch volume approximately 32 GiB.
-These are point-in-time runtime observations, not guaranteed quotas or price limits.
+| GitHub repository integration | Connected and verified for PR #83 | PR merged; exact head and workflow run IDs recorded above |
+| Source verification | Merged and CI-verified | SQLite run history, bounded attempts, runtime-aware resume and atomic allowlisted evidence |
+| Observability | Checkout-local evidence plus CI summary | No provider monitoring, alert delivery or durable cross-session state |
+| Codex Cloud separate runtime | Not verified by this document | Repository CI and connector access do not prove a separate Codex Cloud runtime |
+| MCP Gateway | Not integrated | Scoped authentication and protocol behavior remain unverified; no secrets used |
+| Agents SDK / API | Not integrated | No dependency installed and no paid API key used |
+| Production deployment | Outside this utility's scope | Merging PR #83 did not deploy the public site or authorize DNS, database or hosting changes |
+| Local device administration | Outside scope | No device permission is granted by this repository utility |
 
 ## Prior work and plan
 
-PR #82 is open, draft and unmerged at
-`af5d8c271c999d22f8c45af3b05456e964ebcf33`. Its contract file exists only on its
-feature branch (default-branch fetch returned 404). Existing production
-architecture documents contain old DNS observations; this mission does not
-reverify or change production ownership.
+PR #82 remains historical design work. PR #83 delivered the first bounded source
+preflight increment to `main`; future work must extend that implementation rather
+than recreate it.
 
 | Priority | Increment | Value / risk / effort |
 |---|---|---|
-| 1 | Fixed source preflight with resume, bounded retries and lock | Immediate repeatable verification; medium script risk; small |
-| 2 | Durable runner adapter and immutable evidence upload | Needed for reliable cross-session resume; requires storage review; medium |
-| 3 | Scoped MCP adapter with capability probes | Enables provider execution; authentication approval required; medium |
-| 4 | SDK orchestration and budget accounting | Plan/execute/validate separation; keys and spend caps required; large |
-| 5 | Reviewed scheduler and alert delivery | Enables periodic operation; end-to-end test and cost evidence required; medium |
+| 1 | Durable runner adapter and immutable evidence upload | Needed for reliable cross-session resume; requires storage review; medium |
+| 2 | Scoped MCP adapter with capability probes | Enables provider execution; authentication approval required; medium |
+| 3 | SDK orchestration and budget accounting | Plan/execute/validate separation; keys and spend caps required; large |
+| 4 | Reviewed scheduler and alert delivery | Enables periodic operation; end-to-end test and cost evidence required; medium |
 
 Do not duplicate existing schedules. Before proposing activation, verify the
 runner, durable storage, timeout/cost policy, lock across runners, alert delivery,
@@ -100,9 +103,10 @@ establish background engineering or continuous service.
 Discover → Evaluate → Sandbox → Benchmark → Review → Integrate → Verify → Monitor.
 For each future dependency record exact version, upstream license, official
 source, benefit, trust boundary, resource budget, baseline/candidate measurements,
-review verdict and rollback. No new dependency is adopted by this increment.
+review verdict and rollback. No new dependency was adopted by PR #83.
 
-Official research sources consulted:
+Official research sources consulted for the original increment:
+
 - https://openai.github.io/openai-agents-python/sessions/ — conversation memory
   and interrupted-run continuation; does not provide a scheduler.
 - https://github.com/openai/openai-agents-python/blob/main/docs/tracing.md —
@@ -115,7 +119,9 @@ status and must not substitute for durable job orchestration.
 
 ## Rollback
 
-Close the draft PR without merging to leave production untouched. If eventually
-merged, revert its reviewed commit; no data/schema migration or dependency
-uninstall is needed. Keep the local Git-metadata state as evidence or archive it
-separately; state removal is not required for rollback.
+Before this documentation update is merged, close its draft PR or delete its
+branch. If the update is merged, revert its documentation commit. To roll back
+the preflight implementation itself, revert merge commit
+`08d5b50ba9a3cb87d29dead59be814a4f360e612` through a separately reviewed PR.
+No data/schema migration or dependency uninstall is required. Checkout-local
+Git-metadata state may be retained as evidence or archived separately.
