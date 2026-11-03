@@ -3,6 +3,7 @@
 from __future__ import annotations
 import argparse
 import json
+import re
 from pathlib import Path
 from urllib.parse import urlparse
 
@@ -11,7 +12,7 @@ SEVERITY = ("Info", "Low", "Medium", "High")
 
 
 def parse_report(path: Path, expected_host: str) -> dict:
-    if not expected_host.startswith("dia-local-site-") or not expected_host.replace("-", "").isalnum():
+    if not re.fullmatch(r"dia-local-site-[0-9]+", expected_host):
         raise ValueError("invalid_local_target")
     try:
         if path.is_symlink() or path.stat().st_size > MAX_BYTES:
@@ -61,6 +62,11 @@ def parse_report(path: Path, expected_host: str) -> dict:
         "publisher_tested": False,
         "scan_report_parsed": True,
         "risk_totals": totals,
+        "review_decision": (
+            "FAIL_HIGH_ALERTS" if totals["High"] else
+            "MANUAL_TRIAGE_REQUIRED" if (totals["Medium"] or totals["Low"] or totals["Info"]) else
+            "NO_ALERTS_IN_ISOLATED_SCOPE"
+        ),
         "findings": issues,
         "limitations": [
             "Header alerts reflect a disposable Python static test server, not production hosting",
@@ -105,7 +111,8 @@ def main() -> int:
         return 2
     print("ISOLATED_DAST_REPORT: PARSED; results require manual triage")
     print("RISK_COUNTS: " + json.dumps(result["risk_totals"], sort_keys=True))
-    return 0
+    print("ISOLATED_DAST_DECISION: " + result["review_decision"])
+    return 1 if result["review_decision"] == "FAIL_HIGH_ALERTS" else 0
 
 
 if __name__ == "__main__":
