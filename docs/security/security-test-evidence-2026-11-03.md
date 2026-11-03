@@ -94,6 +94,22 @@ Reference standard: OWASP Web Security Testing Guide (WSTG), https://owasp.org/w
 4. Keep vendor NightVision deferred: owner does not have an account and disallows spending.
 5. Coordinate PR #116 and #109 modifications to scripts/agent-verify.sh before any merge. Independent review is still required.
 
+## Security gate hardening and final-run verification (2026-11-03)
+
+- **Verified at commit `983abc8f6352519f6dbbbbd7225d2e06cf95cf9f`**: [ZAP full scan / isolated static replica — success](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41719443548), [Agent Governance — success](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41719443580), [Static Site Quality — success](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41719443597).
+- ZAP returned `FAIL-NEW:0`, `WARN-NEW:6`, and the sanitized JSON reported `High:0, Medium:4, Low:2, Info:3`. Its explicit source-enforced decision was **`MANUAL_TRIAGE_REQUIRED`**, not `PRODUCTION_SECURE`.
+- Updated `scripts/summarize_isolated_zap.py` to **fail with nonzero status on any High-risk alert** and to verify that the scanner's reported host matches the numeric, run-scoped local container. The existing `scripts/test_summarize_isolated_zap.py` includes synthetic tests for the blocking and review decisions.
+- Updated `.github/workflows/dast-isolated-site.yml` to surface sanitized findings even on failure, and to use **pull-request-specific concurrency** so one PR does not cancel another PR's security scan.
+- Official ZAP reference: https://www.zaproxy.org/docs/docker/full-scan/ . By default ZAP full-scan alerts are WARN, and `-I` suppresses exit failures for warnings. The new source parser gates High-risk records independently of this tool exit behavior.
+- GitHub reference on per-PR concurrency: https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax .
+
+**Acceptance distinction:** The tests demonstrate that the added gate behaves as designed for synthetic High-risk alerts and that the real isolated report was parsed. The scanned site was a temporary HTTP replica, not the production host; real headers, APIs, login sessions and client data were not tested. Manual review of the sandbox alerts is still required, and PR #116 remains draft.
+
+### Repository documentation conflict requiring verification
+
+`AGENTS.md` and `PRODUCTION-ARCHITECTURE.md` still contain September 2026 migration notes implying DNS/Railway cutover is incomplete, while newer security issues describe GitHub Pages as currently serving public content. Treat the live delivery provider as **unverified by this turn** until DNS + TLS + response + Pages artifact evidence are correlated in issue #104. No DNS, CDN or deployment changes were made.
+
+
 ## Primary sources
 
 - [OWASP WSTG](https://owasp.org/www-project-web-security-testing-guide/)
