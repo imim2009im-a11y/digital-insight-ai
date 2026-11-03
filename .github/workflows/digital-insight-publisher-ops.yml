@@ -23,52 +23,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
-      # Scheduled runs are read-only until an independent data recovery/replay approval.
-      # Even a matching token must not trigger old queued publications automatically.
-      - name: Explain scheduler publication hold
-        if: github.event_name != 'workflow_dispatch' || vars.DIA_SCHEDULER_RELEASE_APPROVED != 'true'
+      # Containment while real queued posts and storage recovery remain unverified.
+      # No GitHub Actions event can call a publisher execution endpoint.
+      - name: Explain publication hold
         run: |
-          echo 'Publisher scheduler execution is HELD. Scheduled runs perform health observations only.' >> "$GITHUB_STEP_SUMMARY"
-          echo 'Manual workflow_dispatch plus separately approved DIA_SCHEDULER_RELEASE_APPROVED=true is required for controlled execution.' >> "$GITHUB_STEP_SUMMARY"
-
-      - name: Run due publishing jobs
-        if: github.event_name == 'workflow_dispatch' && vars.DIA_SCHEDULER_RELEASE_APPROVED == 'true'
-        id: run_due
-        continue-on-error: true
-        env:
-          DIA_SCHEDULER_TOKEN: ${{ secrets.DIA_SCHEDULER_TOKEN }}
-        run: |
-          set -euo pipefail
-          if [[ ${#DIA_SCHEDULER_TOKEN} -lt 32 ]]; then
-            echo '::error::DIA_SCHEDULER_TOKEN must be configured with 32+ characters in both Render and GitHub Actions.'
-            exit 1
-          fi
-          # Node reads the credential from the environment; never print it.
-          node --input-type=module <<'NODE'
-          import https from 'node:https';
-          const token = process.env.DIA_SCHEDULER_TOKEN;
-          if (!/^[A-Za-z0-9_-]{32,}$/.test(token || '')) {
-            console.error('Scheduler token must contain 32+ URL-safe characters.');
-            process.exit(1);
-          }
-          const request = https.request('https://digital-insight-publisher.onrender.com/api/run-due', {
-            method: 'POST',
-            headers: { Authorization: 'Bearer ' + token },
-          }, response => {
-            response.resume();
-            response.on('end', () => {
-              const status = response.statusCode || 0;
-              console.log('Scheduler HTTP status:', status);
-              if (status < 200 || status >= 300) process.exitCode = 1;
-            });
-          });
-          request.setTimeout(90000, () => request.destroy(new Error('timeout')));
-          request.on('error', () => {
-            console.error('Scheduler request failed.');
-            process.exitCode = 1;
-          });
-          request.end();
-          NODE
+          echo 'Publisher execution remains HELD. This workflow only observes service health and public auth boundaries.' >> "$GITHUB_STEP_SUMMARY"
+          echo 'Manual dispatch is also observation-only. A separate reviewed per-job release mechanism is required before any resumption.' >> "$GITHUB_STEP_SUMMARY"
 
       - name: Verify production health and auth configuration
         id: health
@@ -114,7 +74,6 @@ jobs:
         if: always()
         shell: bash
         env:
-          RUN_DUE_OUTCOME: ${{ steps.run_due.outcome }}
           HEALTH_OUTCOME: ${{ steps.health.outcome }}
           AUTH_GUARD_OUTCOME: ${{ steps.auth_guard.outcome }}
           FRONTEND_OUTCOME: ${{ steps.frontend.outcome }}
@@ -124,21 +83,17 @@ jobs:
             echo ''
             echo '| Control | Outcome |'
             echo '| --- | --- |'
-            printf '| Scheduler POST | %s |\n' "$RUN_DUE_OUTCOME"
+            echo '| Publisher execution | HELD / NOT RUN |'
             printf '| Public health | %s |\n' "$HEALTH_OUTCOME"
             printf '| Anonymous API denial | %s |\n' "$AUTH_GUARD_OUTCOME"
             printf '| Frontend and headers | %s |\n' "$FRONTEND_OUTCOME"
             echo ''
-            if [[ "$RUN_DUE_OUTCOME" == 'failure' && "$HEALTH_OUTCOME" == 'success' ]]; then
-              echo 'A healthy public endpoint does not prove scheduler authentication works.'
-              echo 'Review the sanitized scheduler HTTP status and the private configuration names.'
-              echo 'Do not re-enable scheduler publishing until pending jobs and data recovery are reviewed.'
-              echo 'Recovery plan: docs/runbooks/publisher-scheduler-401-recovery.md'
-            fi
+            echo 'Successful observations are not proof of scheduler credential parity, durable state, or delivery.'
+            echo 'Recovery runbook: docs/runbooks/publisher-scheduler-401-recovery.md'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Open one incident issue on failure
-        if: steps.run_due.outcome == 'failure' || steps.health.outcome == 'failure' || steps.auth_guard.outcome == 'failure' || steps.frontend.outcome == 'failure'
+        if: steps.health.outcome == 'failure' || steps.auth_guard.outcome == 'failure' || steps.frontend.outcome == 'failure'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -155,7 +110,7 @@ jobs:
       # health does not establish queue safety, durable state, or external delivery.
       # A human reviewer must verify recovery evidence and close the issue manually.
       - name: Report healthy probes without closing an incident
-        if: steps.run_due.outcome == 'success' && steps.health.outcome == 'success' && steps.auth_guard.outcome == 'success' && steps.frontend.outcome == 'success'
+        if: steps.health.outcome == 'success' && steps.auth_guard.outcome == 'success' && steps.frontend.outcome == 'success'
         shell: bash
         run: |
           {
