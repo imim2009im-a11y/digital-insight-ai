@@ -1,7 +1,7 @@
 # NightVision DAST staging readiness — evidence-only gate
 
 **Date:** 2026-11-03. **Issue:** #115. **Phase:** metadata review only.
-**Production:** NO CHANGE. **NightVision:** NOT INSTALLED, NOT CONFIGURED, NOT EXECUTED.
+**Production:** NO CHANGE. **NightVision:** no installation, provider configuration, or scan performed by this PR; pre-existing account/CLI status not verified.
 
 ## Objective and architecture
 
