@@ -108,5 +108,31 @@ class IsolatedZAPTests(unittest.TestCase):
             self.parse(report)
 
 
+    def test_high_alerts_block_review(self):
+        report = self.sample()
+        report["site"][0]["alerts"][0]["riskcode"] = "3"
+        result = self.parse(report)
+        self.assertEqual(result["review_decision"], "FAIL_HIGH_ALERTS")
+        self.assertEqual(result["risk_totals"]["High"], 1)
+
+    def test_medium_alerts_require_manual_review(self):
+        self.assertEqual(self.parse(self.sample())["review_decision"], "MANUAL_TRIAGE_REQUIRED")
+
+    def test_zero_alerts_do_not_certify_production(self):
+        report = self.sample()
+        report["site"][0]["alerts"] = []
+        result = self.parse(report)
+        self.assertEqual(result["review_decision"], "NO_ALERTS_IN_ISOLATED_SCOPE")
+        self.assertFalse(result["production_tested"])
+
+    def test_host_requires_numeric_run_identifier(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "data.json"
+            path.write_text(json.dumps(self.sample()))
+            for bad in ("dia-local-site-", "dia-local-site-production", "dia-local-site-1234.fake"):
+                with self.subTest(host=bad), self.assertRaises(ValueError):
+                    parse_report(path, bad)
+
+
 if __name__ == "__main__":
     unittest.main()
