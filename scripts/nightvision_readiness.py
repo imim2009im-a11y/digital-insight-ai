@@ -47,11 +47,11 @@ def unique_pairs(pairs: list[tuple[str, object]]) -> dict:
 
 
 def parse_manifest(path: Path) -> dict:
-    if path.is_symlink():
-        raise InvalidManifest("symlink_disallowed")
-    if not path.is_file() or path.stat().st_size > MAX_BYTES:
-        raise InvalidManifest("missing_or_oversized_manifest")
     try:
+        if path.is_symlink():
+            raise InvalidManifest("symlink_disallowed")
+        if not path.is_file() or path.stat().st_size > MAX_BYTES:
+            raise InvalidManifest("missing_or_oversized_manifest")
         with path.open("r", encoding="utf-8") as handle:
             data = json.load(handle, object_pairs_hook=unique_pairs)
     except (OSError, UnicodeError, json.JSONDecodeError) as exc:
