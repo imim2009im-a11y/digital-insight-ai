@@ -16,7 +16,7 @@ Reference standard: OWASP Web Security Testing Guide (WSTG), https://owasp.org/w
 | Authorization | Sample Supabase RLS policy; publisher release gates in draft PR #110 | STATIC REVIEW ONLY |
 | Session management | Publisher draft security changes and production branch architecture | NOT TESTED LIVE |
 | Input / client-side | Offline HTML checker and synthetic regressions; source code of site/ | CI PASS for source checks |
-| Dynamic security (DAST) | OWASP ZAP full scanner against **offline copy** of site/ in Docker --internal network | ATTEMPTED; see run evidence after completion |
+| Dynamic security (DAST) | ZAP full scanner against isolated Docker copy of site/ | COMPLETED — run 41712618622; six warning rules, manually review |
 | Error handling / data resilience | Publisher loadState() fallback and JSON-file persistence | STATIC FINDING |
 | Cryptography / headers | Existing repo headers documentation and issue #56 | LIVE CURRENT STATE UNVERIFIED |
 | Business logic | Scheduler workflow code and HTTP 401 evidence | INCIDENT CONFIRMED; no live replay |
@@ -49,6 +49,36 @@ Reference standard: OWASP Web Security Testing Guide (WSTG), https://owasp.org/w
 - Evidence: supabase/baiti-schema.sql in the public repo creates demo RLS policies allowing role anon SELECT, INSERT and UPDATE for a shared public-demo state.
 - Impact: if applied to an actual service used by multiple people, shared prototype content may be modified by unauthenticated clients.
 - Action: treat only as an explicitly disposable public demo; require per-user authorization / proper access control before real user deployment. **Actual deployment of this example schema is unverified.**
+
+## Completed isolated ZAP test: 2026-11-03
+
+- **Evidence:** [GitHub Actions run 41712618622](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41712618622) completed SUCCESS; all steps including network creation, the bounded full scan, sanitized report parsing, and teardown completed.
+- **Scope:** disposable Python HTTP server mounting public static site/ read-only, accessible only via a Docker --internal network. The dynamic scanner could not reach the actual web domain, external providers or Publisher.
+- **Tool:** official ZAP container. Its pulled image digest was sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af; a later review commit pins that exact digest.
+- **Raw ZAP console:** 0 FAIL-NEW, **6 distinct WARN-NEW rule categories** and 108 PASS policy checks; do not interpret these numbers as tested pages, confirmed production weaknesses, or comprehensive penetration-test coverage.
+- **Sanitized ZAP JSON:** High 0, Medium 4, Low 2, Info 3 distinct alert records. No sensitive request or response payloads were uploaded.
+
+| Warning category (ZAP rule) | Interpreting this isolated test |
+| --- | --- |
+| Missing Anti-clickjacking Header (10020) | The Python test server does not mimic deployed response headers. Issue #56 independently documents a previous production header problem, but this scan does not reconfirm it. |
+| X-Content-Type-Options Header Missing (10021) | Local test-server response; live header status needs independent verification. |
+| Server Leaks Version Information (10036) | Python test-server header, not evidence of a Publisher or Pages server disclosure. |
+| Content Security Policy Header Not Set (10038) | Test-server observation; site/_headers does not automatically enforce CSP on GitHub Pages. |
+| HTTP to HTTPS Insecure Transition in Form Post (10041) | The isolated replica uses HTTP while the real form endpoint is HTTPS. This is an environment artifact, not proof of a production mixed-content flaw. |
+| Absence of Anti-CSRF Tokens (10202) | Observed public third-party contact form in local test; it does not prove a vulnerable authenticated state-change endpoint. |
+
+**Interpretation:** The full-scan automation executed and identified review items, but **no successful exploitation of production was demonstrated**. In particular, the protected GitHub Pages site, real TLS/headers, external form backend and any authenticated Publisher route were not tested. Absence of high-risk alerts here is not evidence that production is secure.
+
+### F-06 P1 conditional: non-atomic MongoDB migration may destroy target records
+
+- Evidence: mongodb-api/server.js lines 59–90. If MIGRATE_ON_START is explicitly enabled, it enumerates target collections, calls deleteMany({}) per collection, and then attempts insertMany() from the source. This can leave partially migrated data after an error.
+- The runtime flag, target database and actual migration status were **not** verified; this is an operational design risk, not a confirmed incident or externally exploitable vulnerability.
+- Action: keep migration disabled until target snapshot/restore, isolated reconciliation, per-collection integrity checks and rollback are verified. Never trigger this workflow as a routine security test.
+
+### F-07 P2: reproducible dependency inventory incomplete
+
+- The main repository's mongodb-api/package.json pins mongodb 7.6.0, but the recursive tree listing contains no mongodb-api/package-lock.json. Its transitive dependency resolution and audit of known vulnerabilities remain outside this engagement.
+- Action: review/update lockfile and dependency advisories in a dedicated nonproduction PR. No CVE has been independently verified by this observation.
 
 ## Automated source evidence
 
