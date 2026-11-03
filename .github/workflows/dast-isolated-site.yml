@@ -1,0 +1,104 @@
+name: Isolated Static Site DAST (no production traffic)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/dast-isolated-site.yml"
+      - "scripts/summarize_isolated_zap.py"
+      - "scripts/test_summarize_isolated_zap.py"
+      - "site/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: isolated-site-dast
+  cancel-in-progress: true
+
+jobs:
+  local-copy-dast:
+    # Only same-repository PRs; no fork-controlled code running with writable permissions.
+    if: github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Checkout source without persisted Git credentials
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+
+      - name: Verify target and evidence parser
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f site/index.html
+          python3 -m unittest discover -s scripts -p test_summarize_isolated_zap.py
+          mkdir -p dast-report
+          chmod 0777 dast-report
+
+      - name: Create outbound-blocked Docker network and local site replica
+        shell: bash
+        run: |
+          set -euo pipefail
+          image='ghcr.io/zaproxy/zaproxy:stable'
+          docker pull "$image"
+          network="dia-dast-$GITHUB_RUN_ID"
+          target="dia-local-site-$GITHUB_RUN_ID"
+          docker network create --driver bridge --internal "$network"
+          test "$(docker network inspect "$network" --format '{{.Internal}}')" = "true"
+          # Only a read-only bind mount of the public, static source. No production endpoints.
+          docker run -d --name "$target" --network "$network" \
+            --read-only --mount "type=bind,src=$GITHUB_WORKSPACE/site,dst=/home/zap/site,readonly" \
+            "$image" python3 -m http.server 8000 --bind 0.0.0.0 --directory /home/zap/site
+          docker run --rm --network "$network" "$image" python3 -c \
+            'import urllib.request; assert urllib.request.urlopen("http://dia-local-site-" + __import__("os").environ["GITHUB_RUN_ID"] + ":8000", timeout=10).status == 200'
+          echo 'ZAP image version/digest used for evidence:' >> "$GITHUB_STEP_SUMMARY"
+          docker image inspect "$image" --format '{{join .RepoDigests " "}}' >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Run bounded ZAP full scan on isolated copy only
+        shell: bash
+        run: |
+          set -euo pipefail
+          network="dia-dast-$GITHUB_RUN_ID"
+          target="dia-local-site-$GITHUB_RUN_ID"
+          test "$(docker network inspect "$network" --format '{{.Internal}}')" = "true"
+          set +e
+          timeout --signal=TERM --kill-after=20s 12m docker run --rm \
+            --name "dia-zap-$GITHUB_RUN_ID" --network "$network" \
+            --memory 4g --cpus 2 \
+            --mount "type=bind,src=$GITHUB_WORKSPACE/dast-report,dst=/zap/wrk" \
+            ghcr.io/zaproxy/zaproxy:stable \
+            zap-full-scan.py -t "http://$target:8000" -m 1 -T 3 -I -s \
+            -J zap-report.json
+          code=$?
+          set -e
+          echo "ZAP scan command exit: $code" >> "$GITHUB_STEP_SUMMARY"
+          echo "$code" > dast-report/zap-exit-code.txt
+          # ZAP 0=success, 1=findings graded FAIL, 2=warnings, 3=tool error.
+          if [ "$code" -gt 2 ]; then
+            echo 'Scanner failed, timed out, or could not produce reliable evidence.' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Sanitize evidence and summarize limitations
+        if: always()
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ ! -f dast-report/zap-report.json ]; then
+            echo '## Isolated DAST: NO REPORT (not a passing test)' >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+          python3 scripts/summarize_isolated_zap.py dast-report/zap-report.json \
+            --expected-host "dia-local-site-$GITHUB_RUN_ID" \
+            --output-dir dast-report
+          cat dast-report/sanitized-summary.md >> "$GITHUB_STEP_SUMMARY"
+          # Full ZAP payload report is deliberately not uploaded or committed.
+
+      - name: Destroy local test containers and isolated network
+        if: always()
+        shell: bash
+        run: |
+          docker rm -f "dia-local-site-$GITHUB_RUN_ID" "dia-zap-$GITHUB_RUN_ID" >/dev/null 2>&1 || true
+          docker network rm "dia-dast-$GITHUB_RUN_ID" >/dev/null 2>&1 || true
