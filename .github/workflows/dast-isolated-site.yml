@@ -51,7 +51,7 @@ jobs:
           docker run -d --name "$target" --network "$network" \
             --read-only --mount "type=bind,src=$GITHUB_WORKSPACE/site,dst=/home/zap/site,readonly" \
             "$image" python3 -m http.server 8000 --bind 0.0.0.0 --directory /home/zap/site
-          docker run --rm --network "$network" "$image" python3 -c \
+          docker run --rm --network "$network" -e GITHUB_RUN_ID "$image" python3 -c \
             'import urllib.request; assert urllib.request.urlopen("http://dia-local-site-" + __import__("os").environ["GITHUB_RUN_ID"] + ":8000", timeout=10).status == 200'
           echo 'ZAP image version/digest used for evidence:' >> "$GITHUB_STEP_SUMMARY"
           docker image inspect "$image" --format '{{join .RepoDigests " "}}' >> "$GITHUB_STEP_SUMMARY"
