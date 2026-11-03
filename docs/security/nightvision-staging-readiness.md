@@ -29,6 +29,19 @@ python3 scripts/nightvision_readiness.py --strict
 
 The validator's excluded path strings are **advisory declarations**, not enforceable NightVision scanner scope. The exact target configuration, authentication, API methods and any scope rules must separately be reviewed and applied inside NightVision before an approved scan. No generic scanner/CI script may read the file and infer scan authorization.
 
+## Verified local-only synthetic target (2026-11-03)
+
+The branch now includes `scripts/nightvision_synthetic_target.py`, a disposable **127.0.0.1-only** HTTP service with an OS-assigned local port. It has a static test-only page, a synthetic health response and **no real data, form, credential, storage write, external link or outbound provider request**. Unknown routes respond 404; POST/PUT/PATCH/DELETE respond 405.
+
+```bash
+# Local/CI synthetic tests only; they do not use or run NightVision
+python3 -m unittest discover -s scripts -p 'test_nightvision_*.py'
+# Optional local inspection. Quit with Ctrl-C; loopback only.
+python3 scripts/nightvision_synthetic_target.py
+```
+
+This establishes a disposable **local test fixture**, not a deployed HTTPS staging hostname or a NightVision-managed target. The readiness manifest remains intentionally BLOCKED. Port/host selection is local and ephemeral, so the fixture must not be mistaken for an account-approved, internet-facing test service. NightVision Smart Proxy use would require separate vendor account, CLI, authorization, runtime and scan-cost checks. Tests confirm local-only binding, inert content, denied mutating verbs and protective response headers.
+
 ## Human verification gates (not yet fulfilled)
 
 1. Confirm legal ownership and explicit permission to scan a **disposable nonproduction** environment; identify the exact HTTPS hostname and target kind (WEB/API). Verify physical/logical isolation from production data, external accounts, publishing/checkout/messaging and privileged services.
