@@ -4,6 +4,8 @@
 **Owner roles:** Backend/SRE (diagnosis), Security (credential handling), Data/QA (state preservation and verification).
 **Change classification:** high-risk authentication + automated external publishing + ephemeral storage.
 
+**Update 2026-11-03 (draft PR #109 only; not deployed):** The proposed GitHub Actions workflow has been tightened to **observation-only on both scheduled and manual runs**. It contains no scheduler credential reference and no request to any job-execution route. Earlier draft language permitting manual release via a repository variable is superseded. Recovery requires a separately reviewed, authorized, per-job release mechanism compatible with draft PR #110. This does not fix the live HTTP 401; the current `main` workflow remains unchanged until an approved merge.
+
 ## Confirmed evidence and scope
 
 - GitHub Actions `Digital Insight Publisher Ops` run [41218141767](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41218141767) returned `401` for `POST /api/run-due` on **2026-10-31 16:08 UTC**. Earlier runs [41195966997](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41195966997) and [41173409040](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41173409040) showed the same failure.
