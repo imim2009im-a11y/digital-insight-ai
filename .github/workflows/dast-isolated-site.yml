@@ -41,7 +41,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          image='ghcr.io/zaproxy/zaproxy:stable'
+          image='ghcr.io/zaproxy/zaproxy@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af'
           docker pull "$image"
           network="dia-dast-$GITHUB_RUN_ID"
           target="dia-local-site-$GITHUB_RUN_ID"
@@ -68,7 +68,7 @@ jobs:
             --name "dia-zap-$GITHUB_RUN_ID" --network "$network" \
             --memory 4g --cpus 2 \
             --mount "type=bind,src=$GITHUB_WORKSPACE/dast-report,dst=/zap/wrk" \
-            ghcr.io/zaproxy/zaproxy:stable \
+            ghcr.io/zaproxy/zaproxy@sha256:9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af \
             zap-full-scan.py -t "http://$target:8000" -m 1 -T 3 -I -s \
             -J zap-report.json
           code=$?
