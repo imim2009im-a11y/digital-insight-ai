@@ -13,7 +13,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: isolated-site-dast
+  group: isolated-site-dast-${{ github.event.pull_request.number }}
   cancel-in-progress: true
 
 jobs:
@@ -90,10 +90,17 @@ jobs:
             echo '## Isolated DAST: NO REPORT (not a passing test)' >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
+          set +e
           python3 scripts/summarize_isolated_zap.py dast-report/zap-report.json \
             --expected-host "dia-local-site-$GITHUB_RUN_ID" \
             --output-dir dast-report
-          cat dast-report/sanitized-summary.md >> "$GITHUB_STEP_SUMMARY"
+          report_status=$?
+          set -e
+          if [ -f dast-report/sanitized-summary.md ]; then
+            cat dast-report/sanitized-summary.md >> "$GITHUB_STEP_SUMMARY"
+          fi
+          # High-risk findings fail the job; other alerts remain visible for manual triage.
+          exit "$report_status"
           # Full ZAP payload report is deliberately not uploaded or committed.
 
       - name: Destroy local test containers and isolated network
