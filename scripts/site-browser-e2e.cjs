@@ -124,8 +124,8 @@ async function main() {
           'Two tools activate comparison');
         assert(await page.locator('#compare-shortcut').isVisible(),
           'Compare shortcut becomes discoverable after selecting two tools');
-        assert.equal(await page.locator('#comparison-rows tr:first-child > *').count(),4,
-          'Comparison has four evidence-only columns');
+        assert.equal(await page.locator('#comparison-rows tr:first-child > *').count(),6,
+          'Comparison has six evidence-only columns');
         assert.equal(await page.locator('#comparison-rows tr:first-child th[scope=row]').count(),1,
           'Comparison has accessible row headers');
         await toolButtons.nth(2).click();
@@ -151,12 +151,16 @@ async function main() {
         assert.match(await page.locator('#advisor-status').textContent(),/4/,
           'Advisor announces the number of category matches');
         const limitations=await page.locator('.advisor-disclaimer').textContent();
-        assert.match(limitations,/أسعار الأدوات والخطط المجانية غير موثقة/,
-          'Advisor does not invent free-plan availability or prices');
-        assert.match(limitations,/دعم اللغة العربية غير موثق/,
-          'Advisor does not invent Arabic-language support');
+        assert.match(limitations,/بعض الخطط المجانية موثقة بمصادر رسمية/,
+          'Advisor distinguishes verified free plans from unverified entries');
+        assert.match(limitations,/توثيق ترجمة الفيديو للعربية متاح لبعض الأدوات فقط/,
+          'Advisor qualifies officially verified video translation scope');
         assert.match(limitations,/متطلبات الخصوصية وحماية البيانات غير موثقة/,
           'Advisor does not invent privacy assurances');
+        assert.match(await page.locator('.advisor-option').first().textContent(),/HeyGen|خطة مجانية/,
+          'Advisor prioritizes supported facts and preserves local proof');
+        assert((await page.locator('.advisor-option .advisor-fact').count()) >= 4,
+          'Advisor shows known and unknown fact states beside each result');
         assert.equal(await page.locator('.advisor-option a[href^="http"]').count(),0,
           'Advisor links only to local cards or local published reviews');
         await page.locator('#advisor-task').selectOption('apps');
