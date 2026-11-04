@@ -1,8 +1,8 @@
 # Digital Insight AI — public HTTP and release readiness evidence
 
-**Observation date:** 2026-11-04 09:33:38 UTC  
-**Scope:** publicly accessible HEAD responses only, no redirect following, no credentials, no site mutations.  
-**Evidence:** [GitHub Actions public HTTP audit, run 41808508406](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41808508406) (job `Read-only public HTTP evidence`).  
+**Observation date:** 2026-11-04 09:33:38 UTC
+**Scope:** publicly accessible HEAD responses only, no redirect following, no credentials, no site mutations.
+**Evidence:** [GitHub Actions public HTTP audit, run 41808508406](https://github.com/imim2009im-a11y/digital-insight-ai/actions/runs/41808508406) (job `Read-only public HTTP evidence`).
 **Release status:** **HOLD — not approved for merge or deployment.**
 
 ## Observed production behavior
