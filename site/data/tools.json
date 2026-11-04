@@ -32,7 +32,8 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
-      }
+      },
+      "official": null
     },
     {
       "id": "launchspy",
@@ -63,7 +64,8 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
-      }
+      },
+      "official": null
     },
     {
       "id": "frase",
@@ -94,7 +96,8 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
-      }
+      },
+      "official": null
     },
     {
       "id": "creatify",
@@ -125,7 +128,8 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
-      }
+      },
+      "official": null
     },
     {
       "id": "synthesia",
@@ -161,6 +165,11 @@
           "verifiedOn": "2026-11-04"
         },
         "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://www.synthesia.io/",
+        "evidenceUrl": "https://www.synthesia.io/",
+        "verifiedOn": "2026-11-04"
       }
     },
     {
@@ -189,6 +198,11 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://kling.ai/",
+        "evidenceUrl": "https://kling.ai/ar",
+        "verifiedOn": "2026-11-04"
       }
     },
     {
@@ -222,6 +236,11 @@
           "verifiedOn": "2026-11-04"
         },
         "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://runwayml.com/",
+        "evidenceUrl": "https://help.runwayml.com/hc/en-us/articles/36555466922131-Keeping-Your-Account-Safe-and-Preventing-Fraud",
+        "verifiedOn": "2026-11-04"
       }
     },
     {
@@ -260,6 +279,11 @@
           "sourceUrl": "https://help.heygen.com/en/articles/11391941-video-translation-languages-we-support",
           "verifiedOn": "2026-11-04"
         }
+      },
+      "official": {
+        "url": "https://www.heygen.com/ar-sa",
+        "evidenceUrl": "https://www.heygen.com/ar-sa",
+        "verifiedOn": "2026-11-04"
       }
     },
     {
@@ -288,6 +312,11 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://openart.ai/ar",
+        "evidenceUrl": "https://openart.ai/ar",
+        "verifiedOn": "2026-11-04"
       }
     },
     {
@@ -316,6 +345,11 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://lovable.dev/",
+        "evidenceUrl": "https://lovable.dev/build",
+        "verifiedOn": "2026-11-04"
       }
     },
     {
@@ -344,6 +378,11 @@
       "facts": {
         "freePlan": null,
         "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://meshy.ai/",
+        "evidenceUrl": "https://help.meshy.ai/en/articles/15641671-official-meshy-links-how-to-avoid-fake-apps-and-scams",
+        "verifiedOn": "2026-11-04"
       }
     }
   ]
