@@ -79,6 +79,28 @@ async function main() {
         assert.equal(await visibleNews.evaluateAll(cards =>
           cards.filter(card => !card.textContent.toLowerCase().includes('gemini')).length),0,
           'News filters Gemini hides non-matches');
+        await page.goto(BASE+'/guides/',{waitUntil:'domcontentloaded'});
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),3,
+          'Guides show all published articles initially');
+        await page.locator('#guide-search').fill('فيديو');
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),1,
+          'Guides search finds video content');
+        await page.locator('#guide-search').fill('');
+        await page.locator('#guide-topic').selectOption('plans');
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),1,
+          'Guides filter Google AI subscription plans');
+        await page.locator('#guide-search').fill('محتوى غير منشور');
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),0,
+          'Guides show no incorrect matches');
+        assert(await page.locator('#guides-empty').isVisible(),'Guides empty state is visible');
+        await page.locator('#guide-reset').click();
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),3,
+          'Guides reset restores published content');
+        await page.goto(BASE+'/tools/?category=marketing',{waitUntil:'domcontentloaded'});
+        assert.equal(await page.locator('#tool-category').inputValue(),'marketing',
+          'Marketing category is honored from homepage links');
+        assert((await page.locator('[data-tool-card]:visible').count())>=1,
+          'Marketing category displays published tools');
         await page.goto(BASE+'/tools/',{waitUntil:'domcontentloaded'});
         await page.locator('#tool-category').selectOption('apps');
         assert.equal(await page.locator('[data-tool-card]:visible').count(),1,
