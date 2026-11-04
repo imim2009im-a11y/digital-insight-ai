@@ -20,6 +20,15 @@ END = "<!-- catalog:end -->"
 ALLOWED_CATEGORIES = {"video", "design", "apps", "marketing", "3d"}
 UNKNOWN_KEYS = {"price", "arabicSupport", "privacy"}
 FACT_KEYS = {"freePlan", "arabicVideoTranslation"}
+OFFICIAL_DESTINATIONS = {
+    "kling-ai": ("kling.ai", {"kling.ai"}),
+    "runway": ("runwayml.com", {"help.runwayml.com"}),
+    "heygen": ("www.heygen.com", {"www.heygen.com"}),
+    "openart": ("openart.ai", {"openart.ai"}),
+    "lovable": ("lovable.dev", {"lovable.dev"}),
+    "meshy": ("meshy.ai", {"help.meshy.ai"}),
+    "synthesia": ("www.synthesia.io", {"www.synthesia.io"}),
+}
 OFFICIAL_FACT_HOSTS = {
     "runway": {"help.runwayml.com"},
     "heygen": {"www.heygen.com", "help.heygen.com"},
@@ -89,6 +98,24 @@ def validate(data):
                 raise ValueError(key + " missing single review marker")
         elif "{review}" in tool["description"]:
             raise ValueError(key + " unexplained review marker")
+        official = tool.get("official")
+        if official is not None:
+            if key not in OFFICIAL_DESTINATIONS or not isinstance(official, dict):
+                raise ValueError(key + " unapproved official vendor destination")
+            if set(official) != {"url", "evidenceUrl", "verifiedOn"}:
+                raise ValueError(key + " invalid official provenance record")
+            expected_host, evidence_hosts = OFFICIAL_DESTINATIONS[key]
+            for field, approved_hosts in (
+                ("url", {expected_host}),
+                ("evidenceUrl", evidence_hosts),
+            ):
+                uri = urlsplit(official.get(field, ""))
+                if (uri.scheme != "https" or uri.hostname not in approved_hosts
+                        or uri.username or uri.password or uri.port not in (None, 443)
+                        or uri.fragment or uri.query):
+                    raise ValueError(key + " official destination or evidence mismatch")
+            if not re.fullmatch(r"20[0-9]{2}-[01][0-9]-[0-3][0-9]", official.get("verifiedOn", "")):
+                raise ValueError(key + " invalid official verification date")
         outbound = tool.get("external")
         if not isinstance(outbound, dict) or not isinstance(outbound.get("sponsored"), bool):
             raise ValueError(key + " invalid external action")
@@ -97,6 +124,8 @@ def validate(data):
         url = urlsplit(outbound.get("href", ""))
         if url.scheme != "https" or not url.netloc or url.username or url.password:
             raise ValueError(key + " external links must be valid HTTPS without credentials")
+        if outbound["sponsored"] and official is None:
+            raise ValueError(key + " missing independent official link for sponsored card")
     return tools
 
 
@@ -129,6 +158,21 @@ def render(data):
                     + ' <small>تحقق: ' + escaped(fact["verifiedOn"]) + '</small></p>'
                 )
         facts_html = ''.join(verification)
+        official_html = ""
+        official = tool["official"]
+        if official:
+            official_html = (
+                '<p class="tool-official-link"><a href="' + escaped(official["url"])
+                + '" target="_blank" rel="noopener noreferrer">زيارة موقع المزود الرسمي</a>'
+                + ' <a class="tool-origin-proof" href="' + escaped(official["evidenceUrl"])
+                + '" target="_blank" rel="noopener noreferrer">تحقق من المصدر</a></p>'
+            )
+        third_party_html = ""
+        if official and action["sponsored"] and urlsplit(action["href"]).hostname != urlsplit(official["url"]).hostname:
+            third_party_html = (
+                '<p class="tool-partner-note">رابط الشريك التالي يؤدي إلى وسيط خارجي،'
+                ' وليس إلى موقع الشركة المطورة. تحقق من الشروط قبل التسجيل أو الدفع.</p>'
+            )
         cards.append(
             '<article data-tool-card data-tool-id="' + escaped(tool["id"]) + '"'
             ' id="tool-' + escaped(tool["id"]) + '"'
@@ -141,6 +185,8 @@ def render(data):
             '<h2>' + escaped(tool["name"]) + '</h2>'
             '<p>' + description + '</p>'
             + facts_html
+            + official_html
+            + third_party_html
             + '<a' + attributes + ' rel="' + relation + '" target="_blank" href="'
             + escaped(action["href"]) + '">' + escaped(action["label"]) + '</a>'
             '<div class="card-actions"><button class="compare-button" type="button"'
