@@ -16,6 +16,7 @@
   const comparisonWrap = byId('comparison-table-wrap');
   const compareStatus = byId('compare-status');
   const shortcut = byId('compare-shortcut');
+  const scrollHint = byId('comparison-scroll-hint');
   const reset = byId('reset-filters');
   const clear = byId('clear-comparison');
   if (!counter || !empty || !rows || !comparisonWrap || !compareStatus || !reset || !clear) return;
@@ -58,6 +59,7 @@
     rows.replaceChildren();
     const enough = selected.size >= 2;
     comparisonWrap.hidden = !enough;
+    if (scrollHint) scrollHint.hidden = !enough;
     if (shortcut) {
       shortcut.hidden = !enough;
       if (enough) shortcut.textContent = 'عرض مقارنة ' + selected.size + ' من الأدوات المختارة';
