@@ -139,6 +139,30 @@ async function main() {
           'Comparison reset clears all selections');
         assert(await page.locator('#compare-shortcut').isHidden(),
           'Comparison shortcut disappears after clearing selection');
+        await page.locator('#advisor-form').waitFor({state:'visible',timeout:10000});
+        await page.locator('#advisor-task').selectOption('video');
+        await page.locator('#advisor-audience').selectOption('business');
+        await page.locator('#advisor-budget').selectOption('free');
+        await page.locator('#advisor-arabic').check();
+        await page.locator('#advisor-privacy').check();
+        await page.locator('#advisor-form button[type=submit]').click();
+        assert.equal(await page.locator('.advisor-option').count(),4,
+          'Advisor returns only four published video tools');
+        assert.match(await page.locator('#advisor-status').textContent(),/4/,
+          'Advisor announces the number of category matches');
+        const limitations=await page.locator('.advisor-disclaimer').textContent();
+        assert.match(limitations,/أسعار الأدوات والخطط المجانية غير موثقة/,
+          'Advisor does not invent free-plan availability or prices');
+        assert.match(limitations,/دعم اللغة العربية غير موثق/,
+          'Advisor does not invent Arabic-language support');
+        assert.match(limitations,/متطلبات الخصوصية وحماية البيانات غير موثقة/,
+          'Advisor does not invent privacy assurances');
+        assert.equal(await page.locator('.advisor-option a[href^="http"]').count(),0,
+          'Advisor links only to local cards or local published reviews');
+        await page.locator('#advisor-task').selectOption('apps');
+        await page.locator('#advisor-form button[type=submit]').click();
+        assert.equal(await page.locator('.advisor-option').count(),1,
+          'Advisor uses the existing catalog for app-development tasks');
         const amount=await page.locator('#calc-result').textContent();
         assert(amount && /١٥٠|150/.test(amount),'initial calculator 150 SAR');
         console.log('PASS functional Arabic news filter, tools filter, cost calculation');
