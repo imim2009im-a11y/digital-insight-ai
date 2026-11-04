@@ -42,7 +42,13 @@
         const arabic = byId('advisor-arabic').checked;
         const privacy = byId('advisor-privacy').checked;
         const matching = all.filter((tool) => tool.category === task)
-          .sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+          .sort((a, b) => {
+            const score = (tool) => (
+              (budget === 'free' && tool.facts?.freePlan?.available === true ? 2 : 0)
+              + (arabic && tool.facts?.arabicVideoTranslation?.available === true ? 1 : 0)
+            );
+            return score(b) - score(a) || a.name.localeCompare(b.name, 'ar');
+          });
         results.replaceChildren();
         if (!matching.length) {
           status.textContent = 'لا توجد أدوات منشورة في هذا التصنيف. اختر مهمة أخرى أو تصفح الدليل.';
@@ -50,10 +56,11 @@
         }
 
         status.textContent = matching.length + (matching.length === 1 ? ' أداة أولية مطابقة للتصنيف. ' : ' أدوات أولية مطابقة للتصنيف. ')
-          + 'النتائج مرتبة أبجديًا، وليست ترتيبًا للأفضل.';
+          + 'عند اختيار شروط إضافية، تظهر الحقائق الموثقة أولًا ثم البقية للمراجعة؛ ليست النتائج تقييمًا للجودة.';
         const caveats = ['المطابقة حسب تصنيف المهمة المنشور فقط، وليست إثباتًا لجودة الأداة أو ملاءمتها النهائية.'];
-        if (budget !== 'unknown') caveats.push('أسعار الأدوات والخطط المجانية غير موثقة في السجل الحالي؛ تعذّر التحقق من مطابقة الميزانية.');
-        if (arabic) caveats.push('دعم اللغة العربية غير موثق لهذه الأدوات؛ لا يمكن تأكيد الشرط دون اختبار.');
+        if (budget === 'free') caveats.push('بعض الخطط المجانية موثقة بمصادر رسمية؛ لا يثبت ذلك أن كل ميزة متاحة مجانًا، والأدوات الأخرى تحتاج تحققًا.');
+        else if (budget !== 'unknown') caveats.push('الأسعار بالريال السعودي غير موثقة؛ لا يمكن تأكيد مطابقة ميزانيتك.');
+        if (arabic) caveats.push('توثيق ترجمة الفيديو للعربية متاح لبعض الأدوات فقط؛ ولا يثبت جودة العربية أو إتاحتها في الخطة المجانية. دعم بقية الأدوات يحتاج تحققًا.');
         if (privacy) caveats.push('متطلبات الخصوصية وحماية البيانات غير موثقة؛ يلزم فحص شروط المزود قبل مشاركة بيانات العمل.');
         if (audience === 'business') caveats.push('الاستخدام المؤسسي يحتاج مراجعة الترخيص والتكامل وسياسات البيانات لدى المزود.');
         const summary = create('p', caveats.join(' '), 'advisor-disclaimer');
@@ -68,6 +75,18 @@
           heading.append(link);
           article.append(heading);
           article.append(create('p', 'الاستخدام المذكور في الدليل: ' + tool.focus));
+          if (budget !== 'unknown') {
+            const free = tool.facts?.freePlan;
+            article.append(create('p', free?.available === true
+              ? 'خطة مجانية مثبتة بمصدر رسمي: ' + free.scope + ' (راجع المصدر بالبطاقة).'
+              : 'توفر خطة مجانية غير موثق لهذا الخيار.', 'advisor-fact'));
+          }
+          if (arabic) {
+            const translation = tool.facts?.arabicVideoTranslation;
+            article.append(create('p', translation?.available === true
+              ? 'تتوفر ترجمة فيديو بالعربية وفق المصدر الرسمي: ' + translation.scope
+              : 'لم يُتحقق من دعم العربية للميزة المطلوبة.', 'advisor-fact'));
+          }
           if (tool.review && validReview(tool.review.href)) {
             const review = create('a', 'اقرأ المراجعة المنشورة');
             review.href = tool.review.href;
