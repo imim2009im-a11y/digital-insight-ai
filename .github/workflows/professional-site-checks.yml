@@ -39,6 +39,7 @@ jobs:
           node --check site/assets/directory.js
           node --check site/assets/site.js
           node --check site/assets/guides.js
+          node --check site/assets/advisor.js
       - name: Exercise search, calculator and share interactions
         run: node --test scripts/site-interactions.test.cjs scripts/guides-library.test.cjs
       - name: Require production preflight and least-privilege deployment
