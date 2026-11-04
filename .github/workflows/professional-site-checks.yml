@@ -88,7 +88,7 @@ jobs:
           {
             echo '### Live HTTP observation (not a deployment)'
             echo 'The checks read public HTTP HEAD responses; warnings remain release-review blockers.'
-            echo '\`\`\`text'
+            echo '~~~text'
             grep -E '^(ROUTE|  UNVERIFIED:|  PASS:)' "$RUNNER_TEMP/observed-http.txt" || true
-            echo '\`\`\`'
+            echo '~~~'
           } >> "$GITHUB_STEP_SUMMARY"
