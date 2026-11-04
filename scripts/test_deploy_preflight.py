@@ -24,10 +24,13 @@ class DeploymentPreflightTest(unittest.TestCase):
         preflight = match.group(1)
         for command in (
             "python3 scripts/site-professional-check.py",
+            "python3 scripts/sync_tools_catalog.py --check",
+            "python3 -m unittest discover -s scripts -p test_tools_catalog.py",
             "node --check site/assets/app.js",
             "node --check site/assets/directory.js",
             "node --check site/assets/site.js",
             "node --check site/assets/guides.js",
+            "node --check site/assets/advisor.js",
             "node --test scripts/site-interactions.test.cjs scripts/guides-library.test.cjs",
         ):
             with self.subTest(command=command):
