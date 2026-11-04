@@ -130,3 +130,12 @@ body{min-width:300px}
 .guide-highlight{background:linear-gradient(120deg,#142942,#0b1b31);border-inline-start:3px solid var(--brand);border-radius:16px;margin-block:28px;padding:28px}
 .guide-highlight h2{margin:5px 0 13px}
 @media(max-width:760px){.guide-highlight{padding:19px}.example-script{padding:14px}}
+
+/* Directory comparison visibility and keyboard-friendly horizontal table. */
+.comparison-shortcut{display:inline-flex;align-items:center;gap:8px;background:#133d55;border-color:#6ee7ff}
+.comparison-shortcut[hidden],.comparison-scroll-hint[hidden]{display:none!important}
+.comparison-scroll-hint{font-size:.88rem;color:var(--muted);margin:12px 0 8px}
+.comparison .table-scroll:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+.comparison table{min-width:700px}
+.comparison tbody th[scope=row]{text-align:right;color:var(--text);font-weight:750}
+@media(min-width:900px){.comparison-scroll-hint{display:none}}
