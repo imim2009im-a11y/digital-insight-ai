@@ -24,6 +24,8 @@ class DeploymentPreflightTest(unittest.TestCase):
         preflight = match.group(1)
         for command in (
             "python3 scripts/site-professional-check.py",
+            "python3 scripts/sync_legacy_routes.py --check",
+            "python3 -m unittest discover -s scripts -p test_legacy_routes.py",
             "python3 scripts/sync_tools_catalog.py --check",
             "python3 -m unittest discover -s scripts -p test_tools_catalog.py",
             "node --check site/assets/app.js",
