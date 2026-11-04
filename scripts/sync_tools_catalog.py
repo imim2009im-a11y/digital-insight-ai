@@ -141,7 +141,7 @@ def render(data):
             '<h2>' + escaped(tool["name"]) + '</h2>'
             '<p>' + description + '</p>'
             + facts_html
-            '<a' + attributes + ' rel="' + relation + '" target="_blank" href="'
+            + '<a' + attributes + ' rel="' + relation + '" target="_blank" href="'
             + escaped(action["href"]) + '">' + escaped(action["label"]) + '</a>'
             '<div class="card-actions"><button class="compare-button" type="button"'
             ' aria-pressed="false">أضف للمقارنة</button></div></article>'
