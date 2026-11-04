@@ -5,21 +5,41 @@ on:
     branches: [main]
     paths:
       - '.github/workflows/digital-insight-publisher-ops.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - '.github/workflows/digital-insight-publisher-ops.yml'
+      - 'scripts/check-publisher-ops-policy.mjs'
   schedule:
     - cron: '*/5 * * * *'
   workflow_dispatch:
 
 permissions:
   contents: read
-  issues: write
 
 concurrency:
-  group: digital-insight-publisher-ops
+  group: digital-insight-publisher-ops-${{ github.event_name == 'pull_request' && github.ref || 'production' }}
   cancel-in-progress: false
 
 jobs:
+  source-policy:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Check publisher operations policy without credentials
+        run: node scripts/check-publisher-ops-policy.mjs
+
   scheduler-health:
-    if: github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
+    permissions:
+      contents: read
+      issues: write
     runs-on: ubuntu-latest
     timeout-minutes: 4
     steps:
