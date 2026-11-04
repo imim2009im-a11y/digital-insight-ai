@@ -1,84 +1,126 @@
-/* Accessible, no-dependency directory interactions. Never transmits user input. */
+/* Progressive and privacy-preserving AI tools directory.
+ * Search and comparisons use only tool cards already published in the page.
+ * No remote calls, browser storage, prices or inferred product capabilities.
+ */
 (() => {
   'use strict';
-  const search = document.getElementById('tool-search');
-  const category = document.getElementById('tool-category');
+  const byId = (id) => document.getElementById(id);
+  const search = byId('tool-search');
+  const category = byId('tool-category');
   if (!search || !category) return;
-  const cards = [...document.querySelectorAll('[data-tool-card]')];
-  const counter = document.getElementById('tool-results-count');
-  const empty = document.getElementById('tool-no-results');
-  const rows = document.getElementById('comparison-rows');
-  const comparisonWrap = document.getElementById('comparison-table-wrap');
-  const compareStatus = document.getElementById('compare-status');
+
+  const cards = Array.from(document.querySelectorAll('[data-tool-card]'));
+  const counter = byId('tool-results-count');
+  const empty = byId('tool-no-results');
+  const rows = byId('comparison-rows');
+  const comparisonWrap = byId('comparison-table-wrap');
+  const compareStatus = byId('compare-status');
+  const shortcut = byId('compare-shortcut');
+  const reset = byId('reset-filters');
+  const clear = byId('clear-comparison');
+  if (!counter || !empty || !rows || !comparisonWrap || !compareStatus || !reset || !clear) return;
+
   const selected = new Set();
-  const normalize = (value) => String(value || '').normalize('NFKC').toLocaleLowerCase('ar').replace(/[\u064b-\u065f]/g, '').trim();
-  const validCategories = new Set(['all', 'video', 'design', 'apps', 'marketing', '3d']);
+  const labels = new Map(Array.from(category.options, (option) => [option.value, option.textContent.trim()]));
+  const normalize = (value) => String(value || '')
+    .normalize('NFKC').toLocaleLowerCase('ar')
+    .replace(/[\u064b-\u065f\u0670]/g, '')
+    .replace(/[أإآ]/g, 'ا').replace(/ى/g, 'ي')
+    .replace(/ـ/g, '').replace(/\s+/g, ' ').trim();
+
+  // Only accept actual existing select options, not arbitrary URL parameters.
   const requested = new URLSearchParams(location.search).get('category');
-  if (validCategories.has(requested)) category.value = requested;
+  if (labels.has(requested)) category.value = requested;
+
+  function cardName(card) { return card.querySelector('h2').textContent.trim(); }
   function filter() {
-    const q = normalize(search.value);
+    const query = normalize(search.value);
     let visible = 0;
     cards.forEach((card) => {
+      const searchable = normalize(cardName(card) + ' ' + card.textContent + ' ' + (card.dataset.focus || ''));
       const matches = (category.value === 'all' || card.dataset.category === category.value)
-        && (!q || normalize(card.textContent).includes(q));
+        && (!query || searchable.includes(query));
       card.hidden = !matches;
       if (matches) visible += 1;
     });
-    counter.textContent = visible + (visible === 1 ? ' أداة مطابقة' : ' أدوات مطابقة');
+    counter.textContent = visible + (visible === 1 ? ' أداة مطابقة' : ' أدوات مطابقة') + ' من ' + cards.length;
     empty.hidden = visible !== 0;
   }
-  function cell(text) {
-    const td = document.createElement('td');
-    td.textContent = text;
-    return td;
+
+  function makeCell(tag, value) {
+    const cell = document.createElement(tag);
+    cell.textContent = value;
+    if (tag === 'th') cell.scope = 'row';
+    return cell;
   }
+
   function showComparison(message) {
     rows.replaceChildren();
-    comparisonWrap.hidden = selected.size < 2;
+    const enough = selected.size >= 2;
+    comparisonWrap.hidden = !enough;
+    if (shortcut) {
+      shortcut.hidden = !enough;
+      if (enough) shortcut.textContent = 'عرض مقارنة ' + selected.size + ' من الأدوات المختارة';
+    }
+
     cards.forEach((card) => {
-      const name = card.querySelector('h2').textContent.trim();
       const button = card.querySelector('.compare-button');
-      const isSelected = selected.has(name);
+      const isSelected = selected.has(card);
       button.setAttribute('aria-pressed', String(isSelected));
       button.textContent = isSelected ? 'إزالة من المقارنة' : 'أضف للمقارنة';
-      if (!isSelected || selected.size < 2) return;
-      const tr = document.createElement('tr');
-      tr.append(cell(name), cell(card.dataset.focus));
-      const detail = document.createElement('td');
-      if (card.dataset.review) {
-        const a = document.createElement('a');
-        a.href = card.dataset.review;
-        a.textContent = 'اقرأ المراجعة الموثقة';
-        detail.append(a);
+      if (!isSelected || !enough) return;
+
+      const row = document.createElement('tr');
+      row.append(
+        makeCell('th', cardName(card)),
+        makeCell('td', labels.get(card.dataset.category) || 'غير مصنف'),
+        makeCell('td', card.dataset.focus || 'لم تُوثق حالة الاستخدام')
+      );
+      const reference = document.createElement('td');
+      // Restrict dynamic review links to known local review routes.
+      if (/^\.\.\/reviews\/[a-z0-9-]+\/$/.test(card.dataset.review || '')) {
+        const link = document.createElement('a');
+        link.href = card.dataset.review;
+        link.textContent = 'المراجعة المنشورة';
+        reference.append(link);
       } else {
-        detail.textContent = 'لا توجد مراجعة مفصّلة بعد';
+        reference.textContent = 'لم تُنشر مراجعة تفصيلية بعد';
       }
-      tr.append(detail);
-      rows.append(tr);
+      row.append(reference);
+      rows.append(row);
     });
-    compareStatus.textContent = message || (selected.size < 2
-      ? 'اختر أداتين على الأقل لإظهار الجدول. (' + selected.size + ' من 3)'
-      : 'يظهر الآن ' + selected.size + ' من الأدوات للمقارنة حسب الاستخدام.');
+    compareStatus.textContent = message || (enough
+      ? 'تم اختيار ' + selected.size + ' أدوات. المقارنة مبنية على الاستخدام والمراجعات المنشورة فقط.'
+      : 'اختر أداتين على الأقل لإظهار المقارنة. (' + selected.size + ' من 3)');
   }
+
   cards.forEach((card) => {
-    card.querySelector('.compare-button').addEventListener('click', () => {
-      const name = card.querySelector('h2').textContent.trim();
-      if (selected.has(name)) selected.delete(name);
+    const button = card.querySelector('.compare-button');
+    if (!button) return;
+    button.addEventListener('click', () => {
+      if (selected.has(card)) selected.delete(card);
       else if (selected.size >= 3) {
         showComparison('الحد الأقصى ثلاث أدوات؛ أزل إحداها قبل إضافة أخرى.');
         return;
-      } else selected.add(name);
+      } else selected.add(card);
       showComparison();
     });
   });
+
   search.addEventListener('input', filter);
   category.addEventListener('change', filter);
-  document.getElementById('reset-filters').addEventListener('click', () => {
-    search.value = ''; category.value = 'all'; filter(); search.focus();
-    if (location.search && history.replaceState) history.replaceState(null, '', location.pathname + location.hash);
+  reset.addEventListener('click', () => {
+    search.value = '';
+    category.value = 'all';
+    filter();
+    search.focus();
+    if (location.search && history.replaceState) {
+      history.replaceState(null, '', location.pathname + location.hash);
+    }
   });
-  document.getElementById('clear-comparison').addEventListener('click', () => {
-    selected.clear(); showComparison();
+  clear.addEventListener('click', () => {
+    selected.clear();
+    showComparison();
   });
   filter();
   showComparison();
