@@ -96,6 +96,22 @@ async function main() {
         await page.locator('#guide-reset').click();
         assert.equal(await page.locator('[data-guide-card]:visible').count(),3,
           'Guides reset restores published content');
+        // GitHub Pages fallbacks are instant HTML refreshes, not HTTP 301.
+        for (const [legacy, destination] of [
+          ['/tools.html','/tools/'],
+          ['/start.html','/guides/'],
+          ['/methodology.html','/about/'],
+          ['/editorial-policy/','/about/'],
+          ['/privacy-policy.html','/privacy/'],
+          ['/best-ai-video-tools.html','/reviews/'],
+          ['/kling-vs-runway.html','/reviews/'],
+          ['/lovable-vs-v0.html','/reviews/']
+        ]) {
+          await page.goto(BASE+legacy,{waitUntil:'domcontentloaded'});
+          await page.waitForURL(BASE+destination,{timeout:8000});
+          assert.equal(await page.locator('h1').count(),1,
+            'Legacy fallback lands on the canonical destination: '+legacy);
+        }
         await page.goto(BASE+'/tools/?category=marketing',{waitUntil:'domcontentloaded'});
         assert.equal(await page.locator('#tool-category').inputValue(),'marketing',
           'Marketing category is honored from homepage links');
