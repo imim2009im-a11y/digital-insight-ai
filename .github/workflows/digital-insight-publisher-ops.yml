@@ -143,13 +143,7 @@ jobs:
           fi
           exit 1
 
-      - name: Close incident after recovery
+      - name: Report green checks without closing unresolved production incident
         if: steps.run_due.outcome == 'success' && steps.health.outcome == 'success' && steps.auth_guard.outcome == 'success' && steps.frontend.outcome == 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
         run: |
-          title='Digital Insight Publisher production health failure'
-          existing="$(gh issue list --repo "$GITHUB_REPOSITORY" --state open --search "$title in:title" --json number --jq '.[0].number // empty')"
-          if [ -n "$existing" ]; then
-            gh issue close "$existing" --repo "$GITHUB_REPOSITORY" --comment 'Production, frontend, and security checks recovered automatically.'
-          fi
+          echo "HTTP checks passed. Preserve the incident until scheduled jobs, ephemeral state, and restore evidence have been independently verified." >> "$GITHUB_STEP_SUMMARY"
