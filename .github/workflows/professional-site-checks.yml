@@ -5,7 +5,16 @@ on:
     paths:
       - "site/**"
       - "scripts/site-professional-check.py"
+      - "scripts/sync_tools_catalog.py"
+      - "scripts/test_tools_catalog.py"
+      - "scripts/sync_legacy_routes.py"
+      - "scripts/test_legacy_routes.py"
+      - "scripts/observe_live_release.py"
+      - "scripts/test_observe_live_release.py"
       - "scripts/site-interactions.test.cjs"
+      - "scripts/guides-library.test.cjs"
+      - "scripts/test_deploy_preflight.py"
+      - ".github/workflows/pages-staging.yml"
       - "scripts/site-browser-e2e.cjs"
       - ".github/workflows/professional-site-checks.yml"
   push:
@@ -23,6 +32,16 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           persist-credentials: false
+      - name: Verify legacy fallback pages
+        run: |
+          python3 scripts/sync_legacy_routes.py --check
+          python3 -m unittest discover -s scripts -p test_legacy_routes.py
+      - name: Verify single-source tool catalog and generated directory
+        run: python3 scripts/sync_tools_catalog.py --check
+      - name: Reject invalid catalog records and unsafe generated markup
+        run: python3 -m unittest discover -s scripts -p test_tools_catalog.py
+      - name: Validate production HTTP observation logic offline
+        run: python3 -m unittest discover -s scripts -p test_observe_live_release.py
       - name: Check static content / metadata / links / sitemap
         run: python3 scripts/site-professional-check.py
       - name: Keep public news RSS synchronized with articles
@@ -32,8 +51,12 @@ jobs:
           node --check site/assets/app.js
           node --check site/assets/directory.js
           node --check site/assets/site.js
+          node --check site/assets/guides.js
+          node --check site/assets/advisor.js
       - name: Exercise search, calculator and share interactions
-        run: node --test scripts/site-interactions.test.cjs
+        run: node --test scripts/site-interactions.test.cjs scripts/guides-library.test.cjs
+      - name: Require production preflight and least-privilege deployment
+        run: python3 scripts/test_deploy_preflight.py
 
   browser:
     runs-on: ubuntu-latest
@@ -53,3 +76,25 @@ jobs:
       - name: Verify all pages at 320/390/768/1365 widths
         shell: bash
         run: NODE_PATH="$RUNNER_TEMP/site-browser-qa/node_modules" node scripts/site-browser-e2e.cjs
+
+  production-observation:
+    name: Read-only public HTTP evidence
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: Observe live statuses, security headers and permanent redirects (no writes)
+        shell: bash
+        run: |
+          python3 scripts/observe_live_release.py | tee "$RUNNER_TEMP/observed-http.txt"
+          {
+            echo '### Live HTTP observation (not a deployment)'
+            echo 'The checks read public HTTP HEAD responses; warnings remain release-review blockers.'
+            echo '~~~text'
+            grep -E '^(ROUTE|  UNVERIFIED:|  PASS:)' "$RUNNER_TEMP/observed-http.txt" || true
+            echo '~~~'
+          } >> "$GITHUB_STEP_SUMMARY"

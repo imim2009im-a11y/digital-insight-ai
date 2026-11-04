@@ -79,10 +79,121 @@ async function main() {
         assert.equal(await visibleNews.evaluateAll(cards =>
           cards.filter(card => !card.textContent.toLowerCase().includes('gemini')).length),0,
           'News filters Gemini hides non-matches');
+        await page.goto(BASE+'/guides/',{waitUntil:'domcontentloaded'});
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),3,
+          'Guides show all published articles initially');
+        await page.locator('#guide-search').fill('فيديو');
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),1,
+          'Guides search finds video content');
+        await page.locator('#guide-search').fill('');
+        await page.locator('#guide-topic').selectOption('plans');
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),1,
+          'Guides filter Google AI subscription plans');
+        await page.locator('#guide-search').fill('محتوى غير منشور');
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),0,
+          'Guides show no incorrect matches');
+        assert(await page.locator('#guides-empty').isVisible(),'Guides empty state is visible');
+        await page.locator('#guide-reset').click();
+        assert.equal(await page.locator('[data-guide-card]:visible').count(),3,
+          'Guides reset restores published content');
+        // GitHub Pages fallbacks are instant HTML refreshes, not HTTP 301.
+        for (const [legacy, destination] of [
+          ['/tools.html','/tools/'],
+          ['/start.html','/guides/'],
+          ['/methodology.html','/about/'],
+          ['/editorial-policy/','/about/'],
+          ['/privacy-policy.html','/privacy/'],
+          ['/best-ai-video-tools.html','/reviews/'],
+          ['/kling-vs-runway.html','/reviews/'],
+          ['/lovable-vs-v0.html','/reviews/']
+        ]) {
+          await page.goto(BASE+legacy,{waitUntil:'domcontentloaded'});
+          await page.waitForURL(BASE+destination,{timeout:8000});
+          assert.equal(await page.locator('h1').count(),1,
+            'Legacy fallback lands on the canonical destination: '+legacy);
+        }
+        await page.goto(BASE+'/tools/?category=marketing',{waitUntil:'domcontentloaded'});
+        assert.equal(await page.locator('#tool-category').inputValue(),'marketing',
+          'Marketing category is honored from homepage links');
+        assert((await page.locator('[data-tool-card]:visible').count())>=1,
+          'Marketing category displays published tools');
         await page.goto(BASE+'/tools/',{waitUntil:'domcontentloaded'});
+
+        assert.equal(await page.locator('[data-tool-card] .tool-official-link').count(),7,
+          'Every existing sponsored tool exposes its verified official provider link');
+        assert.equal(await page.locator('[data-tool-card] .tool-partner-note').count(),6,
+          'Third-party resellers are disclosed separately from the direct sponsored vendor link');
+        assert.equal(await page.locator('a.affiliate[rel~="sponsored"]').count(),7,
+          'Sponsored relationships are preserved and explicitly qualified for crawlers');
+        assert.equal(await page.locator('#tool-meshy .tool-official-link a').first().getAttribute('href'),'https://meshy.ai/',
+          'Meshy official destination is available beside the reseller link');
+        assert.equal(await page.locator('#tool-runway .tool-official-link a').first().getAttribute('href'),'https://runwayml.com/',
+          'Runway official destination is available beside the reseller link');
         await page.locator('#tool-category').selectOption('apps');
         assert.equal(await page.locator('[data-tool-card]:visible').count(),1,
           'Directory filters apps');
+        await page.locator('#tool-category').selectOption('all');
+        await page.locator('#tool-search').fill('إِنْشَاء');
+        assert((await page.locator('[data-tool-card]:visible').count()) >= 1,
+          'Directory normalizes Arabic diacritics and hamza in search');
+        await page.locator('#tool-search').fill('عبارة-ليس-لها-نتائج-2026');
+        assert.equal(await page.locator('[data-tool-card]:visible').count(),0,
+          'Unknown tool search has no false matches');
+        assert(await page.locator('#tool-no-results').isVisible(),
+          'Directory empty state is visible');
+        await page.locator('#reset-filters').click();
+        const toolButtons=page.locator('[data-tool-card] .compare-button');
+        await toolButtons.nth(0).click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),0,
+          'A single tool does not activate comparison');
+        await toolButtons.nth(1).click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),2,
+          'Two tools activate comparison');
+        assert(await page.locator('#compare-shortcut').isVisible(),
+          'Compare shortcut becomes discoverable after selecting two tools');
+        assert.equal(await page.locator('#comparison-rows tr:first-child > *').count(),6,
+          'Comparison has six evidence-only columns');
+        assert.equal(await page.locator('#comparison-rows tr:first-child th[scope=row]').count(),1,
+          'Comparison has accessible row headers');
+        await toolButtons.nth(2).click();
+        await toolButtons.nth(3).click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),3,
+          'Comparison enforces its three-tool limit');
+        assert.match(await page.locator('#compare-status').textContent(),/الحد الأقصى/,
+          'Comparison announces capacity when fourth selection is denied');
+        await page.locator('#clear-comparison').click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),0,
+          'Comparison reset clears all selections');
+        assert(await page.locator('#compare-shortcut').isHidden(),
+          'Comparison shortcut disappears after clearing selection');
+        await page.locator('#advisor-form').waitFor({state:'visible',timeout:10000});
+        await page.locator('#advisor-task').selectOption('video');
+        await page.locator('#advisor-audience').selectOption('business');
+        await page.locator('#advisor-budget').selectOption('free');
+        await page.locator('#advisor-arabic').check();
+        await page.locator('#advisor-privacy').check();
+        await page.locator('#advisor-form button[type=submit]').click();
+        assert.equal(await page.locator('.advisor-option').count(),4,
+          'Advisor returns only four published video tools');
+        assert.match(await page.locator('#advisor-status').textContent(),/4/,
+          'Advisor announces the number of category matches');
+        const limitations=await page.locator('.advisor-disclaimer').textContent();
+        assert.match(limitations,/بعض الخطط المجانية موثقة بمصادر رسمية/,
+          'Advisor distinguishes verified free plans from unverified entries');
+        assert.match(limitations,/توثيق ترجمة الفيديو للعربية متاح لبعض الأدوات فقط/,
+          'Advisor qualifies officially verified video translation scope');
+        assert.match(limitations,/متطلبات الخصوصية وحماية البيانات غير موثقة/,
+          'Advisor does not invent privacy assurances');
+        assert.match(await page.locator('.advisor-option').first().textContent(),/HeyGen|خطة مجانية/,
+          'Advisor prioritizes supported facts and preserves local proof');
+        assert((await page.locator('.advisor-option .advisor-fact').count()) >= 4,
+          'Advisor shows known and unknown fact states beside each result');
+        assert.equal(await page.locator('.advisor-option a[href^="http"]').count(),0,
+          'Advisor links only to local cards or local published reviews');
+        await page.locator('#advisor-task').selectOption('apps');
+        await page.locator('#advisor-form button[type=submit]').click();
+        assert.equal(await page.locator('.advisor-option').count(),1,
+          'Advisor uses the existing catalog for app-development tasks');
         const amount=await page.locator('#calc-result').textContent();
         assert(amount && /١٥٠|150/.test(amount),'initial calculator 150 SAR');
         console.log('PASS functional Arabic news filter, tools filter, cost calculation');
