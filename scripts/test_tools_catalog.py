@@ -64,6 +64,37 @@ class CatalogValidationTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "evidence scope"):
             validate(data)
 
+    def test_each_sponsored_link_has_an_official_destination(self):
+        entries = validate(self.data)
+        self.assertEqual(sum(bool(t["official"]) for t in entries), 7)
+        for tool in entries:
+            if tool["external"]["sponsored"]:
+                self.assertIsNotNone(tool["official"], tool["id"])
+
+    def test_untrusted_domain_cannot_claim_to_be_official(self):
+        for key in ("url", "evidenceUrl"):
+            data = copy.deepcopy(self.data)
+            runway = next(t for t in data["tools"] if t["id"] == "runway")
+            runway["official"][key] = "https://runwayml.com.evil.example/offers"
+            with self.subTest(field=key):
+                with self.assertRaisesRegex(ValueError, "official destination or evidence mismatch"):
+                    validate(data)
+
+    def test_origin_render_preserves_affiliate_disclosure(self):
+        rendered = render(self.data)
+        self.assertEqual(rendered.count('class="tool-official-link"'), 7)
+        self.assertEqual(rendered.count('class="tool-partner-note"'), 6)
+        self.assertEqual(rendered.count('rel="sponsored noopener noreferrer"'), 7)
+        self.assertIn('https://meshy.ai/', rendered)
+        self.assertIn('https://runwayml.com/', rendered)
+
+    def test_sponsored_link_without_official_origin_is_rejected(self):
+        data = copy.deepcopy(self.data)
+        meshy = next(t for t in data["tools"] if t["id"] == "meshy")
+        meshy["official"] = None
+        with self.assertRaisesRegex(ValueError, "missing independent official link"):
+            validate(data)
+
 
 if __name__ == "__main__":
     unittest.main()
