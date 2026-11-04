@@ -1,0 +1,25 @@
+import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { fileURLToPath } from 'node:url';
+
+const workflowFile = fileURLToPath(new URL('../.github/workflows/digital-insight-publisher-ops.yml', import.meta.url));
+const source = readFileSync(workflowFile, 'utf8');
+const schedulerStart = source.indexOf('  scheduler-health:\n');
+const prJobStart = source.indexOf('  source-policy:\n');
+assert.ok(prJobStart !== -1 && schedulerStart > prJobStart, 'source check and scheduler jobs must be explicit');
+const checks = source.slice(prJobStart, schedulerStart);
+const scheduler = source.slice(schedulerStart);
+assert.match(source, /pull_request:\s*\n\s*branches: \[main\]/);
+assert.match(source, /digital-insight-publisher-ops-\$\{\{ github\.event_name == 'pull_request'/);
+assert.match(source, /permissions:\s*\n\s*contents: read/);
+assert.match(checks, /if: github\.event_name == 'pull_request'/);
+assert.match(checks, /permissions:\s*\n\s*contents: read/);
+assert.doesNotMatch(checks, /issues: write|secrets\.|run-due|curl /);
+assert.match(scheduler, /if: github\.event_name != 'pull_request' && github\.ref == 'refs\/heads\/main'/);
+assert.match(scheduler, /permissions:\s*\n\s*contents: read\s*\n\s*issues: write/);
+assert.match(scheduler, /DIA_SCHEDULER_TOKEN: \$\{\{ secrets\.DIA_SCHEDULER_TOKEN \}\}/);
+assert.match(scheduler, /if \(status < 200 \|\| status >= 300\) process\.exitCode = 1;/);
+assert.match(scheduler, /code="\$\(curl /);
+assert.doesNotMatch(source, /\bcat \/tmp\/state-body\b|^\s*echo "\$response"/m);
+assert.match(scheduler, /trap 'rm -f \/tmp\/state-body' EXIT/);
+console.log('PASS: publisher PR safety, least privilege, fail-closed status checks, response redaction');
