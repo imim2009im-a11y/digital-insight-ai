@@ -10,15 +10,38 @@ on:
 
 permissions:
   contents: read
-  pages: write
-  id-token: write
 
 concurrency:
   group: pages-production
   cancel-in-progress: true
 
 jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout production revision
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Validate routes, SEO, metadata and content
+        run: python3 scripts/site-professional-check.py
+      - name: Validate JavaScript syntax
+        run: |
+          node --check site/assets/app.js
+          node --check site/assets/directory.js
+          node --check site/assets/site.js
+          node --check site/assets/guides.js
+      - name: Verify public interactions and Arabic discovery
+        run: node --test scripts/site-interactions.test.cjs scripts/guides-library.test.cjs
+
   deploy:
+    needs: preflight
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
