@@ -102,6 +102,17 @@ async function main() {
         assert((await page.locator('[data-tool-card]:visible').count())>=1,
           'Marketing category displays published tools');
         await page.goto(BASE+'/tools/',{waitUntil:'domcontentloaded'});
+
+        assert.equal(await page.locator('[data-tool-card] .tool-official-link').count(),7,
+          'Every existing sponsored tool exposes its verified official provider link');
+        assert.equal(await page.locator('[data-tool-card] .tool-partner-note').count(),6,
+          'Third-party resellers are disclosed separately from the direct sponsored vendor link');
+        assert.equal(await page.locator('a.affiliate[rel~="sponsored"]').count(),7,
+          'Sponsored relationships are preserved and explicitly qualified for crawlers');
+        assert.equal(await page.locator('#tool-meshy .tool-official-link a').first().getAttribute('href'),'https://meshy.ai/',
+          'Meshy official destination is available beside the reseller link');
+        assert.equal(await page.locator('#tool-runway .tool-official-link a').first().getAttribute('href'),'https://runwayml.com/',
+          'Runway official destination is available beside the reseller link');
         await page.locator('#tool-category').selectOption('apps');
         assert.equal(await page.locator('[data-tool-card]:visible').count(),1,
           'Directory filters apps');
