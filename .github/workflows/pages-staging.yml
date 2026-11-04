@@ -25,6 +25,10 @@ jobs:
         uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
         with:
           persist-credentials: false
+      - name: Verify legacy fallback pages
+        run: |
+          python3 scripts/sync_legacy_routes.py --check
+          python3 -m unittest discover -s scripts -p test_legacy_routes.py
       - name: Verify single-source tool catalog
         run: python3 scripts/sync_tools_catalog.py --check
       - name: Reject invalid catalog records and unsafe generated markup
