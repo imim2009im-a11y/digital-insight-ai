@@ -105,6 +105,40 @@ async function main() {
         await page.locator('#tool-category').selectOption('apps');
         assert.equal(await page.locator('[data-tool-card]:visible').count(),1,
           'Directory filters apps');
+        await page.locator('#tool-category').selectOption('all');
+        await page.locator('#tool-search').fill('إِنْشَاء');
+        assert((await page.locator('[data-tool-card]:visible').count()) >= 1,
+          'Directory normalizes Arabic diacritics and hamza in search');
+        await page.locator('#tool-search').fill('عبارة-ليس-لها-نتائج-2026');
+        assert.equal(await page.locator('[data-tool-card]:visible').count(),0,
+          'Unknown tool search has no false matches');
+        assert(await page.locator('#tool-no-results').isVisible(),
+          'Directory empty state is visible');
+        await page.locator('#reset-filters').click();
+        const toolButtons=page.locator('[data-tool-card] .compare-button');
+        await toolButtons.nth(0).click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),0,
+          'A single tool does not activate comparison');
+        await toolButtons.nth(1).click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),2,
+          'Two tools activate comparison');
+        assert(await page.locator('#compare-shortcut').isVisible(),
+          'Compare shortcut becomes discoverable after selecting two tools');
+        assert.equal(await page.locator('#comparison-rows tr:first-child > *').count(),4,
+          'Comparison has four evidence-only columns');
+        assert.equal(await page.locator('#comparison-rows tr:first-child th[scope=row]').count(),1,
+          'Comparison has accessible row headers');
+        await toolButtons.nth(2).click();
+        await toolButtons.nth(3).click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),3,
+          'Comparison enforces its three-tool limit');
+        assert.match(await page.locator('#compare-status').textContent(),/الحد الأقصى/,
+          'Comparison announces capacity when fourth selection is denied');
+        await page.locator('#clear-comparison').click();
+        assert.equal(await page.locator('#comparison-rows tr').count(),0,
+          'Comparison reset clears all selections');
+        assert(await page.locator('#compare-shortcut').isHidden(),
+          'Comparison shortcut disappears after clearing selection');
         const amount=await page.locator('#calc-result').textContent();
         assert(amount && /١٥٠|150/.test(amount),'initial calculator 150 SAR');
         console.log('PASS functional Arabic news filter, tools filter, cost calculation');
