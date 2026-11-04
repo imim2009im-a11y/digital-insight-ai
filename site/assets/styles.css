@@ -145,3 +145,10 @@ body{min-width:300px}
 .tools .tool-verified-fact a{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
 .tools .tool-verified-fact small{display:inline-block;color:var(--muted)}
 .comparison table{min-width:950px}
+
+/* Vendor origin and affiliate disclosures: clear separation from paid partner links. */
+.tools .tool-official-link{margin-block:12px 8px;display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+.tools .tool-official-link>a:first-child{display:inline-flex;align-items:center;min-height:44px;border:1px solid #43a8ce;border-radius:10px;padding:8px 12px;background:#10354a;color:#e8f8ff;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.tools .tool-origin-proof{font-size:.86rem;color:#b5d9eb;text-decoration:underline;text-underline-offset:3px}
+.tools .tool-partner-note{font-size:.86rem;line-height:1.7;background:#30281b;border-inline-start:3px solid #e2ac56;border-radius:7px;padding:10px 12px;color:#fff1d6}
+.tools .tool-official-link a:focus-visible,.tools .tool-origin-proof:focus-visible{outline:3px solid #fff;outline-offset:3px}
