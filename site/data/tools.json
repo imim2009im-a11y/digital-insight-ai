@@ -1,7 +1,7 @@
 {
   "version": 1,
   "language": "ar-SA",
-  "notice": "فهرس محرري مستخرج من الأدوات المنشورة؛ ليس تدقيقاً مستقلاً لأسعار أو مزايا المزودين.",
+  "notice": "فهرس محرري بمصادر رسمية لبعض الحقائق المحددة فقط. غياب التوثيق لا يعني غياب الميزة، والأسعار والخصوصية واختبارات جودة العربية غير مؤكدة.",
   "tools": [
     {
       "id": "arvow",
@@ -25,10 +25,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -53,10 +56,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -81,10 +87,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -109,10 +118,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -137,10 +149,18 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": {
+          "available": true,
+          "scope": "خطة Basic مجانية لتجربة المحرر والأصوات والأفاتارات؛ راجع القيود لدى المزود.",
+          "sourceUrl": "https://help.synthesia.io/en/articles/15972650-what-are-synthesia-s-pricing-plans",
+          "verifiedOn": "2026-11-04"
+        },
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -162,10 +182,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -187,10 +210,18 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": {
+          "available": true,
+          "scope": "خطة مجانية للتجربة بأرصدة محدودة تُمنح مرة واحدة؛ ليست جميع النماذج متاحة.",
+          "sourceUrl": "https://help.runwayml.com/hc/en-us/articles/50404627334547-Free-plan-details",
+          "verifiedOn": "2026-11-04"
+        },
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -212,10 +243,23 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": {
+          "available": true,
+          "scope": "خطة مجانية لإنتاج عدد محدود من مقاطع الفيديو شهريًا وفق شروط المزود.",
+          "sourceUrl": "https://www.heygen.com/ar-sa/pricing",
+          "verifiedOn": "2026-11-04"
+        },
+        "arabicVideoTranslation": {
+          "available": true,
+          "scope": "العربية، بما فيها السعودية، مدرجة للترجمة الصوتية ومزامنة الشفاه؛ لا يثبت ذلك جودة كل اللهجات.",
+          "sourceUrl": "https://help.heygen.com/en/articles/11391941-video-translation-languages-we-support",
+          "verifiedOn": "2026-11-04"
+        }
       }
     },
     {
@@ -237,10 +281,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -262,10 +309,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     },
     {
@@ -287,10 +337,13 @@
         "externalVerificationDate": null
       },
       "unknown": {
-        "freePlan": null,
         "price": null,
         "arabicSupport": null,
         "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
       }
     }
   ]
