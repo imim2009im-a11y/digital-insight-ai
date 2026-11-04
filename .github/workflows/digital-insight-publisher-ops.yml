@@ -71,9 +71,9 @@ jobs:
           response="$(curl --fail-with-body --silent --show-error \
             --retry 3 --retry-all-errors --retry-delay 5 --max-time 90 \
             https://digital-insight-publisher.onrender.com/api/health)"
-          printf '%s\n' "$response" | grep -q '"ok":true'
-          printf '%s\n' "$response" | grep -q 'Digital Insight Publisher'
-          printf '%s\n' "$response" | grep -q '"authConfigured":true'
+          grep -q '"ok":true' <<< "$response"
+          grep -q 'Digital Insight Publisher' <<< "$response"
+          grep -q '"authConfigured":true' <<< "$response"
 
       - name: Verify protected API rejects anonymous access
         id: auth_guard
