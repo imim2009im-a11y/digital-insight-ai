@@ -18,7 +18,13 @@ TARGET = ROOT / "site/tools/index.html"
 BEGIN = "<!-- catalog:begin -->"
 END = "<!-- catalog:end -->"
 ALLOWED_CATEGORIES = {"video", "design", "apps", "marketing", "3d"}
-UNKNOWN_KEYS = {"freePlan", "price", "arabicSupport", "privacy"}
+UNKNOWN_KEYS = {"price", "arabicSupport", "privacy"}
+FACT_KEYS = {"freePlan", "arabicVideoTranslation"}
+OFFICIAL_FACT_HOSTS = {
+    "runway": {"help.runwayml.com"},
+    "heygen": {"www.heygen.com", "help.heygen.com"},
+    "synthesia": {"help.synthesia.io"},
+}
 
 
 def validate(data):
@@ -45,6 +51,25 @@ def validate(data):
             raise ValueError(key + " unknown fields must be explicit")
         if any(value is not None for value in unknown.values()):
             raise ValueError(key + " unverified commercial facts cannot be asserted here")
+        facts = tool.get("facts")
+        if not isinstance(facts, dict) or set(facts) != FACT_KEYS:
+            raise ValueError(key + " must list both fact types, including unknown")
+        for fact_key, fact in facts.items():
+            if fact is None:
+                continue
+            if key not in OFFICIAL_FACT_HOSTS:
+                raise ValueError(key + " official fact source is not approved")
+            if not isinstance(fact, dict) or set(fact) != {"available", "scope", "sourceUrl", "verifiedOn"}:
+                raise ValueError(key + " invalid verified fact structure")
+            if fact["available"] is not True or not isinstance(fact["scope"], str) or not fact["scope"].strip():
+                raise ValueError(key + " invalid evidence scope")
+            source = urlsplit(fact["sourceUrl"])
+            if (source.scheme != "https" or source.hostname not in OFFICIAL_FACT_HOSTS[key]
+                    or source.username or source.password or source.port not in (None, 443)
+                    or not source.path or source.path == "/"):
+                raise ValueError(key + " invalid official evidence source")
+            if not re.fullmatch(r"20[0-9]{2}-[01][0-9]-[0-3][0-9]", fact["verifiedOn"]):
+                raise ValueError(key + " invalid verification date")
         evidence = tool.get("evidence")
         if (not isinstance(evidence, dict)
                 or evidence.get("sourceFile") != "site/tools/index.html"
@@ -92,6 +117,18 @@ def render(data):
                       if action["sponsored"] else "")
         relation = "sponsored noopener noreferrer" if action["sponsored"] else "noopener noreferrer"
         review_ref = review["href"] if review else ""
+        verification = []
+        for fact_key, label in (("freePlan", "خطة مجانية موثقة"), ("arabicVideoTranslation", "ترجمة الفيديو بالعربية موثقة")):
+            fact = tool["facts"][fact_key]
+            if fact is not None:
+                verification.append(
+                    '<p class="tool-verified-fact">'
+                    + escaped(label) + ': ' + escaped(fact["scope"])
+                    + ' <a href="' + escaped(fact["sourceUrl"])
+                    + '" target="_blank" rel="noopener noreferrer">المصدر الرسمي</a>'
+                    + ' <small>تحقق: ' + escaped(fact["verifiedOn"]) + '</small></p>'
+                )
+        facts_html = ''.join(verification)
         cards.append(
             '<article data-tool-card data-tool-id="' + escaped(tool["id"]) + '"'
             ' id="tool-' + escaped(tool["id"]) + '"'
@@ -101,6 +138,7 @@ def render(data):
             '<span>' + escaped(tool["categoryLabel"]) + '</span>'
             '<h2>' + escaped(tool["name"]) + '</h2>'
             '<p>' + description + '</p>'
+            + facts_html
             '<a' + attributes + ' rel="' + relation + '" target="_blank" href="'
             + escaped(action["href"]) + '">' + escaped(action["label"]) + '</a>'
             '<div class="card-actions"><button class="compare-button" type="button"'
