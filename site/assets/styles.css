@@ -139,3 +139,9 @@ body{min-width:300px}
 .comparison table{min-width:700px}
 .comparison tbody th[scope=row]{text-align:right;color:var(--text);font-weight:750}
 @media(min-width:900px){.comparison-scroll-hint{display:none}}
+
+/* Source-backed tool claims: local facts remain legible and independent of sponsored outbound links. */
+.tools .tool-verified-fact{flex:none!important;border-inline-start:3px solid var(--brand);padding-inline-start:10px;color:#d4e4f5;font-size:.88rem;margin:8px 0;line-height:1.7}
+.tools .tool-verified-fact a{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+.tools .tool-verified-fact small{display:inline-block;color:var(--muted)}
+.comparison table{min-width:950px}
