@@ -39,10 +39,29 @@ class CatalogValidationTest(unittest.TestCase):
                 with self.assertRaises(ValueError):
                     validate(data)
 
-    def test_unverified_claims_cannot_be_published_without_schema_review(self):
+    def test_unverified_claims_cannot_be_published_without_evidence(self):
         data = copy.deepcopy(self.data)
-        data["tools"][0]["unknown"]["freePlan"] = True
+        data["tools"][0]["unknown"]["price"] = "10 SAR"
         with self.assertRaisesRegex(ValueError, "unverified"):
+            validate(data)
+
+    def test_all_verified_facts_have_scoped_official_sources(self):
+        entries = validate(self.data)
+        self.assertEqual(sum(bool(t["facts"]["freePlan"]) for t in entries), 3)
+        self.assertEqual(sum(bool(t["facts"]["arabicVideoTranslation"]) for t in entries), 1)
+
+    def test_fact_source_cannot_be_replaced_with_unrelated_website(self):
+        data = copy.deepcopy(self.data)
+        runway = next(t for t in data["tools"] if t["id"] == "runway")
+        runway["facts"]["freePlan"]["sourceUrl"] = "https://not-runway.test/free"
+        with self.assertRaisesRegex(ValueError, "official evidence"):
+            validate(data)
+
+    def test_claim_without_scope_is_rejected(self):
+        data = copy.deepcopy(self.data)
+        heygen = next(t for t in data["tools"] if t["id"] == "heygen")
+        heygen["facts"]["arabicVideoTranslation"]["scope"] = ""
+        with self.assertRaisesRegex(ValueError, "evidence scope"):
             validate(data)
 
 
