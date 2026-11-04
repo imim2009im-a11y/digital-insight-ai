@@ -7,6 +7,8 @@ on:
       - "scripts/site-professional-check.py"
       - "scripts/site-interactions.test.cjs"
       - "scripts/guides-library.test.cjs"
+      - "scripts/test_deploy_preflight.py"
+      - ".github/workflows/pages-staging.yml"
       - "scripts/site-browser-e2e.cjs"
       - ".github/workflows/professional-site-checks.yml"
   push:
@@ -36,6 +38,8 @@ jobs:
           node --check site/assets/guides.js
       - name: Exercise search, calculator and share interactions
         run: node --test scripts/site-interactions.test.cjs scripts/guides-library.test.cjs
+      - name: Require production preflight and least-privilege deployment
+        run: python3 scripts/test_deploy_preflight.py
 
   browser:
     runs-on: ubuntu-latest
