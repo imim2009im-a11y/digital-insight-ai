@@ -33,6 +33,8 @@ jobs:
           node --check site/assets/directory.js
           node --check site/assets/site.js
           node --check site/assets/guides.js
+      - name: Verify response-header observation logic offline
+        run: python3 -m unittest discover -s scripts -p test_response_security.py
       - name: Verify public interactions and Arabic discovery
         run: node --test scripts/site-interactions.test.cjs scripts/guides-library.test.cjs
 
