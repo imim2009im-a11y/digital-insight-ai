@@ -76,7 +76,11 @@
       row.append(
         makeCell('th', cardName(card)),
         makeCell('td', labels.get(card.dataset.category) || 'غير مصنف'),
-        makeCell('td', card.dataset.focus || 'لم تُوثق حالة الاستخدام')
+        makeCell('td', card.dataset.focus || 'لم تُوثق حالة الاستخدام'),
+        makeCell('td', card.dataset.freePlan === 'verified'
+          ? 'خطة مجانية موثقة؛ راجع شروطها في البطاقة' : 'غير موثق'),
+        makeCell('td', card.dataset.arabicTranslation === 'verified'
+          ? 'ترجمة فيديو عربية موثقة؛ لا تشمل جميع الميزات' : 'غير موثق')
       );
       const reference = document.createElement('td');
       // Restrict dynamic review links to known local review routes.
