@@ -5,6 +5,7 @@ on:
     paths:
       - "site/**"
       - "scripts/site-professional-check.py"
+      - "scripts/sync_tools_catalog.py"
       - "scripts/site-interactions.test.cjs"
       - "scripts/guides-library.test.cjs"
       - "scripts/test_deploy_preflight.py"
@@ -26,6 +27,8 @@ jobs:
       - uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
         with:
           persist-credentials: false
+      - name: Verify single-source tool catalog and generated directory
+        run: python3 scripts/sync_tools_catalog.py --check
       - name: Check static content / metadata / links / sitemap
         run: python3 scripts/site-professional-check.py
       - name: Keep public news RSS synchronized with articles
