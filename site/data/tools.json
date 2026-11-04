@@ -1,0 +1,297 @@
+{
+  "version": 1,
+  "language": "ar-SA",
+  "notice": "فهرس محرري مستخرج من الأدوات المنشورة؛ ليس تدقيقاً مستقلاً لأسعار أو مزايا المزودين.",
+  "tools": [
+    {
+      "id": "arvow",
+      "name": "Arvow",
+      "category": "marketing",
+      "categoryLabel": "AI SEO",
+      "focus": "AI SEO والنشر الآلي وتتبع الظهور",
+      "description": "كتابة وتحسين وأتمتة محتوى SEO مع تتبع الظهور في منصات AI. {review}.",
+      "review": {
+        "href": "../reviews/arvow/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://arvow.com/",
+        "label": "زيارة Arvow الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "launchspy",
+      "name": "LaunchSpy",
+      "category": "marketing",
+      "categoryLabel": "Marketing Intelligence",
+      "focus": "استخبارات المنافسين والفنل والإعلانات",
+      "description": "تحليل إعلانات المنافسين والفنل والتقنيات المستخدمة. {review}.",
+      "review": {
+        "href": "../reviews/launchspy/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://launchspy.io/",
+        "label": "زيارة LaunchSpy الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "frase",
+      "name": "Frase",
+      "category": "marketing",
+      "categoryLabel": "SEO وGEO",
+      "focus": "SEO وGEO وتحسين المحتوى",
+      "description": "بحث وتحسين المحتوى لمحركات البحث ومنصات AI. {review}.",
+      "review": {
+        "href": "../reviews/frase/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://www.frase.io/",
+        "label": "زيارة Frase الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "creatify",
+      "name": "Creatify",
+      "category": "marketing",
+      "categoryLabel": "إعلانات AI",
+      "focus": "إعلانات فيديو قصيرة واختبار إبداعي",
+      "description": "إنتاج نسخ إعلانية متعددة من المنتج أو الرابط. {review}.",
+      "review": {
+        "href": "../reviews/creatify/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://creatify.ai/",
+        "label": "زيارة Creatify الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "synthesia",
+      "name": "Synthesia",
+      "category": "video",
+      "categoryLabel": "فيديو وتدريب",
+      "focus": "فيديو تدريب وشرح بمتحدث افتراضي",
+      "description": "إنشاء شروحات وتدريب بالفيديو باستخدام نصوص ومقدّمين افتراضيين. {review} قبل الدفع.",
+      "review": {
+        "href": "../reviews/synthesia/",
+        "label": "اقرأ التقييم والقيود"
+      },
+      "external": {
+        "href": "https://www.synthesia.io/?via=ibrahim-albalawi",
+        "label": "زيارة Synthesia عبر رابط الإحالة ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "kling-ai",
+      "name": "Kling AI",
+      "category": "video",
+      "categoryLabel": "فيديو",
+      "focus": "توليد فيديو وتجارب بصرية",
+      "description": "لتجارب إنشاء الفيديو بالذكاء الاصطناعي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/kling-ai/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "runway",
+      "name": "Runway",
+      "category": "video",
+      "categoryLabel": "فيديو",
+      "focus": "إنشاء وتحرير فيديو",
+      "description": "لإنشاء وتحرير محتوى فيديو مدعوم بالذكاء الاصطناعي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/runway-accounts/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "heygen",
+      "name": "HeyGen",
+      "category": "video",
+      "categoryLabel": "فيديو",
+      "focus": "متحدث افتراضي وعروض",
+      "description": "لفيديوهات العروض والمتحدث الافتراضي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/heygen/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "openart",
+      "name": "OpenArt",
+      "category": "design",
+      "categoryLabel": "تصميم",
+      "focus": "تصميم الصور والمفاهيم",
+      "description": "لإنشاء الصور والتجارب البصرية.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/openart/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "lovable",
+      "name": "Lovable",
+      "category": "apps",
+      "categoryLabel": "بناء تطبيقات",
+      "focus": "بناء نموذج تطبيق أولي",
+      "description": "لبناء نماذج أولية وتطبيقات من أوامر نصية.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/lovable/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    },
+    {
+      "id": "meshy",
+      "name": "Meshy",
+      "category": "3d",
+      "categoryLabel": "3D",
+      "focus": "نماذج ثلاثية الأبعاد",
+      "description": "لتجارب النمذجة ثلاثية الأبعاد المدعومة بالذكاء الاصطناعي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/meshy/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "freePlan": null,
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      }
+    }
+  ]
+}
