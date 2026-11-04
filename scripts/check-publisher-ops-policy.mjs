@@ -22,4 +22,6 @@ assert.match(scheduler, /if \(status < 200 \|\| status >= 300\) process\.exitCod
 assert.match(scheduler, /code="\$\(curl /);
 assert.doesNotMatch(source, /\bcat \/tmp\/state-body\b|^\s*echo "\$response"/m);
 assert.match(scheduler, /trap 'rm -f \/tmp\/state-body' EXIT/);
-console.log('PASS: publisher PR safety, least privilege, fail-closed status checks, response redaction');
+assert.doesNotMatch(source, /gh issue close/);
+assert.match(scheduler, /Preserve the incident until scheduled jobs, ephemeral state, and restore evidence/);
+console.log('PASS: publisher PR safety, least privilege, fail-closed status checks, response redaction, manual incident review');
