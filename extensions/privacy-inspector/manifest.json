@@ -1,0 +1,12 @@
+{
+  "manifest_version": 3,
+  "name": "Digital Insight Privacy Inspector",
+  "short_name": "DIA Privacy",
+  "version": "0.1.0",
+  "description": "فحص يدوي محدود لمؤشرات الخصوصية في الصفحة الحالية دون جمع بيانات التصفح أو إرسالها.",
+  "permissions": ["activeTab", "scripting"],
+  "action": {
+    "default_title": "فحص الخصوصية — Digital Insight AI",
+    "default_popup": "popup.html"
+  }
+}
