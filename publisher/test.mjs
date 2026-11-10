@@ -226,6 +226,19 @@ async function exercise(configured) {
     const missingNested=await request('/api/health');
     assert.equal(missingNested.status,503,'missing provider objects must fail closed, not crash');
     assert.equal(readFileSync(statePath,'utf8'),invalidProviders);
+    // A valid top-level structure with null members must fail closed and preserve bytes.
+    const validFixture=JSON.parse(savedState);
+    for(const collection of ['posts','jobs','audit']){
+      const bad=structuredClone(validFixture);
+      bad[collection]=[null];
+      const bytes=JSON.stringify(bad);
+      writeFileSync(statePath,bytes);
+      const invalidHealth=await request('/api/health');
+      assert.equal(invalidHealth.status,503,collection+' with null members cannot report healthy');
+      const invalidPreflight=await request('/api/scheduler/preflight',{headers:authHeaders});
+      assert.equal(invalidPreflight.status,503,collection+' with null members cannot pass preflight');
+      assert.equal(readFileSync(statePath,'utf8'),bytes,'invalid state must not be overwritten');
+    }
     writeFileSync(statePath, savedState);
     // The test bootstrap variable is intentionally limited to a synthetic process;
     // restoration should leave old state intact rather than re-bootstrap it.
