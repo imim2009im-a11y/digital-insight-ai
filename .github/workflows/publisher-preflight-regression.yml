@@ -1,0 +1,44 @@
+name: Publisher Preflight Regression
+
+on:
+  pull_request:
+    branches: [digital-insight-publisher]
+    paths:
+      - "publisher/**"
+      - ".github/workflows/publisher-preflight-regression.yml"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publisher-preflight-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  isolated-regression:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout pinned action
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+      - name: Verify Node.js source syntax
+        run: |
+          node --check publisher/server.mjs
+          node --check publisher/test.mjs
+          node --check publisher/public/app.js
+          node --check publisher/test-races.mjs
+          node --check publisher/state-inventory.mjs
+          node --check publisher/test-inventory.mjs
+      - name: Run isolated publisher authentication and preflight tests
+        working-directory: publisher
+        env:
+          TELEGRAM_BOT_TOKEN: ""
+          TELEGRAM_CHAT_ID: ""
+          DISCORD_WEBHOOK_URL: ""
+        run: npm test
+      - name: Test blocked outbound traffic, parallel writes and crash recovery
+        run: node publisher/test-races.mjs
+      - name: Test read-only snapshot inventory and redaction
+        run: node publisher/test-inventory.mjs
