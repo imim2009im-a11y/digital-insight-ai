@@ -147,7 +147,7 @@ const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://
     const b=await readBody(req);if(!timingSafeEqual(cleanText(b.password,256),ADMIN_PASSWORD)){recordLoginFailure(req);return json(res,401,{error:'invalid_credentials'})}
     clearLoginFailures(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=${issueSession()}; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=43200`});
   }
-  if(req.method==='POST'&&u.pathname==='/api/logout'){revokeSession(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});}
+  if(req.method==='POST'&&u.pathname==='/api/logout'){if(!requireCsrf(req,res))return;revokeSession(req);return json(res,200,{ok:true},{'set-cookie':`${SESSION_COOKIE}=; Path=/; HttpOnly; Secure; SameSite=Strict; Max-Age=0`});}
   if(req.method==='POST'&&u.pathname==='/api/scheduler/check'){
     // Check scheduler credential parity without running jobs or touching the datastore.
     if(DIA_SCHEDULER_TOKEN.length<32)return json(res,503,{error:'scheduler_auth_not_configured'});
