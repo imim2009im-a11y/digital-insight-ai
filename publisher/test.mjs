@@ -89,6 +89,12 @@ async function exercise(configured) {
     assert.equal(loginAgain.status,200);
     const secondCookie=loginAgain.headers.get('set-cookie')?.split(';')[0];
     assert.ok(secondCookie&&secondCookie!==cookie,'every login must create a distinct session');
+    const crossOriginLogout=await request('/api/logout',{method:'POST',headers:{Cookie:secondCookie,Origin:'https://attacker.onrender.com','content-type':'text/plain'},body:'{}'});
+    assert.equal(crossOriginLogout.status,403,'logout must reject cross-origin requests');
+    assert.equal((await request('/api/state',{headers:{Cookie:secondCookie}})).status,200,'rejected cross-origin logout must preserve session');
+    const noOriginLogout=await request('/api/logout',{method:'POST',headers:{Cookie:secondCookie,'content-type':'application/json','X-Requested-With':'DigitalInsightPublisher'},body:'{}'});
+    assert.equal(noOriginLogout.status,403,'logout must reject requests without Origin');
+    assert.equal((await request('/api/state',{headers:{Cookie:secondCookie}})).status,200,'rejected missing-Origin logout must preserve session');
     const loggedOut=await request('/api/logout',{method:'POST',headers:{...authHeaders,Cookie:secondCookie}});
     assert.equal(loggedOut.status,200);
     assert.equal((await request('/api/state',{headers:{Cookie:secondCookie}})).status,401,'logout must invalidate the session server-side');
