@@ -68,7 +68,7 @@ function releaseEligible(state,job,now=Date.now()){
   if(!state.posts.some(post=>post.id===job.postId))return false;
   return !state.jobs.some(other=>other.id!==job.id&&other.postId===job.postId&&true);
 }
-function cookieMap(req){return Object.fromEntries(String(req.headers.cookie||'').split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),decodeURIComponent(v.slice(i+1))]}))}
+function cookieMap(req){return Object.fromEntries(String(req.headers.cookie||'').split(';').map(v=>v.trim()).filter(Boolean).map(v=>{const i=v.indexOf('=');return i<0?[v,'']:[v.slice(0,i),v.slice(i+1)]}))}
 const sessions=new Map();
 const SESSION_TTL_MS=12*60*60*1000;
 function digestSession(token){return crypto.createHmac('sha256',SESSION_SECRET).update(token).digest('hex')}
@@ -90,8 +90,24 @@ function isAuthenticated(req){
   if(expiry<=Date.now()){sessions.delete(key);return false}
   return true;
 }
-function clientKey(req){return String(req.headers['x-forwarded-for']||req.socket.remoteAddress||'unknown').split(',')[0].trim()}
-function loginAllowed(req){const key=clientKey(req);const now=Date.now();const row=loginAttempts.get(key);if(!row||now-row.windowStart>15*60_000){loginAttempts.set(key,{count:0,windowStart:now});return true}return row.count<8}
+// X-Forwarded-For can contain attacker-controlled entries unless every proxy hop is verified.
+// Conservative default: use the transport peer; never trust arbitrary header text for auth limits.
+const MAX_LOGIN_KEYS = 2048;
+function clientKey(req){return String(req.socket.remoteAddress||'unknown')}
+function pruneLoginAttempts(now){
+  if(loginAttempts.size<MAX_LOGIN_KEYS)return;
+  for(const [key,row] of loginAttempts)if(now-row.windowStart>15*60_000)loginAttempts.delete(key);
+}
+function loginAllowed(req){
+  const key=clientKey(req),now=Date.now(),row=loginAttempts.get(key);
+  if(!row||now-row.windowStart>15*60_000){
+    pruneLoginAttempts(now);
+    if(!row&&loginAttempts.size>=MAX_LOGIN_KEYS)return false;
+    loginAttempts.set(key,{count:0,windowStart:now});
+    return true;
+  }
+  return row.count<8;
+}
 function recordLoginFailure(req){const key=clientKey(req);const now=Date.now();const row=loginAttempts.get(key)||{count:0,windowStart:now};if(now-row.windowStart>15*60_000){row.count=0;row.windowStart=now}row.count++;loginAttempts.set(key,row)}
 function clearLoginFailures(req){loginAttempts.delete(clientKey(req))}
 function requireAuth(req,res){if(!isAuthenticated(req)){json(res,401,{error:'authentication_required'});return false}return true}
