@@ -159,7 +159,7 @@ async function acquireStateLock(){
   return release;
 }
 const MUTATING_API_ROUTES=new Set(['/api/run-due','/api/scheduler/approve-job','/api/posts','/api/schedule','/api/publish','/api/settings']);
-const server=http.createServer(async(req,res)=>{const u=new URL(req.url,`http://${req.headers.host}`);const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';
+const server=http.createServer(async(req,res)=>{let u;try{u=new URL(req.url,`http://${req.headers.host}`)}catch{return json(res,400,{error:'invalid_request_target'})}const probeRequest=req.method==='GET'&&u.pathname==='/api/scheduler/preflight';const schedulerCheck=req.method==='POST'&&u.pathname==='/api/scheduler/check';
   const lockRequired=(req.method==='POST'&&MUTATING_API_ROUTES.has(u.pathname))||(req.method==='GET'&&(u.pathname==='/api/state'||u.pathname==='/api/scheduler/release-preview'));
   const unlock=lockRequired?await acquireStateLock():()=>{};
   try {
