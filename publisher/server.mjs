@@ -36,13 +36,25 @@ const defaultState = {
   }
 };
 
+function isPlainRecord(value){return value!==null&&typeof value==='object'&&!Array.isArray(value)}
+// One shared shape check for /api/health and read-only preflight: reject malformed rows.
+function isValidStateShape(value){
+  return isPlainRecord(value)
+    && Array.isArray(value.posts)&&value.posts.every(isPlainRecord)
+    && Array.isArray(value.jobs)&&value.jobs.every(isPlainRecord)
+    && Array.isArray(value.audit)&&value.audit.every(isPlainRecord)
+    && isPlainRecord(value.settings)&&typeof value.settings.safeMode==='boolean'
+    && isPlainRecord(value.providers)
+    && isPlainRecord(value.providers.telegram)
+    && isPlainRecord(value.providers.discord);
+}
 function ensureDataDir(){fs.mkdirSync(path.dirname(dataFile),{recursive:true})}
 function loadState(){
   ensureDataDir();
   if(!fs.existsSync(dataFile)){if((process.env.NODE_ENV!=='test'||process.env.DIA_ALLOW_EMPTY_STATE_BOOTSTRAP!=='ISOLATED_TEST_ONLY'))throw new Error('publisher_state_unavailable');fs.writeFileSync(dataFile,JSON.stringify(defaultState,null,2));return structuredClone(defaultState)}
   try {
     const value=JSON.parse(fs.readFileSync(dataFile,'utf8'));
-    if(!value||typeof value!=='object'||!Array.isArray(value.posts)||!Array.isArray(value.jobs)||!Array.isArray(value.audit)||!value.settings||typeof value.settings.safeMode!=='boolean'||!value.providers||typeof value.providers!=='object'||!value.providers.telegram||typeof value.providers.telegram!=='object'||!value.providers.discord||typeof value.providers.discord!=='object')throw new Error('invalid_state_shape');
+    if(!isValidStateShape(value))throw new Error('invalid_state_shape');
     return value;
   } catch {
     // Never silently replace a damaged or unreadable existing datastore with empty jobs.
@@ -131,7 +143,7 @@ function staticFile(res,pathname){const rel=pathname==='/'?'index.html':pathname
 function readStateForPreflight(){
   try {
     const snapshot=JSON.parse(fs.readFileSync(dataFile,'utf8'));
-    return snapshot&&typeof snapshot==='object'&&Array.isArray(snapshot.posts)&&Array.isArray(snapshot.jobs)&&Array.isArray(snapshot.audit)&&snapshot.settings&&typeof snapshot.settings.safeMode==='boolean'&&snapshot.providers&&typeof snapshot.providers==='object'&&snapshot.providers.telegram&&typeof snapshot.providers.telegram==='object'&&snapshot.providers.discord&&typeof snapshot.providers.discord==='object'?snapshot:null;
+    return isValidStateShape(snapshot)?snapshot:null;
   } catch {
     return null;
   }
