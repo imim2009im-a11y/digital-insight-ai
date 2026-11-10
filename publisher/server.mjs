@@ -64,7 +64,12 @@ function loadState(){
 function saveState(state){ensureDataDir();const tmp=`${dataFile}.tmp`;fs.writeFileSync(tmp,JSON.stringify(state,null,2));fs.renameSync(tmp,dataFile)}
 function json(res,status,body,headers={}){res.writeHead(status,{'content-type':'application/json; charset=utf-8','cache-control':'no-store','x-content-type-options':'nosniff','referrer-policy':'no-referrer',...headers});res.end(JSON.stringify(body))}
 function audit(state,action,detail={}){const row={id:crypto.randomUUID(),ts:new Date().toISOString(),action,detail};state.audit.unshift(row);state.audit=state.audit.slice(0,500);return row}
-async function readBody(req){let bytes=0;const chunks=[];for await(const c of req){bytes+=c.length;if(bytes>MAX_BODY_BYTES){const e=new Error('payload_too_large');e.status=413;throw e}chunks.push(c)}const raw=Buffer.concat(chunks).toString('utf8');if(!raw)return{};try{return JSON.parse(raw)}catch{const e=new Error('invalid_json');e.status=400;throw e}}
+async function readBody(req){let bytes=0;const chunks=[];for await(const c of req){bytes+=c.length;if(bytes>MAX_BODY_BYTES){const e=new Error('payload_too_large');e.status=413;throw e}chunks.push(c)}const raw=Buffer.concat(chunks).toString('utf8');if(!raw)return{};let data;
+  try {data=JSON.parse(raw)} catch {const e=new Error('invalid_json');e.status=400;throw e}
+  if(data===null||typeof data!=='object'||Array.isArray(data)){
+    const e=new Error('invalid_json_shape');e.status=400;throw e;
+  }
+  return data;}
 function refreshProviderState(state){state.providers.telegram.connected=Boolean(process.env.TELEGRAM_BOT_TOKEN&&process.env.TELEGRAM_CHAT_ID);state.providers.telegram.mode=state.providers.telegram.connected?'ENV_READY':'ENV_REQUIRED';state.providers.discord.connected=Boolean(process.env.DISCORD_WEBHOOK_URL);state.providers.discord.mode=state.providers.discord.connected?'ENV_READY':'ENV_REQUIRED'}
 function timingSafeEqual(a,b){const aa=Buffer.from(String(a));const bb=Buffer.from(String(b));return aa.length===bb.length&&crypto.timingSafeEqual(aa,bb)}
 function releaseFingerprint(state,job){
