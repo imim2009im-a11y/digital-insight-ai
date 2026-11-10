@@ -241,6 +241,19 @@ async function exercise(configured) {
     assert.equal(crashed.body.manualReviewRequired,true);
     const unchanged=await request('/api/state',{headers:authHeaders});
     assert.equal(unchanged.body.jobs.find(j=>j.id==='synthetic-unverified').status,'PUBLISHING','preflight must never retry an ambiguous publication');
+    const malformedCookie=await request('/api/state',{headers:{Cookie:'dip_session=%ZZ'}});
+    assert.equal(malformedCookie.status,401,'malformed cookie must be rejected, not cause HTTP 500');
+    // Independent adversarial regression: rotating untrusted forwarded IPs cannot evade login limits.
+    const bruteForceStatuses=[];
+    for(let i=0;i<9;i++){
+      const attempt=await request('/api/login',{method:'POST',
+        headers:{'content-type':'application/json','X-Forwarded-For':'192.0.2.'+(i+1)},
+        body:JSON.stringify({password:'synthetic-wrong-password'}),
+      });
+      bruteForceStatuses.push(attempt.status);
+    }
+    assert.deepEqual(bruteForceStatuses,[401,401,401,401,401,401,401,401,429],
+      'untrusted X-Forwarded-For values must not bypass login rate limits');
   } finally {
     child.kill('SIGTERM');
     await new Promise((resolve) => {
