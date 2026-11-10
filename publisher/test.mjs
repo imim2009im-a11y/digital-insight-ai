@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
 import { copyFileSync, existsSync, mkdtempSync, readFileSync, rmSync, unlinkSync, writeFileSync } from 'node:fs';
-import { createServer } from 'node:net';
+import { createServer, connect } from 'node:net';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -56,6 +56,22 @@ async function exercise(configured) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     assert.ok(ready, 'test server did not become ready');
+    // A malformed Host previously threw before request-handler error recovery and killed Node.
+    const invalidHostStatus = await new Promise((resolve, reject) => {
+      const socket = connect(listenPort, '127.0.0.1');
+      let response = '';
+      socket.setTimeout(2000, () => socket.destroy(new Error('timeout')));
+      socket.on('data', chunk => { response += chunk.toString(); });
+      socket.once('error', reject);
+      socket.once('close', () => resolve(response.split('\r\n')[0]));
+      socket.once('connect', () => socket.write(
+        'GET /api/health HTTP/1.1\r\nHost: ]\r\nConnection: close\r\n\r\n'
+      ));
+    });
+    assert.match(invalidHostStatus, /^HTTP\/1\.1 400/,
+      'invalid Host must return HTTP 400 instead of crashing the server');
+    assert.equal((await request('/api/health')).status, 200,
+      'server must stay healthy after rejecting malformed Host');
     assert.equal((await request('/api/state')).status, 401, 'state must require login');
     const anonymous = await request('/api/run-due', { method: 'POST' });
     if (configured) {
