@@ -56,6 +56,13 @@ async function exercise(configured) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     assert.ok(ready, 'test server did not become ready');
+    // JSON primitives/arrays are valid JSON, but not valid API request objects.
+    for (const body of ['null', '[]', '42', 'true']) {
+      const shapeTest = await request('/api/login', {
+        method: 'POST', headers: {'content-type':'application/json'}, body,
+      });
+      assert.equal(shapeTest.status, 400, 'Non-object JSON body must return 400: '+body);
+    }
     // A malformed Host previously threw before request-handler error recovery and killed Node.
     const invalidHostStatus = await new Promise((resolve, reject) => {
       const socket = connect(listenPort, '127.0.0.1');
