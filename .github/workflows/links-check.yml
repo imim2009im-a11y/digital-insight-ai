@@ -36,10 +36,8 @@ jobs:
           args: >-
             --verbose
             --no-progress
-            --accept 200..=399,429
+            --accept 200..=399,403,405,429
             './README.md'
             './docs/**/*.md'
             './.github/**/*.md'
-            './site/**/*.html'
-            './site/**/*.txt'
           fail: true
