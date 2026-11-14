@@ -5,6 +5,7 @@ node_modules/
 dist/
 build/
 .cache/
+__pycache__/
 
 # Local environment and sensitive files
 .env

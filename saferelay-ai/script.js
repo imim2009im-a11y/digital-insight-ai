@@ -12,10 +12,10 @@ const blockedTerms = [
 ];
 
 const riskyPatterns = [
-  /\b05\d{8}\b/g,
-  /\b\d{10,}\b/g,
-  /@\w{3,}/g,
-  /https?:\/\//g
+  /\b05\d{8}\b/,
+  /\b\d{10,}\b/,
+  /@\w{3,}/,
+  /https?:\/\//
 ];
 
 function analyzeMessage(text) {
@@ -66,19 +66,23 @@ if (form) {
     const rewrite = suggestRewrite(text, type);
 
     resultBox.className = `result show ${analysis.level}`;
-    resultBox.innerHTML = `
-      <strong>${analysis.title}</strong>
-      <p>${analysis.body}</p>
-      ${analysis.level !== 'danger' ? `<hr><p><strong>صياغة مقترحة:</strong><br>${escapeHtml(rewrite)}</p>` : '<p>الاقتراح المهني: أعد كتابة الرسالة بنبرة هادئة ومحددة.</p>'}
-    `;
+    // Keep every result as text nodes: user messages must never enter an HTML parser.
+    const title = document.createElement('strong');
+    title.textContent = analysis.title;
+    const summary = document.createElement('p');
+    summary.textContent = analysis.body;
+    const nodes = [title, summary];
+    const note = document.createElement('p');
+    if (analysis.level !== 'danger') {
+      const separator = document.createElement('hr');
+      const label = document.createElement('strong');
+      label.textContent = 'صياغة مقترحة:';
+      note.append(label, document.createElement('br'), document.createTextNode(rewrite));
+      nodes.push(separator, note);
+    } else {
+      note.textContent = 'الاقتراح المهني: أعد كتابة الرسالة بنبرة هادئة ومحددة.';
+      nodes.push(note);
+    }
+    resultBox.replaceChildren(...nodes);
   });
-}
-
-function escapeHtml(value) {
-  return value
-    .replaceAll('&', '&amp;')
-    .replaceAll('<', '&lt;')
-    .replaceAll('>', '&gt;')
-    .replaceAll('"', '&quot;')
-    .replaceAll("'", '&#039;');
 }

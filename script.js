@@ -207,6 +207,102 @@
     track(link);
   });
 
+  function setupRoiCalculator() {
+    const calculator = document.querySelector('[data-roi-calculator]');
+    if (!calculator) return;
+
+    const inputs = Object.fromEntries(
+      Array.from(calculator.querySelectorAll('[data-roi-input]')).map((input) => [input.dataset.roiInput, input])
+    );
+    const calculate = calculator.querySelector('[data-roi-calculate]');
+    const results = calculator.querySelector('[data-roi-results]');
+    const error = calculator.querySelector('[data-roi-error]');
+    const verdict = calculator.querySelector('[data-roi-verdict]');
+    const money = new Intl.NumberFormat('ar-SA', { maximumFractionDigits: 0 });
+    const decimal = new Intl.NumberFormat('ar-SA', { maximumFractionDigits: 1 });
+
+    function valueOf(name) {
+      return Number.parseFloat(inputs[name] ? inputs[name].value : '');
+    }
+
+    function valid(values) {
+      return Object.values(values).every((value) => Number.isFinite(value) && value > 0) &&
+        values.cost <= 1000000 && values.hourly <= 1000000 && values.minutes <= 1440 && values.uses <= 10000;
+    }
+
+    function inputIsValid(name, value) {
+      const maximums = { cost: 1000000, hourly: 1000000, minutes: 1440, uses: 10000 };
+      return Number.isFinite(value) && value > 0 && value <= maximums[name];
+    }
+
+    function setText(selector, value) {
+      const node = calculator.querySelector(selector);
+      if (node) node.textContent = value;
+    }
+
+    function render() {
+      const values = {
+        cost: valueOf('cost'),
+        hourly: valueOf('hourly'),
+        minutes: valueOf('minutes'),
+        uses: valueOf('uses')
+      };
+
+      if (!valid(values)) {
+        error.hidden = false;
+        results.hidden = true;
+        Object.entries(inputs).forEach(([name, input]) => {
+          const inputValue = Number.parseFloat(input.value);
+          input.toggleAttribute('aria-invalid', !inputIsValid(name, inputValue));
+        });
+        return;
+      }
+
+      Object.values(inputs).forEach((input) => input.removeAttribute('aria-invalid'));
+      error.hidden = true;
+
+      const savedHours = values.minutes * values.uses / 60;
+      const timeValue = savedHours * values.hourly;
+      const netValue = timeValue - values.cost;
+      const breakEvenUses = values.cost / (values.hourly * values.minutes / 60);
+      let verdictText = 'غير مجدية بالأرقام الحالية';
+      let guidance = 'اختبر أداة أرخص، ارفع عدد المهام الحقيقية، أو ألغِ الاشتراك حتى يظهر استخدام متكرر يبرر التكلفة.';
+      let verdictClass = 'is-caution';
+      let outcome = 'negative';
+
+      if (netValue > 0 && timeValue >= values.cost * 2) {
+        verdictText = 'واعدة — اختبر الجودة قبل الاشتراك';
+        guidance = 'الأرقام تبدو واعدة، لكن القرار النهائي يعتمد على ثبات الجودة، وقت المراجعة، والخصوصية. اختبر المهمة نفسها ثلاث مرات أولاً.';
+        verdictClass = 'is-positive';
+        outcome = 'strong';
+      } else if (netValue > 0) {
+        verdictText = 'قد تكون مجدية بعد اختبار عملي';
+        guidance = 'الهامش محدود؛ ابدأ بأقصر خطة متاحة وسجّل الوقت الفعلي الموفر قبل التجديد.';
+        verdictClass = 'is-positive';
+        outcome = 'marginal';
+      }
+
+      verdict.classList.remove('is-positive', 'is-caution');
+      verdict.classList.add(verdictClass);
+      setText('[data-roi-verdict-text]', verdictText);
+      setText('[data-roi-time]', decimal.format(savedHours));
+      setText('[data-roi-value]', money.format(timeValue));
+      setText('[data-roi-net]', (netValue < 0 ? '−' : '+') + money.format(Math.abs(netValue)));
+      setText('[data-roi-break-even]', decimal.format(Math.ceil(breakEvenUses * 10) / 10));
+      setText('[data-roi-guidance]', guidance);
+      results.hidden = false;
+      results.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      emitEvent('roi_calculator_complete', { outcome_bucket: outcome });
+    }
+
+    if (calculate) calculate.addEventListener('click', render);
+    Object.values(inputs).forEach((input) => input.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') render();
+    }));
+  }
+
+  setupRoiCalculator();
+
   if (document.body.dataset.page === 'start') {
     const shortUrl = new URL('go/', document.baseURI).href;
     const image = document.querySelector('.qr-box img');

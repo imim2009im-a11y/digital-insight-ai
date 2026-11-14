@@ -3,9 +3,41 @@ set -uo pipefail
 
 # Digital Insight AI production smoke checks.
 # This script intentionally uses only public endpoints and never reads secrets.
+# Transient CDN/TCP resets are retried briefly to avoid false production alarms.
 
 failures=0
 
+check_https_redirect() {
+  local name="$1"
+  local url="$2"
+  local expected="$3"
+  local status location
+
+  status=$(curl \
+    --silent \
+    --show-error \
+    --head \
+    --connect-timeout 10 \
+    --max-time 25 \
+    --retry 2 \
+    --retry-delay 1 \
+    --retry-max-time 12 \
+    --retry-all-errors \
+    --output /tmp/dia-smoke-http-headers.txt \
+    --write-out '%{http_code}' \
+    "$url" 2>/tmp/dia-smoke-curl.err || true)
+
+  location=$(awk 'BEGIN{IGNORECASE=1} /^location:/ {sub(/\r$/, "", $2); print $2; exit}' /tmp/dia-smoke-http-headers.txt)
+
+  if [[ "$status" =~ ^30[1278]$ ]] && [[ "$location" == "$expected" ]]; then
+    printf 'PASS  %-24s %s (%s -> %s)\n' "$name" "$url" "$status" "$location"
+    return 0
+  fi
+
+  printf 'FAIL  %-24s %s (%s -> %s; expected %s)\n' \
+    "$name" "$url" "${status:-000}" "${location:-none}" "$expected" >&2
+  failures=$((failures + 1))
+}
 check_url() {
   local name="$1"
   local url="$2"
@@ -18,6 +50,10 @@ check_url() {
     --location \
     --connect-timeout 10 \
     --max-time 25 \
+    --retry 2 \
+    --retry-delay 1 \
+    --retry-max-time 12 \
+    --retry-all-errors \
     --output /dev/null \
     --write-out '%{http_code} %{time_total}' \
     "$url" 2>/tmp/dia-smoke-curl.err || true)
@@ -52,6 +88,10 @@ check_health_ready() {
     --location \
     --connect-timeout 10 \
     --max-time 25 \
+    --retry 2 \
+    --retry-delay 1 \
+    --retry-max-time 12 \
+    --retry-all-errors \
     --output "$body_file" \
     --write-out '%{http_code} %{time_total}' \
     "$url" 2>/tmp/dia-smoke-curl.err || true)
@@ -81,14 +121,18 @@ check_health_ready() {
 printf 'Digital Insight AI production smoke check\n'
 printf 'UTC: %s\n\n' "$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
 
-# Hit the application pages first. This both validates routing and gives a
-# sleeping MariaDB service a chance to wake before the explicit readiness check.
+# Validate HTTPS enforcement before checking the production surface.
+check_https_redirect 'Primary HTTPS redirect' 'http://digitalinsightai.com/' 'https://digitalinsightai.com/'
+
+# Validate the static production surface. Railway is intentionally not a
+# success dependency after the GitHub Pages cutover.
 check_url 'Primary domain' 'https://digitalinsightai.com/'
 check_url 'Primary tools' 'https://digitalinsightai.com/tools/'
-check_url 'Railway production' 'https://digitalinsightproduction-production.up.railway.app/'
-check_url 'Railway tools' 'https://digitalinsightproduction-production.up.railway.app/tools/'
-check_health_ready 'Railway readiness' 'https://digitalinsightproduction-production.up.railway.app/health/'
-check_url 'GitHub Pages fallback' 'https://imim2009im-a11y.github.io/digital-insight-ai/'
+check_url 'Primary reviews' 'https://digitalinsightai.com/reviews/'
+check_url 'Primary guides' 'https://digitalinsightai.com/guides/'
+check_url 'Primary robots' 'https://digitalinsightai.com/robots.txt'
+check_url 'Primary sitemap' 'https://digitalinsightai.com/sitemap.xml'
+check_url 'GitHub Pages' 'https://imim2009im-a11y.github.io/digital-insight-ai/'
 
 printf '\n'
 if (( failures > 0 )); then

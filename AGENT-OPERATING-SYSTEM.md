@@ -4,6 +4,8 @@ This document defines the project-local engineering workflow for AI coding agent
 
 It intentionally combines the strongest ideas from modern agent-development systems without making production depend on any one third-party framework.
 
+**Approved execution topology:** Manjaro is a scoped local engineering workstation; GitHub-hosted Actions perform repository CI and existing scheduled checks; ChatGPT coordinates authorized tasks. See [docs/IA-MANJARO-GITHUB-OPERATING-MODEL.md](docs/IA-MANJARO-GITHUB-OPERATING-MODEL.md) for trust boundaries, approval gates and validation evidence. This topology does not authorize a public self-hosted runner or persistent cloud control.
+
 ## Goals
 
 1. Plan before changing production-sensitive code.

@@ -2,12 +2,12 @@
 
 ## Mission
 
-Digital Insight AI is a production-sensitive repository for one commercial product with two temporary delivery surfaces:
+Digital Insight AI is a production-sensitive repository for one commercial product moving to a single public delivery surface:
 
-1. the primary WordPress application built and deployed to Railway from this repository; and
-2. the legacy/static Arabic GitHub Pages surface retained as a fallback/reference layer during consolidation.
+1. the canonical static site under `site/`, deployed with GitHub Pages; and
+2. Railway retained only as a temporary rollback path during DNS cutover.
 
-Agents must improve the product conservatively, preserve working production behavior, and prevent the two surfaces from evolving into competing products.
+Agents must improve the product conservatively, preserve rollback until the cutover is verified, and avoid reintroducing a runtime dependency into the public static site.
 
 ## Required reading
 
@@ -29,22 +29,21 @@ If these files disagree with observed live infrastructure, stop and report the c
 
 The product is **Digital Insight AI** under the canonical domain `digitalinsightai.com`.
 
-### Railway production
+### GitHub Pages production target
 
-- Railway project: `Digital Insight AI WordPress`
-- Production service: `DigitalInsightProduction`
-- Source repository: this repository
-- Runtime: WordPress
-- Health path: `/health/`
-- Database: Railway MariaDB
+- Repository: this repository
+- Public source: `site/`
+- Deployment: GitHub Pages via GitHub Actions
+- Canonical custom domain: `digitalinsightai.com`
+- Runtime/database dependency: none
 
-Railway owns the canonical custom domain during the current WordPress cutover. Do not attach the same domain to GitHub Pages, Vercel, Render, or another host as a quick workaround.
+The migration is not complete until the Pages artifact from `site/` is live, the custom domain is configured in GitHub Pages, DNS points to GitHub Pages, and HTTPS is valid.
 
-### Static GitHub Pages fallback
+### Temporary Railway rollback
 
-The root static HTML/CSS/JS site remains a fallback/reference surface. It must stay usable on the repository GitHub Pages path, but it is not a second independent editorial product.
+Railway `DigitalInsightProduction` and MariaDB may remain temporarily during the cutover only as a rollback path. They are not the target public architecture.
 
-The `CNAME` file must remain absent while Railway owns the custom domain. The repository quality gate enforces this.
+When GitHub Actions is the Pages publishing source, a repository `CNAME` file is not required for the custom domain.
 
 ### Modern tools application
 
@@ -92,9 +91,10 @@ Do not deploy it as a public Railway web service merely because a project named 
 ### Domain ownership
 
 - `digitalinsightai.com` has exactly one production owner at a time.
-- Current owner: Railway `DigitalInsightProduction`.
-- Do not recreate a GitHub Pages `CNAME` while Railway owns the domain.
-- DNS changes must be made only after the target service is verified healthy.
+- Current DNS still points to Railway until the cutover is executed.
+- Target production owner: GitHub Pages for this repository.
+- DNS changes must be made only after the GitHub Pages artifact from `site/` is verified healthy.
+- Do not declare the cutover complete until HTTPS and core routes succeed on the custom domain.
 
 ### Railway
 
@@ -110,7 +110,7 @@ Do not delete legacy Railway services simply because they are currently failed. 
 
 ### GitHub Pages
 
-The static site must continue passing `.github/workflows/static-quality.yml`.
+The production static site must continue passing `.github/workflows/static-quality.yml`.
 
 The quality gate checks required files, local links/assets, Railway cutover boundaries, and sensitive deployment material. Do not weaken these checks merely to make a failing change pass.
 
@@ -181,7 +181,7 @@ When adding or materially changing a public route/page:
 
 Use `scripts/agent-verify.sh` as the consolidated source-verification entrypoint for agent-driven changes. Use `scripts/production-smoke.sh` for public endpoint validation when live verification is relevant and authorized.
 
-The scheduled `Production Smoke Monitor` workflow checks the canonical domain, Railway production, Railway `/health/`, and the GitHub Pages fallback.
+The scheduled `Production Smoke Monitor` workflow must validate the canonical domain and GitHub Pages delivery without requiring Railway for success after cutover.
 
 The production smoke workflow is separate from the source quality gate: an outage must be visible without weakening code-quality validation.
 
