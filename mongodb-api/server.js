@@ -1,11 +1,13 @@
 import http from "node:http";
 import { URL } from "node:url";
-import { MongoClient, ServerApiVersion } from "mongodb";\nimport { validateMigrationRequest } from "./migration-safety.js";
+import { MongoClient, ServerApiVersion } from "mongodb";
+import { validateMigrationRequest } from "./migration-safety.js";
 
 const PORT = Number.parseInt(process.env.PORT || "3000", 10);
 const SOURCE_MONGODB_URI = process.env.MONGODB_URI;
 const TARGET_MONGODB_URI = process.env.TARGET_MONGODB_URI;
-const MIGRATE_ON_START = process.env.MIGRATE_ON_START === "true";\nconst MIGRATION_CONFIRM = process.env.MIGRATION_CONFIRM;
+const MIGRATE_ON_START = process.env.MIGRATE_ON_START === "true";
+const MIGRATION_CONFIRM = process.env.MIGRATION_CONFIRM;
 const ACTIVE_MONGODB_URI = TARGET_MONGODB_URI || SOURCE_MONGODB_URI;
 const MONGODB_DB = process.env.MONGODB_DB || "digitalinsightai";
 const DEFAULT_ORIGINS = "https://digitalinsightai.com,https://www.digitalinsightai.com";
