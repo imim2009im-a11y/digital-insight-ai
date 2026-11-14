@@ -55,6 +55,11 @@
 - **Static Rebuild Check**: يتحقق من ملفات `site/` والروابط وعدم وجود اقتران ببنية خادم مدفوعة.
 - **Static Site Quality Gate**: فحوص المستودع العامة والمواد الحساسة.
 - **Agent Governance Verification**: بوابة الحوكمة الحالية.
+- **Quality Gate**: يشغّل التحقق الموحد، وفحص TypeScript، وبناء النسخة المجمدة من دليل الأدوات.
+- **CodeQL Analysis**: يغطي JavaScript/TypeScript وPython في سير العمل الحالي.
+- **Repository Secret Scan**: يفحص الملفات المتعقبة باستخدام Gitleaks.
+- **Documentation Links Check**: يفحص الروابط في Markdown وHTML وTXT.
+- **Dependabot**: يقترح تحديثات أسبوعية لاعتماديات npm وGitHub Actions.
 - **Pages Production Deploy**: ينشر `site/` مباشرة إلى GitHub Pages عبر Actions.
 
 ## خطة القطع

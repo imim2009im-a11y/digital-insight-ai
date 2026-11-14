@@ -6,7 +6,22 @@ updates:
       interval: weekly
     open-pull-requests-limit: 3
   - package-ecosystem: npm
+    directory: "/ai-tools-directory"
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
+  - package-ecosystem: npm
     directory: "/mongodb-api"
     schedule:
       interval: weekly
     open-pull-requests-limit: 3
+    groups:
+      minor-and-patch:
+        update-types:
+          - minor
+          - patch
