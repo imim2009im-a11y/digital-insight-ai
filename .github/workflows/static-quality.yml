@@ -87,7 +87,7 @@ jobs:
             echo 'Runtime infrastructure coupling detected under site/.' >&2
             exit 1
           fi
-          if find . -path './.git' -prune -o -type f \( -name '.env' -o -name '.env.*' -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) -print | grep -q .; then
+          if find . -path './.git' -prune -o -type f \( -name '.env' -o \( -name '.env.*' ! -name '.env.example' \) -o -name '*.pem' -o -name '*.key' -o -name '*.p12' \) -print | grep -q .; then
             echo 'Sensitive deployment material detected.' >&2
             exit 1
           fi
