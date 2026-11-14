@@ -36,7 +36,6 @@ jobs:
           args: >-
             --verbose
             --no-progress
-            --exclude-mail
             --accept 200..=399,429
             './**/*.md'
             './**/*.html'
