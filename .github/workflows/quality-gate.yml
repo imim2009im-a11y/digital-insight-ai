@@ -1,0 +1,57 @@
+name: Quality Gate
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-gate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  repository-verification:
+    name: Repository verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Run consolidated verification
+        run: bash scripts/agent-verify.sh
+
+  legacy-directory-build:
+    name: Frozen tools-directory build verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Setup pnpm
+        uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
+        with:
+          version: 10.4.1
+      - name: Setup Node.js
+        uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: ai-tools-directory/pnpm-lock.yaml
+      - name: Install frozen dependencies
+        working-directory: ai-tools-directory
+        run: pnpm install --frozen-lockfile
+      - name: Type-check
+        working-directory: ai-tools-directory
+        run: pnpm run check
+      - name: Build
+        working-directory: ai-tools-directory
+        run: pnpm run build

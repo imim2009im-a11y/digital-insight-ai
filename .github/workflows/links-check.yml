@@ -1,0 +1,44 @@
+name: Documentation Links Check
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - '**/*.html'
+      - '**/*.txt'
+      - '.github/workflows/links-check.yml'
+  push:
+    branches: [main]
+    paths:
+      - '**/*.md'
+      - '**/*.html'
+      - '**/*.txt'
+      - '.github/workflows/links-check.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  links:
+    name: Check documentation and site links
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          persist-credentials: false
+      - name: Check links
+        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2
+        with:
+          args: >-
+            --verbose
+            --no-progress
+            --exclude-mail
+            --accept 200..=399,429
+            './**/*.md'
+            './**/*.html'
+            './**/*.txt'
+          fail: true
