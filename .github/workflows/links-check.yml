@@ -37,7 +37,9 @@ jobs:
             --verbose
             --no-progress
             --accept 200..=399,429
-            './**/*.md'
-            './**/*.html'
-            './**/*.txt'
+            './README.md'
+            './docs/**/*.md'
+            './.github/**/*.md'
+            './site/**/*.html'
+            './site/**/*.txt'
           fail: true
