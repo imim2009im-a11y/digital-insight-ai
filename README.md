@@ -56,7 +56,8 @@
 - **Static Site Quality Gate**: فحوص المستودع العامة والمواد الحساسة.
 - **Agent Governance Verification**: بوابة الحوكمة الحالية.
 - **Quality Gate**: يشغّل التحقق الموحد، وفحص TypeScript، وبناء النسخة المجمدة من دليل الأدوات.
-- **Security Audit**: CodeQL وتحليل الأسرار دورياً وعند التغييرات.
+- **CodeQL Analysis**: يغطي JavaScript/TypeScript وPython في سير العمل الحالي.
+- **Repository Secret Scan**: يفحص الملفات المتعقبة باستخدام Gitleaks.
 - **Documentation Links Check**: يفحص الروابط في Markdown وHTML وTXT.
 - **Dependabot**: يقترح تحديثات أسبوعية لاعتماديات npm وGitHub Actions.
 - **Pages Production Deploy**: ينشر `site/` مباشرة إلى GitHub Pages عبر Actions.
