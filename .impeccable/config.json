@@ -1,0 +1,17 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "low-contrast",
+        "value": "*",
+        "files": [
+          "prototypes/ia-command-center/index.html"
+        ],
+        "createdAt": "2026-10-11T09:30:07.423Z",
+        "reason": "Agent verified all declared foreground and background color pairs meet WCAG AA; hook did not identify a failing pair"
+      }
+    ]
+  }
+}
