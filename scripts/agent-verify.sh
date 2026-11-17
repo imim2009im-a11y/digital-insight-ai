@@ -86,6 +86,9 @@ bash scripts/check_site.sh
 log "Testing bounded IA source preflight"
 python3 -m unittest discover -s scripts -p test_ia_preflight.py
 
+log "Testing read-only engineering inventory boundaries"
+python3 -m unittest discover -s scripts -p test_engineering_controller.py
+
 if [[ "${AGENT_VERIFY_PRODUCTION:-0}" == "1" ]]; then
   log "Running live production smoke checks"
   bash scripts/production-smoke.sh
