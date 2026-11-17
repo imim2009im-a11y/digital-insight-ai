@@ -1,0 +1,36 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Digital Insight Privacy Inspector</title>
+  <link rel="stylesheet" href="popup.css">
+  <script src="scan.js" defer></script>
+  <script src="popup.js" defer></script>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">Digital Insight AI</p>
+      <h1>فاحص الخصوصية</h1>
+      <p class="intro">مؤشرات من الصفحة الحالية فقط، بعد موافقتك بالنقر.</p>
+    </header>
+    <button id="scan" type="button">افحص الصفحة الحالية</button>
+    <p id="status" class="status" role="status" aria-live="polite">لم يبدأ الفحص بعد.</p>
+    <section id="results" hidden aria-label="نتائج الفحص">
+      <h2>النتائج</h2>
+      <dl>
+        <div><dt>اتصال HTTPS</dt><dd id="https">—</dd></div>
+        <div><dt>ملفات JavaScript من أصول مختلفة</dt><dd id="scripts">—</dd></div>
+        <div><dt>إطارات من أصول مختلفة</dt><dd id="frames">—</dd></div>
+        <div><dt>نماذج ترسل إلى HTTP</dt><dd id="forms">—</dd></div>
+        <div><dt>روابط فتح جديد دون عزل صريح</dt><dd id="links">—</dd></div>
+      </dl>
+      <p id="limit-note" class="notice" hidden>الصفحة كبيرة؛ فُحصت أول 5000 عناصر من كل فئة فقط.</p>
+      <button id="copy" class="secondary" type="button">انسخ ملخصًا دون اسم الموقع</button>
+    </section>
+    <p class="notice">وجود موارد من أصول مختلفة لا يعني أنها متتبعات. الفحص لا يحلل رؤوس HTTP أو طلبات الشبكة المحجوبة أو محتوى الإطارات، ولا يشكّل تدقيقًا أمنيًا شاملًا.</p>
+    <footer><a href="https://digitalinsightai.com/privacy/" target="_blank" rel="noopener noreferrer">سياسة الخصوصية للموقع</a> · <span>بدون نقل نتائج الفحص للخادم</span></footer>
+  </main>
+</body>
+</html>

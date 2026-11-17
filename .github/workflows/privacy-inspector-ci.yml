@@ -1,0 +1,28 @@
+name: Privacy Inspector CI
+
+on:
+  pull_request:
+    paths:
+      - 'extensions/privacy-inspector/**'
+      - '.github/workflows/privacy-inspector-ci.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10
+        with:
+          persist-credentials: false
+      - name: JavaScript syntax
+        run: |
+          node --version
+          node --check extensions/privacy-inspector/scan.js
+          node --check extensions/privacy-inspector/popup.js
+      - name: Isolated browser-extension tests
+        run: node --test extensions/privacy-inspector/test/*.test.cjs
