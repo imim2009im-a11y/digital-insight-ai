@@ -1,0 +1,389 @@
+{
+  "version": 1,
+  "language": "ar-SA",
+  "notice": "فهرس محرري بمصادر رسمية لبعض الحقائق المحددة فقط. غياب التوثيق لا يعني غياب الميزة، والأسعار والخصوصية واختبارات جودة العربية غير مؤكدة.",
+  "tools": [
+    {
+      "id": "arvow",
+      "name": "Arvow",
+      "category": "marketing",
+      "categoryLabel": "AI SEO",
+      "focus": "AI SEO والنشر الآلي وتتبع الظهور",
+      "description": "كتابة وتحسين وأتمتة محتوى SEO مع تتبع الظهور في منصات AI. {review}.",
+      "review": {
+        "href": "../reviews/arvow/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://arvow.com/",
+        "label": "زيارة Arvow الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": null
+    },
+    {
+      "id": "launchspy",
+      "name": "LaunchSpy",
+      "category": "marketing",
+      "categoryLabel": "Marketing Intelligence",
+      "focus": "استخبارات المنافسين والفنل والإعلانات",
+      "description": "تحليل إعلانات المنافسين والفنل والتقنيات المستخدمة. {review}.",
+      "review": {
+        "href": "../reviews/launchspy/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://launchspy.io/",
+        "label": "زيارة LaunchSpy الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": null
+    },
+    {
+      "id": "frase",
+      "name": "Frase",
+      "category": "marketing",
+      "categoryLabel": "SEO وGEO",
+      "focus": "SEO وGEO وتحسين المحتوى",
+      "description": "بحث وتحسين المحتوى لمحركات البحث ومنصات AI. {review}.",
+      "review": {
+        "href": "../reviews/frase/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://www.frase.io/",
+        "label": "زيارة Frase الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": null
+    },
+    {
+      "id": "creatify",
+      "name": "Creatify",
+      "category": "marketing",
+      "categoryLabel": "إعلانات AI",
+      "focus": "إعلانات فيديو قصيرة واختبار إبداعي",
+      "description": "إنتاج نسخ إعلانية متعددة من المنتج أو الرابط. {review}.",
+      "review": {
+        "href": "../reviews/creatify/",
+        "label": "اقرأ المراجعة الموثقة"
+      },
+      "external": {
+        "href": "https://creatify.ai/",
+        "label": "زيارة Creatify الرسمي ←",
+        "sponsored": false
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": null
+    },
+    {
+      "id": "synthesia",
+      "name": "Synthesia",
+      "category": "video",
+      "categoryLabel": "فيديو وتدريب",
+      "focus": "فيديو تدريب وشرح بمتحدث افتراضي",
+      "description": "إنشاء شروحات وتدريب بالفيديو باستخدام نصوص ومقدّمين افتراضيين. {review} قبل الدفع.",
+      "review": {
+        "href": "../reviews/synthesia/",
+        "label": "اقرأ التقييم والقيود"
+      },
+      "external": {
+        "href": "https://www.synthesia.io/?via=ibrahim-albalawi",
+        "label": "زيارة Synthesia عبر رابط الإحالة ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": {
+          "available": true,
+          "scope": "خطة Basic مجانية لتجربة المحرر والأصوات والأفاتارات؛ راجع القيود لدى المزود.",
+          "sourceUrl": "https://help.synthesia.io/en/articles/15972650-what-are-synthesia-s-pricing-plans",
+          "verifiedOn": "2026-11-04"
+        },
+        "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://www.synthesia.io/",
+        "evidenceUrl": "https://www.synthesia.io/",
+        "verifiedOn": "2026-11-04"
+      }
+    },
+    {
+      "id": "kling-ai",
+      "name": "Kling AI",
+      "category": "video",
+      "categoryLabel": "فيديو",
+      "focus": "توليد فيديو وتجارب بصرية",
+      "description": "لتجارب إنشاء الفيديو بالذكاء الاصطناعي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/kling-ai/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://kling.ai/",
+        "evidenceUrl": "https://kling.ai/ar",
+        "verifiedOn": "2026-11-04"
+      }
+    },
+    {
+      "id": "runway",
+      "name": "Runway",
+      "category": "video",
+      "categoryLabel": "فيديو",
+      "focus": "إنشاء وتحرير فيديو",
+      "description": "لإنشاء وتحرير محتوى فيديو مدعوم بالذكاء الاصطناعي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/runway-accounts/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": {
+          "available": true,
+          "scope": "خطة مجانية للتجربة بأرصدة محدودة تُمنح مرة واحدة؛ ليست جميع النماذج متاحة.",
+          "sourceUrl": "https://help.runwayml.com/hc/en-us/articles/50404627334547-Free-plan-details",
+          "verifiedOn": "2026-11-04"
+        },
+        "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://runwayml.com/",
+        "evidenceUrl": "https://help.runwayml.com/hc/en-us/articles/36555466922131-Keeping-Your-Account-Safe-and-Preventing-Fraud",
+        "verifiedOn": "2026-11-04"
+      }
+    },
+    {
+      "id": "heygen",
+      "name": "HeyGen",
+      "category": "video",
+      "categoryLabel": "فيديو",
+      "focus": "متحدث افتراضي وعروض",
+      "description": "لفيديوهات العروض والمتحدث الافتراضي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/heygen/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": {
+          "available": true,
+          "scope": "خطة مجانية لإنتاج عدد محدود من مقاطع الفيديو شهريًا وفق شروط المزود.",
+          "sourceUrl": "https://www.heygen.com/ar-sa/pricing",
+          "verifiedOn": "2026-11-04"
+        },
+        "arabicVideoTranslation": {
+          "available": true,
+          "scope": "العربية، بما فيها السعودية، مدرجة للترجمة الصوتية ومزامنة الشفاه؛ لا يثبت ذلك جودة كل اللهجات.",
+          "sourceUrl": "https://help.heygen.com/en/articles/11391941-video-translation-languages-we-support",
+          "verifiedOn": "2026-11-04"
+        }
+      },
+      "official": {
+        "url": "https://www.heygen.com/ar-sa",
+        "evidenceUrl": "https://www.heygen.com/ar-sa",
+        "verifiedOn": "2026-11-04"
+      }
+    },
+    {
+      "id": "openart",
+      "name": "OpenArt",
+      "category": "design",
+      "categoryLabel": "تصميم",
+      "focus": "تصميم الصور والمفاهيم",
+      "description": "لإنشاء الصور والتجارب البصرية.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/openart/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://openart.ai/ar",
+        "evidenceUrl": "https://openart.ai/ar",
+        "verifiedOn": "2026-11-04"
+      }
+    },
+    {
+      "id": "lovable",
+      "name": "Lovable",
+      "category": "apps",
+      "categoryLabel": "بناء تطبيقات",
+      "focus": "بناء نموذج تطبيق أولي",
+      "description": "لبناء نماذج أولية وتطبيقات من أوامر نصية.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/lovable/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://lovable.dev/",
+        "evidenceUrl": "https://lovable.dev/build",
+        "verifiedOn": "2026-11-04"
+      }
+    },
+    {
+      "id": "meshy",
+      "name": "Meshy",
+      "category": "3d",
+      "categoryLabel": "3D",
+      "focus": "نماذج ثلاثية الأبعاد",
+      "description": "لتجارب النمذجة ثلاثية الأبعاد المدعومة بالذكاء الاصطناعي.",
+      "review": null,
+      "external": {
+        "href": "https://www.gamsgo.com/details/meshy/partner/KatmA",
+        "label": "عرض خيار الشراء عبر الشريك ←",
+        "sponsored": true
+      },
+      "evidence": {
+        "origin": "existing editorial directory",
+        "sourceFile": "site/tools/index.html",
+        "externalVerificationDate": null
+      },
+      "unknown": {
+        "price": null,
+        "arabicSupport": null,
+        "privacy": null
+      },
+      "facts": {
+        "freePlan": null,
+        "arabicVideoTranslation": null
+      },
+      "official": {
+        "url": "https://meshy.ai/",
+        "evidenceUrl": "https://help.meshy.ai/en/articles/15641671-official-meshy-links-how-to-avoid-fake-apps-and-scams",
+        "verifiedOn": "2026-11-04"
+      }
+    }
+  ]
+}

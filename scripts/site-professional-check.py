@@ -7,6 +7,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from html.parser import HTMLParser
 from urllib.parse import urlsplit
+from sync_legacy_routes import LEGACY_TARGETS, generate as generate_legacy
 
 ROOT = Path("site")
 errors = []
@@ -47,6 +48,15 @@ for f in sorted(ROOT.rglob("*.html")):
         fail(f, "expected one h1")
     if 'lang="ar"' not in text or 'dir="rtl"' not in text:
         fail(f, "expected Arabic RTL document")
+    legacy_target = LEGACY_TARGETS.get(f.relative_to(ROOT).as_posix())
+    if legacy_target is not None:
+        # Valid HTML fallbacks are not standalone indexed canonical pages.
+        # Their destination is separately represented in the sitemap.
+        if text != generate_legacy(legacy_target):
+            fail(f, "legacy HTML fallback differs from verified mapping")
+        if not (ROOT / legacy_target.lstrip("/") / "index.html").is_file():
+            fail(f, "legacy fallback points to a missing page")
+        continue
     if f.name == "404.html" or f == ROOT / "contact.html":
         continue
     if len(parser.canonical) != 1:

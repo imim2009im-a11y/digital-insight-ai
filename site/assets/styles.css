@@ -130,3 +130,25 @@ body{min-width:300px}
 .guide-highlight{background:linear-gradient(120deg,#142942,#0b1b31);border-inline-start:3px solid var(--brand);border-radius:16px;margin-block:28px;padding:28px}
 .guide-highlight h2{margin:5px 0 13px}
 @media(max-width:760px){.guide-highlight{padding:19px}.example-script{padding:14px}}
+
+/* Directory comparison visibility and keyboard-friendly horizontal table. */
+.comparison-shortcut{display:inline-flex;align-items:center;gap:8px;background:#133d55;border-color:#6ee7ff}
+.comparison-shortcut[hidden],.comparison-scroll-hint[hidden]{display:none!important}
+.comparison-scroll-hint{font-size:.88rem;color:var(--muted);margin:12px 0 8px}
+.comparison .table-scroll:focus-visible{outline:3px solid var(--brand);outline-offset:4px}
+.comparison table{min-width:700px}
+.comparison tbody th[scope=row]{text-align:right;color:var(--text);font-weight:750}
+@media(min-width:900px){.comparison-scroll-hint{display:none}}
+
+/* Source-backed tool claims: local facts remain legible and independent of sponsored outbound links. */
+.tools .tool-verified-fact{flex:none!important;border-inline-start:3px solid var(--brand);padding-inline-start:10px;color:#d4e4f5;font-size:.88rem;margin:8px 0;line-height:1.7}
+.tools .tool-verified-fact a{color:var(--brand);text-decoration:underline;text-underline-offset:3px}
+.tools .tool-verified-fact small{display:inline-block;color:var(--muted)}
+.comparison table{min-width:950px}
+
+/* Vendor origin and affiliate disclosures: clear separation from paid partner links. */
+.tools .tool-official-link{margin-block:12px 8px;display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+.tools .tool-official-link>a:first-child{display:inline-flex;align-items:center;min-height:44px;border:1px solid #43a8ce;border-radius:10px;padding:8px 12px;background:#10354a;color:#e8f8ff;font-weight:700;text-decoration:underline;text-underline-offset:3px}
+.tools .tool-origin-proof{font-size:.86rem;color:#b5d9eb;text-decoration:underline;text-underline-offset:3px}
+.tools .tool-partner-note{font-size:.86rem;line-height:1.7;background:#30281b;border-inline-start:3px solid #e2ac56;border-radius:7px;padding:10px 12px;color:#fff1d6}
+.tools .tool-official-link a:focus-visible,.tools .tool-origin-proof:focus-visible{outline:3px solid #fff;outline-offset:3px}

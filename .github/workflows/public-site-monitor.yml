@@ -4,6 +4,8 @@ on:
     branches: [main]
     paths:
       - "scripts/public-site-smoke.py"
+      - "scripts/monitor_response_headers.py"
+      - "scripts/test_response_security.py"
       - ".github/workflows/public-site-monitor.yml"
   workflow_run:
     workflows: ["Pages Production Deploy"]
@@ -26,6 +28,13 @@ jobs:
           persist-credentials: false
       - name: Validate smoke-check script
         run: python3 -m py_compile scripts/public-site-smoke.py
+      - name: Verify the header observer without network access
+        run: |
+          python3 -m py_compile scripts/monitor_response_headers.py
+          python3 -m unittest discover -s scripts -p test_response_security.py
       - name: Verify live canonical pages after deployment and daily
         if: ${{ github.event_name != 'pull_request' }}
         run: python3 scripts/public-site-smoke.py
+      - name: Observe actual HTTPS and response security headers
+        if: ${{ github.event_name != 'pull_request' }}
+        run: python3 scripts/monitor_response_headers.py
