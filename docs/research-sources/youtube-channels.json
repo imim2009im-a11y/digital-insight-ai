@@ -1,0 +1,57 @@
+{
+  "channels": [
+    {
+      "handle": "dr_hebaahmed",
+      "focus": "Arabic AI tools",
+      "url": "https://www.youtube.com/@dr_hebaahmed",
+      "identity_status": "api_resolution_pending"
+    },
+    {
+      "handle": "OpenAI",
+      "focus": "AI and Codex",
+      "url": "https://www.youtube.com/@OpenAI",
+      "identity_status": "api_resolution_pending"
+    },
+    {
+      "handle": "HuggingFace",
+      "focus": "open models",
+      "url": "https://www.youtube.com/@HuggingFace",
+      "identity_status": "api_resolution_pending"
+    },
+    {
+      "handle": "n8n-io",
+      "focus": "automation",
+      "url": "https://www.youtube.com/@n8n-io",
+      "identity_status": "api_resolution_pending"
+    },
+    {
+      "handle": "GitHub",
+      "focus": "DevOps",
+      "url": "https://www.youtube.com/@GitHub",
+      "identity_status": "api_resolution_pending"
+    },
+    {
+      "handle": "Fireship",
+      "url": "https://www.youtube.com/@Fireship",
+      "focus": "Developer news and concise coding explanations",
+      "identity_status": "api_resolution_pending",
+      "reference_url": "https://fireship.io/"
+    },
+    {
+      "handle": "NetNinja",
+      "url": "https://www.youtube.com/@NetNinja",
+      "focus": "Step-by-step web development tutorials",
+      "identity_status": "api_resolution_pending",
+      "reference_url": "https://netninja.dev/"
+    },
+    {
+      "handle": "AhrefsCom",
+      "url": "https://www.youtube.com/@AhrefsCom",
+      "focus": "SEO and content marketing education; vendor source",
+      "identity_status": "api_resolution_pending",
+      "reference_url": "https://ahrefs.com/academy"
+    }
+  ],
+  "reviewed_at": "2026-10-11",
+  "verification_policy": "Handles are discovery candidates; live API resolution is required. Metadata is not proof of video claims."
+}
