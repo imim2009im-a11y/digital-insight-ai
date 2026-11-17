@@ -62,6 +62,40 @@ async function main() {
         assert(result.bodyWidth<=result.width+2,
           JSON.stringify({route,width,bodyOverflow:result}));
         assert.equal(result.h1,1,route+' heading');
+        // Prelaunch editorial accessibility and monetization-disclosure guardrails.
+        if (['/guides/','/guides/monetization-paths/','/services/content-and-ai-audit/'].includes(route)) {
+          const audit=await page.evaluate(() => {
+            const anchors=[...document.querySelectorAll('main a')];
+            const emptyLinks=anchors.filter(a => !(a.textContent.trim() || (a.getAttribute('aria-label') || '').trim()))
+              .map(a => a.getAttribute('href'));
+            const trackedLinks=anchors.filter(a => {
+              const params=new URL(a.href).searchParams;
+              return [...params.keys()].some(k => /^(?:ref|affiliate|aff_id|partner_id|promo|utm_[a-z_]+)$/i.test(k));
+            }).map(a => a.href);
+            const meta=(selector) => document.querySelector(selector)?.getAttribute('content') || '';
+            return {
+              lang:document.documentElement.lang,dir:document.documentElement.dir,
+              main:!!document.querySelector('main#content'),
+              skip:document.querySelector('.skip-link')?.getAttribute('href'),
+              metaDescription:meta('meta[name="description"]'),
+              ogDescription:meta('meta[property="og:description"]'),
+              emptyLinks,trackedLinks,
+              serviceIsPilot:document.querySelector('main')?.textContent.includes('غير متاح للتعاقد') || false
+            };
+          });
+          assert.equal(audit.lang,'ar',route+' document language');
+          assert.equal(audit.dir,'rtl',route+' RTL direction');
+          assert.equal(audit.main,true,route+' main landmark');
+          assert.equal(audit.skip,'#content',route+' keyboard skip link');
+          assert(audit.metaDescription.length >= 70,route+' descriptive SEO summary');
+          assert(audit.ogDescription.length >= 50,route+' social share description');
+          assert.deepEqual(audit.emptyLinks,[],route+' accessible link names');
+          assert.deepEqual(audit.trackedLinks,[],route+' no unapproved tracked affiliate links');
+          if(route==='/services/content-and-ai-audit/') {
+            assert(audit.serviceIsPilot,'service must disclose it is not available for contracting');
+          }
+        }
+
         assert.deepEqual(runtimeErrors,[],route+' page JS');
         if(route==='/contact/'){
           assert(result.honeypot && result.honeypot.clip !== 'none',
