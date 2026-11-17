@@ -28,7 +28,8 @@ function fixture(byId, lists = {}, extras = {}) {
   };
   const context = {
     document,
-    location: { href: 'https://digitalinsightai.com/news/sample/#heading' },
+    location: extras.location || { href: 'https://digitalinsightai.com/news/sample/#heading', search: '' },
+    URLSearchParams,
     navigator: extras.navigator || {},
     Intl
   };
@@ -95,4 +96,23 @@ test('Article copy handles unavailable clipboard without a false success claim',
   fixture({}, { '[data-copy-article]':[copy] });
   await copy.trigger('click');
   assert.match(status.textContent,/غير متاح/);
+});
+
+test('Contact preselects automation inquiry and records approved source only', () => {
+  const els = {'contact-purpose': new Element({ value: 'suggestion' }), 'contact-source': new Element({ value: 'direct' })};
+  fixture(els, {}, { location: {
+    href: 'https://digitalinsightai.com/contact/?purpose=ai-automation&source=automation-hero',
+    search: '?purpose=ai-automation&source=automation-hero'
+  } });
+  assert.equal(els['contact-purpose'].value, 'ai-automation');
+  assert.equal(els['contact-source'].value, 'automation-hero');
+});
+test('Contact ignores untrusted source and unsupported purpose', () => {
+  const els = {'contact-purpose': new Element({ value: 'suggestion' }), 'contact-source': new Element({ value: 'direct' })};
+  fixture(els, {}, { location: {
+    href: 'https://digitalinsightai.com/contact/?purpose=not-allowed&source=untrusted',
+    search: '?purpose=not-allowed&source=untrusted'
+  } });
+  assert.equal(els['contact-purpose'].value, 'suggestion');
+  assert.equal(els['contact-source'].value, 'direct');
 });

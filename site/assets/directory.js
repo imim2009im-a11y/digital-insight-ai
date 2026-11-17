@@ -12,7 +12,7 @@
   const compareStatus = document.getElementById('compare-status');
   const selected = new Set();
   const normalize = (value) => String(value || '').normalize('NFKC').toLocaleLowerCase('ar').replace(/[\u064b-\u065f]/g, '').trim();
-  const validCategories = new Set(['all', 'video', 'design', 'apps', '3d']);
+  const validCategories = new Set(['all', 'video', 'design', 'apps', 'marketing', '3d']);
   const requested = new URLSearchParams(location.search).get('category');
   if (validCategories.has(requested)) category.value = requested;
   function filter() {

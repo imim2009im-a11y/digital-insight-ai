@@ -47,6 +47,9 @@ if [[ -f scripts/test-baiti-xss.mjs ]]; then
   node scripts/test-baiti-xss.mjs
 fi
 
+log "Testing public site interactions"
+node --test scripts/site-interactions.test.cjs
+
 log "Checking Python syntax"
 python3 -m py_compile scripts/check_site.py
 
