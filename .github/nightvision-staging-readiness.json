@@ -1,0 +1,22 @@
+{
+  "schema_version": 1,
+  "target_url": "",
+  "target_type": "WEB",
+  "approved_hosts": [],
+  "allowed_paths": [],
+  "excluded_paths": [
+    "/api/run-due",
+    "/api/publish",
+    "/api/scheduler",
+    "/admin",
+    "/billing",
+    "/webhooks",
+    "/logout"
+  ],
+  "owner_authorized": false,
+  "isolated_staging_verified": false,
+  "synthetic_data_only": false,
+  "nightvision_plan_quota_verified": false,
+  "no_unapproved_spend": false,
+  "rollback_and_restore_verified": false
+}

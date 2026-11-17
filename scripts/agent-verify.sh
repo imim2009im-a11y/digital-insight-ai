@@ -86,6 +86,14 @@ bash scripts/check_site.sh
 log "Testing bounded IA source preflight"
 python3 -m unittest discover -s scripts -p test_ia_preflight.py
 
+log "Testing offline NightVision readiness guards (no scans)"
+python3 -m unittest discover -s scripts -p "test_nightvision_*.py"
+python3 scripts/nightvision_readiness.py
+
+log "Auditing static HTML security (offline, no account)"
+python3 -m unittest discover -s scripts -p test_site_security_lint.py
+python3 scripts/site_security_lint.py
+
 if [[ "${AGENT_VERIFY_PRODUCTION:-0}" == "1" ]]; then
   log "Running live production smoke checks"
   bash scripts/production-smoke.sh
