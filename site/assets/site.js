@@ -26,6 +26,17 @@
      }
    });
  });
+ const contactPurpose = $('contact-purpose');
+ if (contactPurpose) {
+   const params = new URLSearchParams(location.search);
+   const purpose = params.get('purpose');
+   const allowedPurposes = new Set(['suggestion', 'partnership', 'ai-automation', 'feedback', 'security']);
+   if (allowedPurposes.has(purpose)) contactPurpose.value = purpose;
+   const sourceField = $('contact-source');
+   const allowedSources = new Set(['home-automation', 'automation-hero', 'automation-footer']);
+   const source = params.get('source');
+   if (sourceField && allowedSources.has(source)) sourceField.value = source;
+ }
  const newsSearch = $('news-search');
  if (newsSearch) {
    const cards = [...document.querySelectorAll('#news-results article')];

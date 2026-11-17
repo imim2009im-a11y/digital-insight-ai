@@ -130,3 +130,4 @@ body{min-width:300px}
 .guide-highlight{background:linear-gradient(120deg,#142942,#0b1b31);border-inline-start:3px solid var(--brand);border-radius:16px;margin-block:28px;padding:28px}
 .guide-highlight h2{margin:5px 0 13px}
 @media(max-width:760px){.guide-highlight{padding:19px}.example-script{padding:14px}}
+.tools article .affiliate-note{display:block;margin-top:10px;color:var(--muted);font-size:.86rem;line-height:1.6}

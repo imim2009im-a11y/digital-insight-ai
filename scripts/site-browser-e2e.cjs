@@ -83,6 +83,23 @@ async function main() {
         await page.locator('#tool-category').selectOption('apps');
         assert.equal(await page.locator('[data-tool-card]:visible').count(),1,
           'Directory filters apps');
+        await page.goto(BASE+'/tools/?category=marketing',{waitUntil:'domcontentloaded'});
+        assert.equal(await page.locator('#tool-category').inputValue(),'marketing');
+        assert.equal(await page.locator('[data-tool-card]:visible').count(),4,
+          'Home marketing deep link selects the four marketing tools');
+        assert.equal(await page.locator('a.affiliate').count(),7);
+        assert.equal(await page.locator('small.affiliate-note').count(),7);
+        assert(await page.locator('a.affiliate').evaluateAll(links => links.every(link =>
+          link.previousElementSibling?.classList.contains('affiliate-note') &&
+          link.rel.includes('sponsored') && link.rel.includes('noopener') &&
+          link.rel.includes('noreferrer'))), 'Sponsored links require adjacent disclosure');
+        await page.goto(BASE+'/contact/?purpose=ai-automation&source=automation-hero',
+          {waitUntil:'domcontentloaded'});
+        assert.equal(await page.locator('#contact-purpose').inputValue(),'ai-automation');
+        assert.equal(await page.locator('#contact-source').inputValue(),'automation-hero');
+        assert.equal(await page.locator('form.contact-card').evaluate(form => form.checkValidity()),
+          false, 'Incomplete form must fail native validation without submission');
+        await page.goto(BASE+'/tools/',{waitUntil:'domcontentloaded'});
         const amount=await page.locator('#calc-result').textContent();
         assert(amount && /١٥٠|150/.test(amount),'initial calculator 150 SAR');
         console.log('PASS functional Arabic news filter, tools filter, cost calculation');
