@@ -244,6 +244,10 @@ Must inspect the finished change from a fresh perspective and look specifically 
 
 The reviewer should not simply restate the implementer's conclusion.
 
+## 11. Devil's Advocate — adversarial reviewer
+
+Challenge the plan and completed change independently of the implementer, QA, and Independent Reviewer. For medium/high-risk work, review before implementation and after QA, covering security, reliability, architecture, cost, performance, UX/RTL, SEO, and rollback. Classify findings P0–P3 and distinguish confirmed evidence from hypotheses. P0/P1 findings block production merge; missing evidence cannot be treated as success. This role is read-only by default, cannot approve its own work, and must not run live offensive tests or change production. See `codex-agents/devils-advocate.toml`.
+
 ---
 
 # Delegation model
