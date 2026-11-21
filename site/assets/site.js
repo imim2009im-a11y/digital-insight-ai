@@ -2,12 +2,14 @@
 (() => {
  'use strict';
  const $ = (id) => document.getElementById(id);
+ // Share only the article address, never visitor tracking parameters or fragments.
+ const articleUrl = () => location.href.split(/[?#]/)[0];
  document.querySelectorAll('[data-copy-article]').forEach((button) => {
    button.addEventListener('click', async () => {
      const status = button.parentElement.querySelector('.share-status');
      try {
        if (!navigator.clipboard || !navigator.clipboard.writeText) throw Error('unsupported');
-       await navigator.clipboard.writeText(location.href.split('#')[0]);
+       await navigator.clipboard.writeText(articleUrl());
        if (status) status.textContent = 'نُسخ رابط الصفحة.';
      } catch (_) {
        if (status) status.textContent = 'النسخ غير متاح هنا؛ انسخ رابط الصفحة من شريط المتصفح.';
@@ -19,13 +21,24 @@
      const status = button.parentElement.querySelector('.share-status');
      if (!navigator.share) { if (status) status.textContent = 'استخدم نسخ الرابط لمشاركته.'; return; }
      try {
-       await navigator.share({ title: document.title, url: location.href.split('#')[0] });
+       await navigator.share({ title: document.title, url: articleUrl() });
        if (status) status.textContent = 'تم فتح خيارات المشاركة.';
      } catch (error) {
        if (error && error.name !== 'AbortError' && status) status.textContent = 'تعذرت المشاركة من الجهاز.';
      }
    });
  });
+ const contactPurpose = $('contact-purpose');
+ if (contactPurpose) {
+   const params = new URLSearchParams(location.search);
+   const purpose = params.get('purpose');
+   const allowedPurposes = new Set(['suggestion', 'partnership', 'ai-automation', 'feedback', 'security']);
+   if (allowedPurposes.has(purpose)) contactPurpose.value = purpose;
+   const sourceField = $('contact-source');
+   const allowedSources = new Set(['home-automation', 'automation-hero', 'automation-footer']);
+   const source = params.get('source');
+   if (sourceField && allowedSources.has(source)) sourceField.value = source;
+ }
  const newsSearch = $('news-search');
  if (newsSearch) {
    const cards = [...document.querySelectorAll('#news-results article')];

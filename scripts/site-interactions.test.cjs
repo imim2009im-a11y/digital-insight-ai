@@ -28,7 +28,8 @@ function fixture(byId, lists = {}, extras = {}) {
   };
   const context = {
     document,
-    location: { href: 'https://digitalinsightai.com/news/sample/#heading' },
+    location: extras.location || { href: 'https://digitalinsightai.com/news/sample/#heading', search: '' },
+    URLSearchParams,
     navigator: extras.navigator || {},
     Intl
   };
@@ -95,4 +96,48 @@ test('Article copy handles unavailable clipboard without a false success claim',
   fixture({}, { '[data-copy-article]':[copy] });
   await copy.trigger('click');
   assert.match(status.textContent,/غير متاح/);
+});
+
+test('Contact preselects automation inquiry and records approved source only', () => {
+  const els = {'contact-purpose': new Element({ value: 'suggestion' }), 'contact-source': new Element({ value: 'direct' })};
+  fixture(els, {}, { location: {
+    href: 'https://digitalinsightai.com/contact/?purpose=ai-automation&source=automation-hero',
+    search: '?purpose=ai-automation&source=automation-hero'
+  } });
+  assert.equal(els['contact-purpose'].value, 'ai-automation');
+  assert.equal(els['contact-source'].value, 'automation-hero');
+});
+test('Contact ignores untrusted source and unsupported purpose', () => {
+  const els = {'contact-purpose': new Element({ value: 'suggestion' }), 'contact-source': new Element({ value: 'direct' })};
+  fixture(els, {}, { location: {
+    href: 'https://digitalinsightai.com/contact/?purpose=not-allowed&source=untrusted',
+    search: '?purpose=not-allowed&source=untrusted'
+  } });
+  assert.equal(els['contact-purpose'].value, 'suggestion');
+  assert.equal(els['contact-source'].value, 'direct');
+});
+
+// Guard against forwarding UTM/source parameters from visitors to article readers.
+test('Article copy strips tracking query parameters and fragment', async () => {
+  let copied;
+  const status = new Element();
+  const copy = new Element({parentElement:{querySelector:()=>status}});
+  fixture({}, { '[data-copy-article]':[copy] }, {
+    location:{ href:'https://digitalinsightai.com/news/sample/?utm_source=social&ref=private#section', search:'?utm_source=social&ref=private' },
+    navigator:{clipboard:{writeText:async (url)=>{copied=url;}}}
+  });
+  await copy.trigger('click');
+  assert.equal(copied, 'https://digitalinsightai.com/news/sample/');
+});
+
+test('Article native share strips tracking query parameters and fragment', async () => {
+  let shared;
+  const status = new Element();
+  const share = new Element({parentElement:{querySelector:()=>status}});
+  fixture({}, { '[data-share-article]':[share] }, {
+    location:{ href:'https://digitalinsightai.com/news/sample/?utm_source=social#section', search:'?utm_source=social' },
+    navigator:{share:async (data)=>{shared=data;}}
+  });
+  await share.trigger('click');
+  assert.equal(shared.url, 'https://digitalinsightai.com/news/sample/');
 });
