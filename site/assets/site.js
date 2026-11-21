@@ -2,12 +2,14 @@
 (() => {
  'use strict';
  const $ = (id) => document.getElementById(id);
+ // Share only the article address, never visitor tracking parameters or fragments.
+ const articleUrl = () => location.href.split(/[?#]/)[0];
  document.querySelectorAll('[data-copy-article]').forEach((button) => {
    button.addEventListener('click', async () => {
      const status = button.parentElement.querySelector('.share-status');
      try {
        if (!navigator.clipboard || !navigator.clipboard.writeText) throw Error('unsupported');
-       await navigator.clipboard.writeText(location.href.split('#')[0]);
+       await navigator.clipboard.writeText(articleUrl());
        if (status) status.textContent = 'نُسخ رابط الصفحة.';
      } catch (_) {
        if (status) status.textContent = 'النسخ غير متاح هنا؛ انسخ رابط الصفحة من شريط المتصفح.';
@@ -19,7 +21,7 @@
      const status = button.parentElement.querySelector('.share-status');
      if (!navigator.share) { if (status) status.textContent = 'استخدم نسخ الرابط لمشاركته.'; return; }
      try {
-       await navigator.share({ title: document.title, url: location.href.split('#')[0] });
+       await navigator.share({ title: document.title, url: articleUrl() });
        if (status) status.textContent = 'تم فتح خيارات المشاركة.';
      } catch (error) {
        if (error && error.name !== 'AbortError' && status) status.textContent = 'تعذرت المشاركة من الجهاز.';
