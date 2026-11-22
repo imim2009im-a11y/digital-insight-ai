@@ -14,6 +14,7 @@ These are project-specific custom Codex agents written for this repository. They
 8. Content / Editorial
 9. Growth / Conversion
 10. Independent Reviewer
+11. Devil's Advocate (adversarial defensive review)
 
 ## Install locally
 
@@ -39,7 +40,7 @@ CODEX_AGENTS_DIR=/custom/path bash scripts/install-codex-project-agents.sh
 
 ## Recommended use
 
-Use the Project Manager to scope substantial tasks. Bring in only the specialist roles needed for the change. Finish non-trivial implementation with QA / Verification and Independent Reviewer passes.
+Use the Project Manager to scope substantial tasks. Bring in only the specialist roles needed for the change. Finish non-trivial implementation with QA / Verification and Independent Reviewer passes. For medium/high-risk changes, invoke the Devil's Advocate independently after planning and after QA; treat P0/P1 findings as release blockers. The Devil's Advocate reviews evidence and does not execute changes, replace QA, or approve its own findings.
 
 Do not dispatch multiple agents to edit the same production-sensitive file concurrently.
 
